@@ -1,31 +1,32 @@
 import React, {useEffect, useRef, useState} from "react";
-import {ActivityIndicator, Animated, RefreshControl, ScrollView, StyleSheet, Text, View,} from "react-native";
-import {Feather} from "@expo/vector-icons";
-
+import {ActivityIndicator, Animated, RefreshControl, StyleSheet, View,} from "react-native";
 import {analyticsService} from "../../services/analytics.service";
 import {MonthComparison, MonthlyAnalytics} from "../../types/api.types";
-import {supabase} from "../../lib/supabase";
-import {useAuth} from "../../hooks/useAuth";
-
-const formatCurrency = (value: number) =>
-    `₹ ${Math.round(value).toLocaleString("en-IN")}`;
+import {DashboardHero} from "./components/DashboardHero";
+import {SummaryCard} from "./components/SummaryCard";
+import {MonthSelector} from "../../components/ui/MonthSelector";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {formatCurrencyCompact, formatCurrencyNumber} from "../../utils/formatCurrency";
 
 const DashboardScreen = () => {
+    const now = new Date();
+
+    const [selectedYear, setSelectedYear] = useState(now.getFullYear());
+    const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+
     const [loading, setLoading] = useState(true);
     const [refreshing, setRefreshing] = useState(false);
-    const [analytics, setAnalytics] =
-        useState<MonthlyAnalytics | null>(null);
-    const [comparison, setComparison] =
-        useState<MonthComparison | null>(null);
+    const [analytics, setAnalytics] = useState<MonthlyAnalytics | null>(null);
+    const [comparison, setComparison] = useState<MonthComparison | null>(null);
 
     const animatedBalance = useRef(new Animated.Value(0)).current;
+    const scrollY = useRef(new Animated.Value(0)).current;
     const [displayBalance, setDisplayBalance] = useState(0);
 
     const loadData = async () => {
         try {
-            const now = new Date();
-            const year = now.getFullYear();
-            const month = now.getMonth() + 1;
+            const year = selectedYear;
+            const month = selectedMonth;
 
             const monthly =
                 await analyticsService.getMonthly(year, month);
@@ -35,7 +36,6 @@ const DashboardScreen = () => {
             setAnalytics(monthly);
             setComparison(compare);
         } catch (error) {
-
             console.log("Dashboard error:", error);
         }
     };
@@ -46,7 +46,7 @@ const DashboardScreen = () => {
             setLoading(false);
         };
         init();
-    }, []);
+    }, [selectedYear, selectedMonth]);
 
     useEffect(() => {
         if (!analytics) return;
@@ -88,117 +88,53 @@ const DashboardScreen = () => {
     }
 
     if (!analytics) {
-        return (
-            <View style={styles.center}>
-                <Text>No data available</Text>
-            </View>
-        );
+        return <View style={styles.center}/>;
     }
 
-    const totalBalance =
-        analytics.totalIncome -
-        analytics.totalExpense -
-        analytics.totalInvestment;
-
     return (
-        <ScrollView
-            style={styles.container}
-            contentContainerStyle={{paddingBottom: 40}}
-            refreshControl={
-                <RefreshControl
-                    refreshing={refreshing}
-                    onRefresh={onRefresh}
+        <SafeAreaView style={styles.container} edges={["top"]}>
+
+            {/* 🔥 Sticky Month Selector */}
+            <MonthSelector
+                month={selectedMonth}
+                year={selectedYear}
+                comparison={comparison}
+                scrollY={scrollY}
+                onChange={(year, month) => {
+                    setSelectedYear(year);
+                    setSelectedMonth(month);
+                }}
+            />
+
+            <Animated.ScrollView
+                contentContainerStyle={{paddingBottom: 40}}
+                refreshControl={
+                    <RefreshControl
+                        refreshing={refreshing}
+                        onRefresh={onRefresh}
+                    />
+                }
+                onScroll={Animated.event(
+                    [{nativeEvent: {contentOffset: {y: scrollY}}}],
+                    {useNativeDriver: false}
+                )}
+                scrollEventThrottle={16}
+            >
+                <DashboardHero
+                    balance={displayBalance}
+                    formatCurrency={formatCurrencyNumber}
                 />
-            }
-        >
-            {/* HERO */}
-            <View style={styles.hero}>
-                <Text style={styles.heroSmall}>Total Balance</Text>
 
-                <Text style={styles.heroAmount}>
-                    {formatCurrency(displayBalance)}
-                </Text>
-            </View>
-
-            {/* SUMMARY CARD */}
-            <View style={styles.summaryCard}>
-                <View style={styles.statsRow}>
-                    <StatBlock
-                        icon="arrow-down-left"
-                        label="Income"
-                        value={analytics.totalIncome}
-                        percent={comparison?.change.income.percent}
-                        color="#10B981"
-                    />
-
-                    <View style={styles.verticalDivider}/>
-
-                    <StatBlock
-                        icon="arrow-up-right"
-                        label="Expense"
-                        value={analytics.totalExpense}
-                        percent={comparison?.change.expense.percent}
-                        color="#EF4444"
-                    />
-
-                    <View style={styles.verticalDivider}/>
-
-                    <StatBlock
-                        icon="trending-up"
-                        label="Savings"
-                        value={analytics.netSavings}
-                        percent={comparison?.change.savings.percent}
-                        color="#2563EB"
-                    />
-                </View>
-            </View>
-        </ScrollView>
+                <SummaryCard
+                    analytics={analytics}
+                    comparison={comparison}
+                    formatCurrency={formatCurrencyCompact}
+                />
+            </Animated.ScrollView>
+        </SafeAreaView>
     );
 };
 
-const StatBlock = ({
-                       icon,
-                       label,
-                       value,
-                       percent,
-                       color,
-                   }: {
-    icon: any;
-    label: string;
-    value: number;
-    percent?: number | null;
-    color: string;
-}) => {
-    const positive = percent && percent > 0;
-    const negative = percent && percent < 0;
-
-    const percentColor = positive
-        ? "#10B981"
-        : negative
-            ? "#EF4444"
-            : "#9CA3AF";
-
-    return (
-        <View style={styles.statBlock}>
-            <View style={[styles.iconContainer, {backgroundColor: `${color}15`}]}>
-                <Feather name={icon} size={16} color={color}/>
-            </View>
-
-            <Text style={styles.statLabel}>{label}</Text>
-
-            <Text style={[styles.statValue, {color}]}>
-                {formatCurrency(value)}
-            </Text>
-
-            {percent !== null && percent !== undefined && (
-                <Text style={[styles.percentText, {color: percentColor}]}>
-                    {percent > 0 ? "▲" : percent < 0 ? "▼" : "•"}{" "}
-                    {Math.abs(percent)}%
-                </Text>
-            )}
-        </View>
-    );
-};
 
 export default DashboardScreen;
 
@@ -207,85 +143,9 @@ const styles = StyleSheet.create({
         flex: 1,
         backgroundColor: "#F3F4F6",
     },
-
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
-    },
-
-    hero: {
-        backgroundColor: "#111827",
-        paddingTop: 100,
-        paddingBottom: 80,
-        paddingHorizontal: 24,
-    },
-
-    heroSmall: {
-        color: "#9CA3AF",
-        fontSize: 14,
-    },
-
-    heroAmount: {
-        color: "#FFFFFF",
-        fontSize: 44,
-        fontWeight: "700",
-        marginTop: 10,
-    },
-
-    summaryCard: {
-        backgroundColor: "#FFFFFF",
-        marginHorizontal: 20,
-        marginTop: -40,
-        borderRadius: 24,
-        paddingVertical: 24,
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 25,
-        elevation: 8,
-    },
-
-    statsRow: {
-        flexDirection: "row",
-        alignItems: "center",
-        justifyContent: "space-between",
-        paddingHorizontal: 12,
-    },
-
-    statBlock: {
-        flex: 1,
-        alignItems: "center",
-    },
-
-    iconContainer: {
-        width: 32,
-        height: 32,
-        borderRadius: 16,
-        justifyContent: "center",
-        alignItems: "center",
-        marginBottom: 8,
-    },
-
-    statLabel: {
-        fontSize: 12,
-        color: "#6B7280",
-    },
-
-    statValue: {
-        fontSize: 16,
-        fontWeight: "600",
-        marginTop: 6,
-    },
-
-    percentText: {
-        fontSize: 11,
-        marginTop: 4,
-        fontWeight: "500",
-    },
-
-    verticalDivider: {
-        width: 1,
-        height: 60,
-        backgroundColor: "#F3F4F6",
     },
 });
