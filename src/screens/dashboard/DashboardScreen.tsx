@@ -1,52 +1,71 @@
 import React, {useEffect, useRef, useState} from "react";
 import {ActivityIndicator, Animated, RefreshControl, StyleSheet, View,} from "react-native";
+import {SafeAreaView} from "react-native-safe-area-context";
+import {useQuery} from "@tanstack/react-query";
+
 import {analyticsService} from "../../services/analytics.service";
-import {MonthComparison, MonthlyAnalytics} from "../../types/api.types";
 import {DashboardHero} from "./components/DashboardHero";
 import {SummaryCard} from "./components/SummaryCard";
 import {MonthSelector} from "../../components/ui/MonthSelector";
-import {SafeAreaView} from "react-native-safe-area-context";
-import {formatCurrencyCompact, formatCurrencyNumber} from "../../utils/formatCurrency";
+import {formatCurrencyCompact, formatCurrencyNumber,} from "../../utils/formatCurrency";
 
 const DashboardScreen = () => {
     const now = new Date();
 
-    const [selectedYear, setSelectedYear] = useState(now.getFullYear());
-    const [selectedMonth, setSelectedMonth] = useState(now.getMonth() + 1);
+    const [selectedYear, setSelectedYear] = useState(
+        now.getFullYear()
+    );
+    const [selectedMonth, setSelectedMonth] = useState(
+        now.getMonth() + 1
+    );
 
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
-    const [analytics, setAnalytics] = useState<MonthlyAnalytics | null>(null);
-    const [comparison, setComparison] = useState<MonthComparison | null>(null);
+    const animatedBalance = useRef(
+        new Animated.Value(0)
+    ).current;
 
-    const animatedBalance = useRef(new Animated.Value(0)).current;
-    const scrollY = useRef(new Animated.Value(0)).current;
-    const [displayBalance, setDisplayBalance] = useState(0);
+    const scrollY = useRef(
+        new Animated.Value(0)
+    ).current;
 
-    const loadData = async () => {
-        try {
-            const year = selectedYear;
-            const month = selectedMonth;
+    const [displayBalance, setDisplayBalance] =
+        useState(0);
 
-            const monthly =
-                await analyticsService.getMonthly(year, month);
-            const compare =
-                await analyticsService.getMonthComparison(year, month);
+    // 🔥 React Query (parallel calls)
+    const {
+        data,
+        isLoading,
+        isRefetching,
+        refetch,
+    } = useQuery({
+        queryKey: [
+            "dashboard",
+            selectedYear,
+            selectedMonth,
+        ],
+        queryFn: async () => {
+            const [monthly, compare] =
+                await Promise.all([
+                    analyticsService.getMonthly(
+                        selectedYear,
+                        selectedMonth
+                    ),
+                    analyticsService.getMonthComparison(
+                        selectedYear,
+                        selectedMonth
+                    ),
+                ]);
 
-            setAnalytics(monthly);
-            setComparison(compare);
-        } catch (error) {
-            console.log("Dashboard error:", error);
-        }
-    };
+            return {
+                monthly,
+                comparison: compare,
+            };
+        },
+        staleTime: 1000 * 60 * 5,
+        placeholderData: (previous) => previous
+    });
 
-    useEffect(() => {
-        const init = async () => {
-            await loadData();
-            setLoading(false);
-        };
-        init();
-    }, [selectedYear, selectedMonth]);
+    const analytics = data?.monthly;
+    const comparison = data?.comparison;
 
     useEffect(() => {
         if (!analytics) return;
@@ -64,22 +83,21 @@ const DashboardScreen = () => {
             useNativeDriver: false,
         }).start();
 
-        const listener = animatedBalance.addListener(({value}) => {
-            setDisplayBalance(value);
-        });
+        const listener =
+            animatedBalance.addListener(
+                ({value}) => {
+                    setDisplayBalance(value);
+                }
+            );
 
         return () => {
-            animatedBalance.removeListener(listener);
+            animatedBalance.removeListener(
+                listener
+            );
         };
     }, [analytics]);
 
-    const onRefresh = async () => {
-        setRefreshing(true);
-        await loadData();
-        setRefreshing(false);
-    };
-
-    if (loading) {
+    if (isLoading) {
         return (
             <View style={styles.center}>
                 <ActivityIndicator size="large"/>
@@ -88,13 +106,16 @@ const DashboardScreen = () => {
     }
 
     if (!analytics) {
-        return <View style={styles.center}/>;
+        return (
+            <View style={styles.center}/>
+        );
     }
 
     return (
-        <SafeAreaView style={styles.container} edges={["top"]}>
-
-            {/* 🔥 Sticky Month Selector */}
+        <SafeAreaView
+            style={styles.container}
+            edges={["top"]}
+        >
             <MonthSelector
                 month={selectedMonth}
                 year={selectedYear}
@@ -107,34 +128,49 @@ const DashboardScreen = () => {
             />
 
             <Animated.ScrollView
-                contentContainerStyle={{paddingBottom: 40}}
+                contentContainerStyle={{
+                    paddingBottom: 40,
+                }}
                 refreshControl={
                     <RefreshControl
-                        refreshing={refreshing}
-                        onRefresh={onRefresh}
+                        refreshing={
+                            isRefetching
+                        }
+                        onRefresh={refetch}
                     />
                 }
                 onScroll={Animated.event(
-                    [{nativeEvent: {contentOffset: {y: scrollY}}}],
+                    [
+                        {
+                            nativeEvent: {
+                                contentOffset: {
+                                    y: scrollY,
+                                },
+                            },
+                        },
+                    ],
                     {useNativeDriver: false}
                 )}
                 scrollEventThrottle={16}
             >
                 <DashboardHero
                     balance={displayBalance}
-                    formatCurrency={formatCurrencyNumber}
+                    formatCurrency={
+                        formatCurrencyNumber
+                    }
                 />
 
                 <SummaryCard
                     analytics={analytics}
                     comparison={comparison}
-                    formatCurrency={formatCurrencyCompact}
+                    formatCurrency={
+                        formatCurrencyCompact
+                    }
                 />
             </Animated.ScrollView>
         </SafeAreaView>
     );
 };
-
 
 export default DashboardScreen;
 

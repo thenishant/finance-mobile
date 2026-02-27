@@ -16,3 +16,8 @@ export interface Transaction {
     category?: { name: string };
     fromAccount?: { name: string };
 }
+
+export interface GroupedTransaction {
+    date: string;
+    transactions: Transaction[];
+}

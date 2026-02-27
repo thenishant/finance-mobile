@@ -1,4 +1,4 @@
-import React from "react";
+import React, {useEffect} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {MainTabs} from "./MainTabs";
 import AddTransactionScreen from "../screens/transaction/AddTransactionScreen";
@@ -8,6 +8,8 @@ import {SelectAccountScreen} from "../screens/transaction/SelectAccountScreen";
 import {CreateAccountScreen} from "../screens/transaction/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
 import {TransactionType} from "../types/transaction";
+import {useQueryClient} from "@tanstack/react-query";
+import {transactionService} from "../services/transaction.service";
 
 export type AppStackParamList = {
     Tabs: undefined;
@@ -22,6 +24,15 @@ export type AppStackParamList = {
 const Stack = createNativeStackNavigator<AppStackParamList>();
 
 export const AppStack = () => {
+    const queryClient = useQueryClient();
+
+    useEffect(() => {
+        queryClient.prefetchQuery({
+            queryKey: ["transactions"],
+            queryFn: transactionService.getAll,
+        });
+    }, []);
+
     return (
         <Stack.Navigator>
             <Stack.Screen

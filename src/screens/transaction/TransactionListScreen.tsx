@@ -1,88 +1,62 @@
-import {ActivityIndicator, FlatList, RefreshControl, Text} from "react-native";
+import React from "react";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {useEffect, useMemo, useState} from "react";
-import {TransactionSnackbar} from "./components/TransactionSnackbar";
-import {TransactionSection} from "./components/TransactionSection";
-import {formatDateLabel} from "../../utils/date";
-import {useUndoDelete} from "../../hooks/useUndoDelete";
+import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {transactionService} from "../../services/transaction.service";
+import {useGroupedTransactions} from "../../hooks/useGroupedTransactions";
 import {Transaction} from "../../types/transaction";
+import {TransactionList} from "./components/TransactionsList";
 
 const TransactionListScreen = () => {
-    const [transactions, setTransactions] = useState<Transaction[]>([]);
-    const [loading, setLoading] = useState(true);
-    const [refreshing, setRefreshing] = useState(false);
+    const queryClient = useQueryClient();
 
-    const loadData = async () => {
-        const res = await transactionService.getAll();
-        setTransactions(res);
-    };
+    const {
+        data: transactions = [],
+        isLoading,
+        refetch,
+        isRefetching,
+    } = useQuery<Transaction[]>({
+        queryKey: ["transactions"],
+        queryFn: transactionService.getAll,
+    });
 
-    useEffect(() => {
-        loadData().finally(() => setLoading(false));
-    }, []);
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) => transactionService.delete(id),
+        onMutate: async (id) => {
+            await queryClient.cancelQueries({queryKey: ["transactions"]});
 
-    const {deleteItem, undo, visible} =
-        useUndoDelete(transactions, setTransactions, loadData);
+            const previous =
+                queryClient.getQueryData<Transaction[]>(["transactions"]);
 
-    const groupedData = useMemo(() => {
-        const grouped: Record<string, Transaction[]> = {};
+            queryClient.setQueryData<Transaction[]>(
+                ["transactions"],
+                (old = []) => old.filter((t) => t.id !== id)
+            );
 
-        transactions.forEach(trx => {
-            const label = formatDateLabel(trx.date);
-
-            if (!grouped[label]) {
-                grouped[label] = [];
+            return {previous};
+        },
+        onError: (_err, _id, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(
+                    ["transactions"],
+                    context.previous
+                );
             }
+        },
+        // onSettled: () => {
+        //     queryClient.invalidateQueries({queryKey: ["transactions"]});
+        // },
+    });
 
-            grouped[label].push(trx);
-        });
-
-        return Object.entries(grouped).map(([date, list]) => ({
-            date,
-            transactions: list,
-        }));
-    }, [transactions]);
-
-    if (loading) {
-        return <ActivityIndicator/>;
-    }
-
-    const isEmpty = transactions.length === 0;
+    const grouped = useGroupedTransactions(transactions);
 
     return (
-        <SafeAreaView style={{flex: 1, marginTop: 15}}>
-            {isEmpty ? (
-                <Text>No transactions yet</Text>
-            ) : (
-                <FlatList
-                    data={groupedData}
-                    keyExtractor={(item) => item.date}
-                    refreshControl={
-                        <RefreshControl
-                            refreshing={refreshing}
-                            onRefresh={loadData}
-                        />
-                    }
-                    renderItem={({item}) => (
-                        <TransactionSection
-                            date={item.date}
-                            transactions={item.transactions.map(t => ({
-                                id: t.id,
-                                type: t.type,
-                                amount: t.amount,
-                                category: t.category?.name,
-                                account: t.fromAccount?.name,
-                            }))}
-                            onDelete={deleteItem}
-                        />
-                    )}
-                />
-            )}
-
-            <TransactionSnackbar
-                visible={visible}
-                onUndo={undo}
+        <SafeAreaView style={{flex: 1}}>
+            <TransactionList
+                data={grouped}
+                isLoading={isLoading}
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                onDelete={(id) => deleteMutation.mutate(id)}
             />
         </SafeAreaView>
     );

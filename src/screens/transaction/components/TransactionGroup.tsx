@@ -1,14 +1,7 @@
 import React from "react";
 import {StyleSheet, Text, View} from "react-native";
+import {Transaction} from "../../../types/transaction";
 import {TransactionItem} from "./TransactionItem";
-
-interface Transaction {
-    id: string;
-    type: string;
-    amount: number;
-    category?: string;
-    account?: string;
-}
 
 interface Props {
     date: string;
@@ -16,24 +9,14 @@ interface Props {
     onDelete: (id: string) => void;
 }
 
-export const TransactionSection = ({
-                                       date,
-                                       transactions,
-                                       onDelete,
-                                   }: Props) => {
-    const netTotal = transactions.reduce((sum, t) => {
-        if (t.type === "INCOME") return sum + t.amount;
-        if (t.type === "EXPENSE") return sum - t.amount;
-        return sum;
-    }, 0);
-
+export const TransactionGroup = ({
+                                     date,
+                                     transactions,
+                                     onDelete,
+                                 }: Props) => {
     return (
         <View style={styles.section}>
-            {date ? (
-                <View style={styles.headerRow}>
-                    <Text style={styles.date}>{date}</Text>
-                </View>
-            ) : null}
+            <Text style={styles.date}>{date}</Text>
 
             <View style={styles.group}>
                 {transactions.map((t, index) => (
@@ -42,8 +25,8 @@ export const TransactionSection = ({
                             id={t.id}
                             type={t.type}
                             amount={t.amount}
-                            category={t.category}
-                            account={t.account}
+                            category={t.category?.name}
+                            account={t.fromAccount?.name}
                             onDelete={onDelete}
                         />
 
@@ -59,30 +42,20 @@ export const TransactionSection = ({
 
 const styles = StyleSheet.create({
     section: {
-        marginBottom: 16,
-    },
-    headerRow: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        marginBottom: 6,
-        paddingHorizontal: 14,
+        marginBottom: 18,
     },
     date: {
         fontSize: 11,
-        fontWeight: "500",
+        fontWeight: "600",
         color: "#94A3B8",
-    },
-    total: {
-        fontSize: 12,
-        fontWeight: "500",
+        marginBottom: 8,
+        paddingHorizontal: 4,
     },
     group: {
         backgroundColor: "#FFFFFF",
         borderRadius: 12,
         overflow: "hidden",
     },
-
     divider: {
         height: 1,
         backgroundColor: "#EEF2F7",

@@ -20,7 +20,6 @@ export const TransactionItem = ({
                                     account,
                                     onDelete,
                                 }: Props) => {
-
     const swipeRef = useRef<Swipeable>(null);
 
     const handleDelete = () => {
@@ -41,26 +40,30 @@ export const TransactionItem = ({
         );
     };
 
-    const renderRightActions = () => (
-        <TouchableOpacity
-            style={styles.deleteButton}
-            onPress={handleDelete}
-        >
-            <Feather name="trash-2" size={18} color="#fff"/>
-        </TouchableOpacity>
-    );
-
     const getColor = () => {
-        if (type === "INCOME") return "#16A34A";
-        if (type === "EXPENSE") return "#DC2626";
-        if (type === "INVESTMENT") return "#4F46E5";
-        return "#6B7280";
+        switch (type) {
+            case "INCOME":
+                return "#16A34A";
+            case "EXPENSE":
+                return "#DC2626";
+            case "INVESTMENT":
+                return "#4F46E5";
+            default:
+                return "#6B7280";
+        }
     };
 
     return (
         <Swipeable
             ref={swipeRef}
-            renderRightActions={renderRightActions}
+            renderRightActions={() => (
+                <TouchableOpacity
+                    style={styles.deleteButton}
+                    onPress={handleDelete}
+                >
+                    <Feather name="trash-2" size={18} color="#fff"/>
+                </TouchableOpacity>
+            )}
             overshootRight={false}
         >
             <View style={styles.container}>
@@ -71,12 +74,10 @@ export const TransactionItem = ({
                             {backgroundColor: getColor()},
                         ]}
                     />
-
                     <View>
                         <Text style={styles.category}>
                             {category || type}
                         </Text>
-
                         {account && (
                             <Text style={styles.account}>
                                 {account}
