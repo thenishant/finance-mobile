@@ -1,6 +1,6 @@
 import {api} from "./api";
 import {PaymentMethod} from "../types/payment";
-import {TransactionType} from "../types/transaction";
+import {Transaction, TransactionType} from "../types/transaction";
 
 type CreateTransactionPayload = {
     transactionType: TransactionType;
@@ -19,9 +19,9 @@ export const transactionService = {
         return response.data.data;
     },
 
-    async getAll() {
-        const response = await api.get("/transactions");
-        return response.data.data;
+    async getAll(): Promise<Transaction[]> {
+        const res = await api.get("/transactions");
+        return res.data.data;
     },
 
     async delete(id: string) {

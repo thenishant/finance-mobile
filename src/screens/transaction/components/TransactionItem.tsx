@@ -1,5 +1,5 @@
-import React from "react";
-import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import React, {useRef} from "react";
+import {Alert, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Swipeable} from "react-native-gesture-handler";
 import {Feather} from "@expo/vector-icons";
 
@@ -20,10 +20,31 @@ export const TransactionItem = ({
                                     account,
                                     onDelete,
                                 }: Props) => {
+
+    const swipeRef = useRef<Swipeable>(null);
+
+    const handleDelete = () => {
+        Alert.alert(
+            "Delete Transaction",
+            "Are you sure you want to delete this transaction?",
+            [
+                {text: "Cancel", style: "cancel"},
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => {
+                        swipeRef.current?.close();
+                        onDelete(id);
+                    },
+                },
+            ]
+        );
+    };
+
     const renderRightActions = () => (
         <TouchableOpacity
             style={styles.deleteButton}
-            onPress={() => onDelete(id)}
+            onPress={handleDelete}
         >
             <Feather name="trash-2" size={18} color="#fff"/>
         </TouchableOpacity>
@@ -36,11 +57,12 @@ export const TransactionItem = ({
         return "#6B7280";
     };
 
-    // const sign =
-    //     type === "INCOME" ? "+" : type === "EXPENSE" ? "-" : "";
-
     return (
-        <Swipeable renderRightActions={renderRightActions}>
+        <Swipeable
+            ref={swipeRef}
+            renderRightActions={renderRightActions}
+            overshootRight={false}
+        >
             <View style={styles.container}>
                 <View style={styles.leftBlock}>
                     <View

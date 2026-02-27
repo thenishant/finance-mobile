@@ -27,23 +27,11 @@ export const TransactionSection = ({
         return sum;
     }, 0);
 
-    const totalColor =
-        netTotal > 0 ? "#16A34A" :
-            netTotal < 0 ? "#DC2626" :
-                "#6B7280";
-
-    const sign = netTotal > 0 ? "+" : "";
-
     return (
         <View style={styles.section}>
-            {/* 🔹 Date + Total Row */}
             {date ? (
                 <View style={styles.headerRow}>
                     <Text style={styles.date}>{date}</Text>
-
-                    {/*<Text style={[styles.total, {color: totalColor}]}>*/}
-                    {/*    {sign}₹ {Math.abs(netTotal).toLocaleString("en-IN")}*/}
-                    {/*</Text>*/}
                 </View>
             ) : null}
 
