@@ -64,8 +64,6 @@ const LoginScreen = ({navigation}: Props) => {
 
     const handleGoogleLogin = async () => {
         try {
-            console.log("Google button clicked");
-
             const redirectTo = "finance-mobile://";
 
             const {data, error} = await supabase.auth.signInWithOAuth({
@@ -84,8 +82,6 @@ const LoginScreen = ({navigation}: Props) => {
                     redirectTo
                 );
 
-                console.log("Auth session result:", result);
-
                 if (result.type === "success" && result.url) {
                     // 🔥 Extract tokens from URL
                     const params = new URLSearchParams(
@@ -99,7 +95,6 @@ const LoginScreen = ({navigation}: Props) => {
                         throw new Error("Missing tokens from OAuth redirect");
                     }
 
-                    // 🔥 Restore Supabase session manually
                     const {error: sessionError} =
                         await supabase.auth.setSession({
                             access_token,
