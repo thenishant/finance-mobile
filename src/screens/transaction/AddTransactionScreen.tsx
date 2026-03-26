@@ -24,7 +24,7 @@ const AddTransactionScreen = () => {
     const mutation = useCreateTransaction();
 
     /* =============================
-       Zustand Selectors (Optimized)
+       Zustand
     ============================== */
 
     const transactionType = useTransactionDraft(s => s.transactionType);
@@ -61,10 +61,9 @@ const AddTransactionScreen = () => {
 
     const theme = transactionColors[transactionType];
 
-    const animatedBg = colorAnim.interpolate({
-        inputRange: [0, 1],
-        outputRange: ["#ffffff", theme.light],
-    });
+    /* =============================
+       Calendar
+    ============================== */
 
     const [calendarVisible, setCalendarVisible] = useState(false);
 
@@ -73,6 +72,17 @@ const AddTransactionScreen = () => {
         month: "short",
         year: "numeric",
     });
+
+    /* =============================
+       Balance Logic
+    ============================== */
+
+    const numericAmount = Number(amount || 0);
+
+    const remaining =
+        selectedAccount && numericAmount
+            ? selectedAccount.balance - numericAmount
+            : null;
 
     /* =============================
        UI
@@ -85,18 +95,13 @@ const AddTransactionScreen = () => {
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={styles.container}
             >
-                {/* ===== Hero Amount ===== */}
-                <Animated.View
-                    style={[
-                        styles.amountSection,
-                        {backgroundColor: animatedBg},
-                    ]}
-                >
+                {/* ===== Amount ===== */}
+                <View style={styles.amountSection}>
                     <AmountInput
                         value={amount}
                         onChangeText={setAmount}
                     />
-                </Animated.View>
+                </View>
 
                 {/* ===== Type ===== */}
                 <TransactionTypeSection
@@ -106,6 +111,8 @@ const AddTransactionScreen = () => {
 
                 {/* ===== Card ===== */}
                 <View style={styles.card}>
+
+                    {/* Account */}
                     <Row
                         label="Account"
                         value={
@@ -113,11 +120,19 @@ const AddTransactionScreen = () => {
                                 ? selectedAccount.name
                                 : "Select"
                         }
+                        subValue={
+                            selectedAccount
+                                ? remaining !== null
+                                    ? `₹${selectedAccount.balance.toLocaleString()} → ₹${remaining.toLocaleString()}`
+                                    : `₹${selectedAccount.balance.toLocaleString()}`
+                                : undefined
+                        }
                         onPress={() =>
                             navigation.navigate("SelectAccount")
                         }
                     />
 
+                    {/* Category */}
                     {transactionType !== "TRANSFER" && (
                         <Row
                             label="Category"
@@ -127,27 +142,29 @@ const AddTransactionScreen = () => {
                                     : "Select"
                             }
                             onPress={() =>
-                                navigation.navigate(
-                                    "SelectCategory",
-                                    {type: transactionType}
-                                )
+                                navigation.navigate("SelectCategory", {
+                                    type: transactionType,
+                                })
                             }
                         />
                     )}
 
+                    {/* Date */}
                     <Row
                         label="Date"
                         value={displayDate}
                         onPress={() => setCalendarVisible(true)}
                     />
 
+                    {/* Payment */}
                     <PaymentSection
                         value={paymentMethod}
                         onChange={setPaymentMethod}
                     />
+
                 </View>
 
-                {/* ===== Note ===== */}
+                {/* Note */}
                 <Input
                     placeholder="Add note..."
                     value={note}
@@ -161,16 +178,14 @@ const AddTransactionScreen = () => {
                 )}
             </KeyboardAwareScrollView>
 
-            {/* ===== Sticky Footer ===== */}
+            {/* Footer */}
             <Animated.View
                 style={[
                     styles.footer,
                     {
                         transform: [
                             {
-                                scale: mutation.isPending
-                                    ? 0.98
-                                    : 1,
+                                scale: mutation.isPending ? 0.98 : 1,
                             },
                         ],
                     },
@@ -190,29 +205,19 @@ const AddTransactionScreen = () => {
                 />
             </Animated.View>
 
-            {/* ===== Calendar Modal ===== */}
-            <Modal
-                transparent
-                animationType="fade"
-                visible={calendarVisible}
-            >
+            {/* Calendar */}
+            <Modal transparent animationType="fade" visible={calendarVisible}>
                 <Pressable
                     style={styles.overlay}
-                    onPress={() =>
-                        setCalendarVisible(false)
-                    }
+                    onPress={() => setCalendarVisible(false)}
                 />
 
                 <SafeAreaView style={styles.calendarWrapper}>
                     <View style={styles.sheet}>
                         <Calendar
-                            current={date
-                                .toISOString()
-                                .split("T")[0]}
+                            current={date.toISOString().split("T")[0]}
                             onDayPress={(day) => {
-                                setDate(
-                                    new Date(day.dateString)
-                                );
+                                setDate(new Date(day.dateString));
                                 setCalendarVisible(false);
                             }}
                         />
@@ -225,35 +230,42 @@ const AddTransactionScreen = () => {
 
 export default AddTransactionScreen;
 
-/* ============================= */
+/* =============================
+   Row Component
+============================= */
 
 const Row = memo(
     ({
          label,
          value,
+         subValue,
          onPress,
      }: {
         label: string;
         value: string;
+        subValue?: string;
         onPress: () => void;
     }) => (
-        <Pressable
-            style={styles.row}
-            onPress={onPress}
-        >
-            <Text style={styles.rowLabel}>
-                {label}
-            </Text>
-            <Text style={styles.rowValue}>
-                {value} ›
-            </Text>
+        <Pressable style={styles.row} onPress={onPress}>
+            <Text style={styles.rowLabel}>{label}</Text>
+
+            <View style={styles.right}>
+                <Text style={styles.rowValue}>{value} ›</Text>
+
+                {subValue && (
+                    <Text style={styles.rowSub}>{subValue}</Text>
+                )}
+            </View>
         </Pressable>
     )
 );
 
-/* ============================= */
+/* =============================
+   Styles
+============================= */
 
 const styles = StyleSheet.create({
+
     container: {
         paddingBottom: 120,
         gap: 24,
@@ -261,11 +273,6 @@ const styles = StyleSheet.create({
 
     amountSection: {
         alignItems: "center",
-    },
-
-    currency: {
-        // fontSize: 24,
-        // fontWeight: "600",
     },
 
     card: {
@@ -289,9 +296,19 @@ const styles = StyleSheet.create({
         color: "#6B7280",
     },
 
+    right: {
+        alignItems: "flex-end",
+    },
+
     rowValue: {
         fontSize: 16,
         fontWeight: "600",
+    },
+
+    rowSub: {
+        fontSize: 12,
+        color: "#6B7280",
+        marginTop: 2,
     },
 
     footer: {

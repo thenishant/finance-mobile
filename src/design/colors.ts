@@ -1,4 +1,4 @@
-export const colors = {
+export const colors: any = {
     primary: "#2563EB",
     background: "#FFFFFF",
     muted: "#6B7280",
@@ -9,4 +9,8 @@ export const colors = {
     expense: "#DC2626",     // strong but not neon red
     investment: "#7C3AED",  // indigo
     savings: "#2563EB",     // fintech blue
+    green: "#10B981",
+    yellow: "#F59E0B",
+    orange: "#FB923C",
+    red: "#EF4444",
 };

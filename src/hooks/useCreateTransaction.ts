@@ -3,22 +3,37 @@ import {transactionService} from "../services/transaction.service";
 import {useTransactionDraft} from "../stores/useTransactionDraft";
 
 export const useCreateTransaction = () => {
+
     const queryClient = useQueryClient();
     const draft = useTransactionDraft();
 
     return useMutation({
+
         mutationFn: () =>
             transactionService.create({
+
                 transactionType: draft.transactionType,
                 paymentMethod: draft.paymentMethod,
                 amount: Number(draft.amount),
                 date: draft.date.toISOString(),
+
                 categoryId:
                     draft.transactionType !== "TRANSFER"
                         ? draft.selectedCategory?.id
                         : undefined,
-                fromAccountId: draft.selectedAccount?.id,
-                note: draft.note,
+
+                fromAccountId:
+                    draft.transactionType !== "INCOME"
+                        ? draft.selectedAccount?.id
+                        : undefined,
+
+                toAccountId:
+                    draft.transactionType === "TRANSFER" ||
+                    draft.transactionType === "INCOME"
+                        ? draft.selectedToAccount?.id
+                        : undefined,
+
+                note: draft.note
             }),
 
         onSuccess: () => {
@@ -31,6 +46,6 @@ export const useCreateTransaction = () => {
             });
 
             draft.reset();
-        },
+        }
     });
 };

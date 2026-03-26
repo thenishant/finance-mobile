@@ -23,7 +23,7 @@
       </BuildActionEntries>
    </BuildAction>
    <TestAction
-      buildConfiguration = "Debug"
+      buildConfiguration = "Release"
       selectedDebuggerIdentifier = "Xcode.DebuggerFoundation.Debugger.LLDB"
       selectedLauncherIdentifier = "Xcode.DebuggerFoundation.Launcher.LLDB"
       shouldUseLaunchSchemeArgsEnv = "YES">
@@ -62,18 +62,18 @@
       </BuildableProductRunnable>
       <EnvironmentVariables>
          <EnvironmentVariable
+            key = "EXPO_PUBLIC_SUPABASE_ANON_KEY"
+            value = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6ImpuZ2tlc3lqcHpjZ2F4eGhzd2FtIiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzIzNzc3OTMsImV4cCI6MjA4Nzk1Mzc5M30.aaWgtrk4SsxWZDH9_u4nt5LTVjSjcz05zF6mVfyj2_I"
+            isEnabled = "YES">
+         </EnvironmentVariable>
+         <EnvironmentVariable
             key = "EXPO_PUBLIC_API_URL"
             value = "https://finance-backend-production-ffb3.up.railway.app"
             isEnabled = "YES">
          </EnvironmentVariable>
          <EnvironmentVariable
-            key = "EXPO_PUBLIC_SUPABASE_ANON_KEY"
-            value = "eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9.eyJpc3MiOiJzdXBhYmFzZSIsInJlZiI6InR6dm9nZmF4cnF4eXVobmd5cGt4Iiwicm9sZSI6ImFub24iLCJpYXQiOjE3NzA5NzkzNjEsImV4cCI6MjA4NjU1NTM2MX0.ye_8JNgG9EQJpLStltMvnDhIERb2xNPXrwV7X6LL4CY"
-            isEnabled = "YES">
-         </EnvironmentVariable>
-         <EnvironmentVariable
-            key = "EXPO_PUBLIC_SUPABASE_URL"
-            value = "https://tzvogfaxrqxyuhngypkx.supabase.co"
+            key = "EXPO_PUBLIC_SUPABASE_KEY"
+            value = "sb_publishable_xG86kp5BMgc0VnXgiNORg_MyZ1joTy"
             isEnabled = "YES">
          </EnvironmentVariable>
       </EnvironmentVariables>

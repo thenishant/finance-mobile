@@ -17,20 +17,41 @@ export interface Category {
     children?: Category[];
 }
 
-export interface MonthlyAnalytics {
+export interface ExpenseChild {
+    id: string;
+    name: string;
+    total: number;
+}
+
+export interface ExpenseCategory {
+    category: string;
+    total: number;
+    children: ExpenseChild[];
+}
+
+export type InvestmentGoal = {
+    percent: number;
+    goalAmount: number;
+    invested: number;
+    remaining: number;
+    progress: number;
+};
+
+export type MonthlyAnalytics = {
     totalIncome: number;
     totalExpense: number;
     totalInvestment: number;
     netSavings: number;
-}
 
-export interface MonthComparison {
-    current: MonthlyAnalytics;
-    previous: MonthlyAnalytics;
-    change: {
-        income: { diff: number; percent: number | null };
-        expense: { diff: number; percent: number | null };
-        investment: { diff: number; percent: number | null };
-        savings: { diff: number; percent: number | null };
-    };
-}
+    investmentGoal?: InvestmentGoal | null;
+
+    expenseBreakdown: {
+        category: string;
+        total: number;
+        children: {
+            id: string;
+            name: string;
+            total: number;
+        }[];
+    }[];
+};

@@ -1,24 +1,18 @@
 import {api} from "./api";
 import {supabase} from "../lib/supabase";
 import * as AuthSession from "expo-auth-session";
+import {unwrap} from "./base";
 
 export const authService = {
-    async login(email: string, password: string) {
-        const response = await api.post("/auth/login", {
-            email,
-            password,
-        });
 
-        return response.data.data.token;
+    async login(email: string, password: string): Promise<string> {
+        const res = await api.post("/auth/login", {email, password});
+        return unwrap<{ token: string }>(res).token;
     },
 
-    async register(email: string, password: string) {
-        const response = await api.post("/auth/register", {
-            email,
-            password,
-        });
-
-        return response.data.data.token;
+    async register(email: string, password: string): Promise<string> {
+        const res = await api.post("/auth/register", {email, password});
+        return unwrap<{ token: string }>(res).token;
     },
 
     async googleOAuth() {
@@ -35,15 +29,14 @@ export const authService = {
         });
 
         if (error) throw error;
-        console.log("Supabase OAuth response:", data);
-        return {authUrl: data.url, redirectTo};
+
+        return {
+            authUrl: data.url,
+            redirectTo,
+        };
     },
 
     async logout() {
-        try {
-            await supabase.auth.signOut();
-        } catch (error) {
-            console.log("Logout error:", error);
-        }
+        await supabase.auth.signOut();
     },
 };

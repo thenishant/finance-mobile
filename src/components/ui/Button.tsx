@@ -1,5 +1,5 @@
 import React from "react";
-import {StyleSheet, Text, TouchableOpacity, ViewStyle} from "react-native";
+import {StyleSheet, Text, TouchableOpacity, View, ViewStyle,} from "react-native";
 import {colors} from "../../design/colors";
 
 interface Props {
@@ -8,6 +8,7 @@ interface Props {
     variant?: "primary" | "secondary" | "ghost";
     disabled?: boolean;
     style?: ViewStyle;
+    leftIcon?: React.ReactNode;
 }
 
 export const Button = ({
@@ -16,6 +17,7 @@ export const Button = ({
                            variant = "primary",
                            disabled,
                            style,
+                           leftIcon,
                        }: Props) => {
     return (
         <TouchableOpacity
@@ -28,38 +30,58 @@ export const Button = ({
                 style,
             ]}
         >
-            <Text
-                style={[
-                    styles.text,
-                    variant !== "primary" && styles.secondaryText,
-                ]}
-            >
-                {title}
-            </Text>
+            <View style={styles.row}>
+                {leftIcon && <View style={styles.icon}>{leftIcon}</View>}
+
+                <Text
+                    style={[
+                        styles.text,
+                        variant !== "primary" && styles.secondaryText,
+                    ]}
+                >
+                    {title}
+                </Text>
+            </View>
         </TouchableOpacity>
     );
 };
 
 const styles = StyleSheet.create({
     base: {
-        paddingVertical: 16,
+        paddingVertical: 14,
+        paddingHorizontal: 16,
         borderRadius: 16,
-        alignItems: "center",
+        alignSelf: "stretch",
     },
+
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    icon: {
+        marginRight: 8,
+    },
+
     primary: {
         backgroundColor: colors.primary,
     },
+
     secondary: {
         backgroundColor: "#F3F4F6",
     },
+
     ghost: {
         backgroundColor: "transparent",
     },
+
     text: {
         color: "#FFFFFF",
         fontWeight: "600",
         fontSize: 16,
     },
+
     secondaryText: {
         color: "#111827",
     },

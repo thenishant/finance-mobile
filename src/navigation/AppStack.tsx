@@ -7,6 +7,8 @@ import {SelectCategoryScreen} from "../screens/categories/SelectCategoryScreen";
 import {SelectAccountScreen} from "../screens/transaction/SelectAccountScreen";
 import {CreateAccountScreen} from "../screens/transaction/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
+import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
+
 import {TransactionType} from "../types/transaction";
 import {useQueryClient} from "@tanstack/react-query";
 import {transactionService} from "../services/transaction.service";
@@ -19,6 +21,7 @@ export type AppStackParamList = {
     ManageCategories: undefined;
     CreateAccount: undefined;
     CreateCategory: { type: TransactionType };
+    Investment: undefined;
 };
 
 const Stack = createNativeStackNavigator<AppStackParamList>();
@@ -80,6 +83,16 @@ export const AppStack = () => {
                 component={CreateCategoryScreen}
                 options={{title: "Create Category"}}
             />
+
+            <Stack.Screen
+                name="Investment"
+                component={InvestmentScreen}
+                options={{
+                    title: "Investment",
+                    headerTitleAlign: "center"
+                }}
+            />
+
         </Stack.Navigator>
     );
 };

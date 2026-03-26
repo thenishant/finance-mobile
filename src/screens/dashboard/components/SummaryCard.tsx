@@ -1,17 +1,17 @@
 import React from "react";
 import {StyleSheet, View} from "react-native";
+import {useNavigation} from "@react-navigation/native";
+
 import {StatBlock} from "./StatBlock";
 import {colors} from "../../../design/colors";
 
-interface Props {
-    analytics: any;
-    comparison: any;
-    formatCurrency: (value: number) => string;
-}
+export const SummaryCard = ({analytics, comparison, formatCurrency}: any) => {
 
-export const SummaryCard = ({analytics, comparison, formatCurrency}: Props) => {
+    const navigation = useNavigation<any>();
+
     return (
         <View style={styles.summaryCard}>
+
             <View style={styles.statsRow}>
 
                 <StatBlock
@@ -43,6 +43,7 @@ export const SummaryCard = ({analytics, comparison, formatCurrency}: Props) => {
                     percent={comparison?.change.investment?.percent}
                     color={colors.investment}
                     formatCurrency={formatCurrency}
+                    onPress={() => navigation.navigate("Investment")}
                 />
 
                 <View style={styles.verticalDivider}/>
@@ -57,30 +58,31 @@ export const SummaryCard = ({analytics, comparison, formatCurrency}: Props) => {
                 />
 
             </View>
+
         </View>
     );
 };
 
 const styles = StyleSheet.create({
+
     summaryCard: {
-        backgroundColor: "#FFFFFF",
-        marginHorizontal: 10,
-        marginTop: -40,
-        borderRadius: 24,
-        paddingVertical: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.08,
-        shadowRadius: 25,
-        elevation: 8,
+        backgroundColor: "#fff",
+        // marginHorizontal: 16,
+        borderTopLeftRadius: 30,
+        borderTopRightRadius: 30,
+        paddingVertical: 16,
     },
+
     statsRow: {
         flexDirection: "row",
-        alignItems: "center",
         justifyContent: "space-between",
+        alignItems: "center",
     },
+
     verticalDivider: {
         width: 1,
-        height: 50,
-        backgroundColor: "#F3F4F6",
+        height: 40,
+        backgroundColor: "#F1F5F9",
     },
+
 });

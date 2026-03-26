@@ -1,173 +1,100 @@
-import React, {useEffect, useRef, useState} from "react";
-import {ActivityIndicator, Animated, RefreshControl, StyleSheet, View,} from "react-native";
+import React, {useRef} from "react";
+import {Animated, RefreshControl, StyleSheet, Text, View,} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {useQuery} from "@tanstack/react-query";
 
-import {analyticsService} from "../../services/analytics.service";
-import {DashboardHero} from "./components/DashboardHero";
-import {SummaryCard} from "./components/SummaryCard";
 import {MonthSelector} from "../../components/ui/MonthSelector";
-import {formatCurrencyCompact, formatCurrencyNumber,} from "../../utils/formatCurrency";
+import {SummaryCard} from "./components/SummaryCard";
+import {TotalBalanceHero} from "./components/TotalBalanceHero";
+
+import {useMonthStore} from "../../stores/useMonthStore";
+import {useDashboard} from "../../hooks/useDashboard";
+import {useAccounts} from "../../hooks/useAccounts";
+import {formatCurrencyCompact} from "../../utils/formatCurrency";
+import {DashboardSkeleton} from "./components/DashboardSkeleton";
 
 const DashboardScreen = () => {
-    const now = new Date();
 
-    const [selectedYear, setSelectedYear] = useState(
-        now.getFullYear()
-    );
-    const [selectedMonth, setSelectedMonth] = useState(
-        now.getMonth() + 1
-    );
+    const year = useMonthStore(s => s.year);
+    const month = useMonthStore(s => s.month);
 
-    const animatedBalance = useRef(
-        new Animated.Value(0)
-    ).current;
+    const scrollY = useRef(new Animated.Value(0)).current;
 
-    const scrollY = useRef(
-        new Animated.Value(0)
-    ).current;
+    const {data, isLoading, isRefetching, refetch, error} =
+        useDashboard(year, month);
 
-    const [displayBalance, setDisplayBalance] =
-        useState(0);
-
-    // 🔥 React Query (parallel calls)
-    const {
-        data,
-        isLoading,
-        isRefetching,
-        refetch,
-    } = useQuery({
-        queryKey: [
-            "dashboard",
-            selectedYear,
-            selectedMonth,
-        ],
-        queryFn: async () => {
-            const [monthly, compare] =
-                await Promise.all([
-                    analyticsService.getMonthly(
-                        selectedYear,
-                        selectedMonth
-                    ),
-                    analyticsService.getMonthComparison(
-                        selectedYear,
-                        selectedMonth
-                    ),
-                ]);
-
-            return {
-                monthly,
-                comparison: compare,
-            };
-        },
-        staleTime: 1000 * 60 * 5,
-        placeholderData: (previous) => previous
-    });
+    const {data: accounts = []} = useAccounts();
 
     const analytics = data?.monthly;
     const comparison = data?.comparison;
 
-    useEffect(() => {
-        if (!analytics) return;
+    if (isLoading) return <DashboardSkeleton/>;
 
-        const total =
-            analytics.totalIncome -
-            analytics.totalExpense -
-            analytics.totalInvestment;
-
-        animatedBalance.setValue(0);
-
-        Animated.timing(animatedBalance, {
-            toValue: total,
-            duration: 800,
-            useNativeDriver: false,
-        }).start();
-
-        const listener =
-            animatedBalance.addListener(
-                ({value}) => {
-                    setDisplayBalance(value);
-                }
-            );
-
-        return () => {
-            animatedBalance.removeListener(
-                listener
-            );
-        };
-    }, [analytics]);
-
-    if (isLoading) {
+    if (error || !analytics) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large"/>
+                <Text style={styles.errorText}>
+                    Failed to load dashboard
+                </Text>
             </View>
         );
     }
 
-    if (!analytics) {
-        return (
-            <View style={styles.center}/>
-        );
-    }
+    const isEmpty =
+        !analytics.totalIncome &&
+        !analytics.totalExpense &&
+        !analytics.totalInvestment;
 
     return (
-        <SafeAreaView
-            style={styles.container}
-            edges={["top"]}
-        >
-            <MonthSelector
-                month={selectedMonth}
-                year={selectedYear}
-                comparison={comparison}
-                scrollY={scrollY}
-                onChange={(year, month) => {
-                    setSelectedYear(year);
-                    setSelectedMonth(month);
-                }}
-            />
+        <SafeAreaView style={styles.container}>
 
             <Animated.ScrollView
-                contentContainerStyle={{
-                    paddingBottom: 40,
-                }}
+                contentContainerStyle={styles.content}
                 refreshControl={
                     <RefreshControl
-                        refreshing={
-                            isRefetching
-                        }
+                        refreshing={isRefetching}
                         onRefresh={refetch}
                     />
                 }
                 onScroll={Animated.event(
-                    [
-                        {
-                            nativeEvent: {
-                                contentOffset: {
-                                    y: scrollY,
-                                },
-                            },
-                        },
-                    ],
+                    [{nativeEvent: {contentOffset: {y: scrollY}}}],
                     {useNativeDriver: false}
                 )}
                 scrollEventThrottle={16}
             >
-                <DashboardHero
-                    balance={displayBalance}
-                    formatCurrency={
-                        formatCurrencyNumber
-                    }
-                />
 
-                <SummaryCard
-                    analytics={analytics}
-                    comparison={comparison}
-                    formatCurrency={
-                        formatCurrencyCompact
-                    }
-                />
+                {/* 🔥 DARK SECTION (INSIDE SCROLL) */}
+                <View style={styles.topSection}>
+
+                    <MonthSelector
+                        comparison={comparison}
+                        scrollY={scrollY}
+                    />
+
+                    <TotalBalanceHero accounts={accounts}/>
+
+                </View>
+
+                {isEmpty ? (
+                    <View style={styles.empty}>
+                        <Text style={styles.emptyTitle}>
+                            No transactions yet
+                        </Text>
+                        <Text style={styles.emptySub}>
+                            Add your first expense 🚀
+                        </Text>
+                    </View>
+                ) : (
+                    <View style={styles.summaryWrapper}>
+                        <SummaryCard
+                            analytics={analytics}
+                            comparison={comparison}
+                            formatCurrency={formatCurrencyCompact}
+                        />
+                    </View>
+                )}
+
             </Animated.ScrollView>
+
         </SafeAreaView>
     );
 };
@@ -175,13 +102,51 @@ const DashboardScreen = () => {
 export default DashboardScreen;
 
 const styles = StyleSheet.create({
+
     container: {
         flex: 1,
         backgroundColor: "#F3F4F6",
     },
+
+    content: {
+        paddingBottom: 60,
+    },
+
+    topSection: {
+        backgroundColor: "#0F172A",
+        paddingHorizontal: 16,
+        paddingBottom: 40, // 🔥 space for overlap
+    },
+
+    summaryWrapper: {
+        marginTop: -28, // 🔥 now this works perfectly
+    },
+
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
     },
+
+    errorText: {
+        color: "#EF4444",
+    },
+
+    empty: {
+        marginTop: 80,
+        alignItems: "center",
+    },
+
+    emptyTitle: {
+        fontSize: 18,
+        fontWeight: "600",
+        color: "#111827",
+    },
+
+    emptySub: {
+        fontSize: 14,
+        color: "#6B7280",
+        marginTop: 6,
+    },
+
 });

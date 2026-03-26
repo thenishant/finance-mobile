@@ -1,5 +1,5 @@
 import React from "react";
-import {StyleSheet, Text, View} from "react-native";
+import {Pressable, StyleSheet, Text, View} from "react-native";
 import {Feather} from "@expo/vector-icons";
 
 interface Props {
@@ -9,27 +9,19 @@ interface Props {
     percent?: number | null;
     color: string;
     formatCurrency: (value: number) => string;
+    onPress?: () => void;
 }
 
-export const StatBlock = ({
-                              icon,
-                              label,
-                              value,
-                              percent,
-                              color,
-                              formatCurrency,
-                          }: Props) => {
-    const positive = percent && percent > 0;
-    const negative = percent && percent < 0;
-
-    const percentColor = positive
-        ? "#10B981"
-        : negative
-            ? "#EF4444"
-            : "#9CA3AF";
+export const StatBlock = ({icon, label, value, percent, color, formatCurrency, onPress}: Props) => {
 
     return (
-        <View style={styles.statBlock}>
+        <Pressable
+            onPress={onPress}
+            style={({pressed}) => [
+                styles.statBlock,
+                pressed && styles.pressed
+            ]}
+        >
             <View style={[styles.iconContainer, {backgroundColor: `${color}15`}]}>
                 <Feather name={icon} size={16} color={color}/>
             </View>
@@ -41,12 +33,12 @@ export const StatBlock = ({
             </Text>
 
             {percent !== null && percent !== undefined && (
-                <Text style={[styles.percentText, {color: percentColor}]}>
+                <Text style={[styles.percentText, {color}]}>
                     {percent > 0 ? "▲" : percent < 0 ? "▼" : "•"}{" "}
                     {Math.abs(percent)}%
                 </Text>
             )}
-        </View>
+        </Pressable>
     );
 };
 
@@ -63,9 +55,13 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 8,
     },
+    pressed: {
+        opacity: 0.7,
+    },
     statLabel: {
         fontSize: 12,
         color: "#6B7280",
+        marginTop: 4
     },
     statValue: {
         fontSize: 16,

@@ -1,7 +1,6 @@
 import React, {useEffect, useState} from "react";
 import {Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
 import * as WebBrowser from "expo-web-browser";
-import {authService} from "../../services/auth.service";
 import {useAuth} from "../../hooks/useAuth";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 import {AuthStackParamList} from "../../navigation/AuthNavigator";
@@ -13,7 +12,7 @@ WebBrowser.maybeCompleteAuthSession();
 type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
 
 const LoginScreen = ({navigation}: Props) => {
-    const {login} = useAuth();
+    const {loginWithPassword, loginWithToken} = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -21,8 +20,8 @@ const LoginScreen = ({navigation}: Props) => {
     useEffect(() => {
         const {data: listener} = supabase.auth.onAuthStateChange(
             async (event, session) => {
-                console.log("AUTH EVENT:", event);
-                console.log("SESSION:", session?.access_token);
+                // console.log("AUTH EVENT:", event);
+                // console.log("SESSION:", session?.access_token);
 
                 if (event === "SIGNED_IN" && session?.access_token) {
                     try {
@@ -36,13 +35,11 @@ const LoginScreen = ({navigation}: Props) => {
 
                         console.log("Backend token received:", appToken);
 
-                        await login(appToken);
+                        await loginWithToken(appToken);
 
-                        console.log("Login context updated");
+                        // console.log("Login context updated");
 
                     } catch (err) {
-                        console.log("API BASE URL:", api.defaults.baseURL);
-                        console.log("Backend exchange failed:", err);
                     }
                 }
             }
@@ -55,8 +52,7 @@ const LoginScreen = ({navigation}: Props) => {
 
     const handleLogin = async () => {
         try {
-            const token = await authService.login(email, password);
-            await login(token);
+            await loginWithPassword(email, password);
         } catch (error) {
             Alert.alert("Login Failed", "Invalid credentials");
         }

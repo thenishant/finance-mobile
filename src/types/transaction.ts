@@ -11,10 +11,24 @@ export type TransactionType =
 export interface Transaction {
     id: string;
     type: TransactionType;
-    amount: number;
+    amount: string;
     date: string;
-    category?: { name: string };
-    fromAccount?: { name: string };
+    category?: {
+        id: string;
+        name: string;
+        parent?: {
+            id: string;
+            name: string;
+        };
+    };
+    fromAccount?: {
+        id: string;
+        name: string;
+    };
+    toAccount?: {
+        id: string;
+        name: string;
+    };
 }
 
 export interface GroupedTransaction {

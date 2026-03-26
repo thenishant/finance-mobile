@@ -1,28 +1,20 @@
 import React, {useEffect, useRef} from "react";
-import {Animated, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {Animated, PanResponder, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Feather} from "@expo/vector-icons";
+import {useMonthStore} from "../../stores/useMonthStore";
+import {monthNames} from "../../utils/months";
 
 interface Props {
-    month: number;
-    year: number;
-    onChange: (year: number, month: number) => void;
-    scrollY: Animated.Value;
     comparison?: any;
+    scrollY?: Animated.Value;
 }
 
-const monthNames = [
-    "January", "February", "March", "April",
-    "May", "June", "July", "August",
-    "September", "October", "November", "December"
-];
+export const MonthSelector = ({scrollY, comparison}: Props) => {
 
-export const MonthSelector = ({
-                                  month,
-                                  year,
-                                  onChange,
-                                  scrollY,
-                                  comparison,
-                              }: Props) => {
+    const year = useMonthStore(s => s.year);
+    const month = useMonthStore(s => s.month);
+    const prevMonth = useMonthStore(s => s.prevMonth);
+    const nextMonth = useMonthStore(s => s.nextMonth);
 
     const fadeAnim = useRef(new Animated.Value(1)).current;
 
@@ -31,67 +23,91 @@ export const MonthSelector = ({
             Animated.timing(fadeAnim, {
                 toValue: 0,
                 duration: 120,
-                useNativeDriver: true,
+                useNativeDriver: true
             }),
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 180,
-                useNativeDriver: true,
-            }),
+                useNativeDriver: true
+            })
         ]).start();
     }, [month, year]);
 
     const now = new Date();
+
     const isFuture =
         year > now.getFullYear() ||
-        (year === now.getFullYear() && month > now.getMonth() + 1);
+        (year === now.getFullYear() && month >= now.getMonth() + 1);
 
-    const goPrevious = () => {
-        if (month === 1) onChange(year - 1, 12);
-        else onChange(year, month - 1);
-    };
+    const goPrevious = () => prevMonth();
 
     const goNext = () => {
         if (isFuture) return;
-
-        if (month === 12) onChange(year + 1, 1);
-        else onChange(year, month + 1);
+        nextMonth();
     };
 
-    const shadowOpacity = scrollY.interpolate({
-        inputRange: [0, 20],
-        outputRange: [0, 0.12],
-        extrapolate: "clamp",
-    });
+    // Swipe detection
+    const panResponder = useRef(
+        PanResponder.create({
 
-    const bgOpacity = scrollY.interpolate({
-        inputRange: [0, 50],
-        outputRange: [0.85, 1],
-        extrapolate: "clamp",
-    });
+            onMoveShouldSetPanResponder: (_, gestureState) =>
+                Math.abs(gestureState.dx) > 30,
 
-    const trendPercent = comparison?.change?.expense?.percent;
+            onPanResponderRelease: (_, gestureState) => {
+
+                if (gestureState.dx > 60) {
+                    goPrevious();
+                }
+
+                if (gestureState.dx < -60 && !isFuture) {
+                    goNext();
+                }
+            }
+
+        })
+    ).current;
+
+    const opacity = scrollY
+        ? scrollY.interpolate({
+            inputRange: [0, 100],
+            outputRange: [1, 0.9],
+            extrapolate: "clamp"
+        })
+        : 1;
+
+    const trendPercent =
+        comparison?.change?.expense?.percent ?? null;
 
     const trendColor =
-        trendPercent > 0 ? "#EF4444" :
-            trendPercent < 0 ? "#10B981" :
-                "#9CA3AF";
+        trendPercent === null
+            ? "#9CA3AF"
+            : trendPercent > 0
+                ? "#EF4444"
+                : trendPercent < 0
+                    ? "#10B981"
+                    : "#9CA3AF";
 
     const trendIcon =
-        trendPercent > 0 ? "trending-up" :
-            trendPercent < 0 ? "trending-down" :
-                "minus";
+        trendPercent === null
+            ? "minus"
+            : trendPercent > 0
+                ? "trending-up"
+                : trendPercent < 0
+                    ? "trending-down"
+                    : "minus";
 
     return (
         <Animated.View
+            {...panResponder.panHandlers}
             style={[
                 styles.container,
                 {
-                    shadowOpacity,
-                    backgroundColor: "rgba(255,255,255,0.95)",
-                },
+                    opacity,
+                    backgroundColor: "rgba(255,255,255,0.95)"
+                }
             ]}
         >
+
             <TouchableOpacity onPress={goPrevious}>
                 <Feather name="chevron-left" size={22} color="#6B7280"/>
             </TouchableOpacity>
@@ -102,14 +118,17 @@ export const MonthSelector = ({
                         {monthNames[month - 1]} {year}
                     </Text>
 
-                    {trendPercent !== undefined && (
+                    {trendPercent !== null && (
                         <View style={styles.trendRow}>
                             <Feather
-                                name={trendIcon}
+                                name={trendIcon as any}
                                 size={14}
                                 color={trendColor}
                             />
-                            <Text style={[styles.trendText, {color: trendColor}]}>
+                            <Text style={[
+                                styles.trendText,
+                                {color: trendColor}
+                            ]}>
                                 {Math.abs(trendPercent)}%
                             </Text>
                         </View>
@@ -124,39 +143,42 @@ export const MonthSelector = ({
             >
                 <Feather name="chevron-right" size={22} color="#6B7280"/>
             </TouchableOpacity>
+
         </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
+
     container: {
         flexDirection: "row",
-        alignItems: "center",
         justifyContent: "space-between",
-        paddingHorizontal: 20,
-        paddingVertical: 14,
-        borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
-        elevation: 6,
-        shadowColor: "#000",
+        alignItems: "center",
+        paddingVertical: 10,
+        paddingHorizontal: 12,
+        borderRadius: 16,
+        backgroundColor: "rgba(255,255,255,0.08)",
     },
+
     label: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: "600",
         color: "#111827",
-        textAlign: "center",
     },
+
     centerBlock: {
         alignItems: "center",
     },
+
     trendRow: {
         flexDirection: "row",
         alignItems: "center",
         marginTop: 4,
-        gap: 4,
     },
+
     trendText: {
         fontSize: 12,
-        fontWeight: "500",
+        marginLeft: 4,
     },
+
 });

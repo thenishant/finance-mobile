@@ -4,10 +4,12 @@ import {Feather} from "@expo/vector-icons";
 import {StyleSheet, View} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
+import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 import DashboardScreen from "../screens/dashboard/DashboardScreen";
 import AccountsScreen from "../screens/accounts/AccountsScreen";
 import TransactionListScreen from "../screens/transaction/TransactionListScreen";
+import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
 import {AppStackParamList} from "./AppStack";
 
 export type MainTabParamList = {
@@ -15,6 +17,7 @@ export type MainTabParamList = {
     Transactions: undefined;
     Add: undefined;
     Accounts: undefined;
+    Analytics: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
@@ -26,39 +29,47 @@ const EmptyScreen = () => null;
 
 export const MainTabs = () => {
     const navigation = useNavigation<StackNavigationProp>();
+    const insets = useSafeAreaInsets();
 
     return (
         <Tab.Navigator
             screenOptions={({route}) => ({
                 headerShown: false,
                 tabBarShowLabel: false,
-                tabBarStyle: styles.tabBarStyle,
                 tabBarActiveTintColor: "#2563EB",
                 tabBarInactiveTintColor: "#9CA3AF",
+                tabBarStyle: [
+                    styles.tabBarStyle,
+                    {paddingBottom: insets.bottom},
+                ],
                 tabBarIcon: ({color}) => {
-                    if (route.name === "Dashboard") {
-                        return <Feather name="home" size={22} color={color}/>;
-                    }
+                    switch (route.name) {
+                        case "Dashboard":
+                            return <Feather name="home" size={22} color={color}/>;
 
-                    if (route.name === "Transactions") {
-                        return <Feather name="list" size={22} color={color}/>;
-                    }
+                        case "Transactions":
+                            return <Feather name="list" size={22} color={color}/>;
 
-                    if (route.name === "Accounts") {
-                        return (
-                            <Feather name="credit-card" size={22} color={color}/>
-                        );
-                    }
+                        case "Accounts":
+                            return (
+                                <Feather name="credit-card" size={22} color={color}/>
+                            );
 
-                    if (route.name === "Add") {
-                        return (
-                            <View style={styles.floatingButton}>
-                                <Feather name="plus" size={26} color="#FFFFFF"/>
-                            </View>
-                        );
-                    }
+                        case "Analytics":
+                            return (
+                                <Feather name="pie-chart" size={22} color={color}/>
+                            );
 
-                    return null;
+                        case "Add":
+                            return (
+                                <View style={styles.floatingButton}>
+                                    <Feather name="plus" size={26} color="#FFFFFF"/>
+                                </View>
+                            );
+
+                        default:
+                            return null;
+                    }
                 },
             })}
         >
@@ -77,17 +88,20 @@ export const MainTabs = () => {
             />
 
             <Tab.Screen name="Accounts" component={AccountsScreen}/>
+            <Tab.Screen name="Analytics" component={AnalyticsScreen}/>
         </Tab.Navigator>
     );
 };
 
 const styles = StyleSheet.create({
     tabBarStyle: {
-        position: "absolute",
         height: 70,
         backgroundColor: "#FFFFFF",
         borderTopWidth: 0,
-        elevation: 15,
+        elevation: 20,
+        shadowColor: "#000",
+        shadowOpacity: 0.1,
+        shadowRadius: 10,
     },
     floatingButton: {
         width: 64,
@@ -96,10 +110,10 @@ const styles = StyleSheet.create({
         backgroundColor: "#111827",
         justifyContent: "center",
         alignItems: "center",
-        marginTop: -32,
+        marginTop: -30,
         shadowColor: "#000",
         shadowOpacity: 0.25,
         shadowRadius: 15,
-        elevation: 10,
+        elevation: 12,
     },
 });

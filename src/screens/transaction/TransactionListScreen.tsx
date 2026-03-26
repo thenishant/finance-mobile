@@ -42,9 +42,6 @@ const TransactionListScreen = () => {
                 );
             }
         },
-        // onSettled: () => {
-        //     queryClient.invalidateQueries({queryKey: ["transactions"]});
-        // },
     });
 
     const grouped = useGroupedTransactions(transactions);
