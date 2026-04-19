@@ -9,10 +9,12 @@ import {TotalBalanceHero} from "./components/TotalBalanceHero";
 import {useMonthStore} from "../../stores/useMonthStore";
 import {useDashboard} from "../../hooks/useDashboard";
 import {useAccounts} from "../../hooks/useAccounts";
+import {useDailySpendingTrends} from "../../hooks/useDailySpendingTrends";
 import {formatCurrencyCompact} from "../../utils/formatCurrency";
 import {DashboardSkeleton} from "./components/DashboardSkeleton";
 import {BudgetCard} from "./components/BudgetCard";
 import {DailySpendCard} from "./components/DailySpend";
+import {SpendingTrendsCard} from "./components/SpendingTrendsCard";
 
 const DashboardScreen = () => {
 
@@ -22,6 +24,7 @@ const DashboardScreen = () => {
     const {data, isLoading, isRefetching, refetch, error} = useDashboard(year, month);
 
     const {data: accounts = []} = useAccounts();
+    const {data: trendData = [], isLoading: trendsLoading} = useDailySpendingTrends(7);
     const analytics = data?.monthly;
     const comparison = data?.comparison;
 
@@ -97,6 +100,7 @@ const DashboardScreen = () => {
                             formatCurrency={formatCurrencyCompact}
                         />
 
+
                         <View style={styles.section}>
                             <BudgetCard spent={spent} budget={budget}/>
                         </View>
@@ -105,6 +109,9 @@ const DashboardScreen = () => {
                             <DailySpendCard amount={dailySpend}/>
                         </View>
 
+                        <View style={styles.section}>
+                            <SpendingTrendsCard data={trendData} isLoading={trendsLoading}/>
+                        </View>
                     </View>
                 )}
 
