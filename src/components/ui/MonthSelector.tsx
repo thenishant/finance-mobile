@@ -1,15 +1,21 @@
 import React, {useEffect, useRef} from "react";
 import {Animated, PanResponder, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Feather} from "@expo/vector-icons";
+
 import {useMonthStore} from "../../stores/useMonthStore";
 import {monthNames} from "../../utils/months";
 
 interface Props {
     comparison?: any;
     scrollY?: Animated.Value;
+    variant?: "light" | "dark";
 }
 
-export const MonthSelector = ({scrollY, comparison}: Props) => {
+export const MonthSelector = ({
+                                  scrollY,
+                                  comparison,
+                                  variant = "light"
+                              }: Props) => {
 
     const year = useMonthStore(s => s.year);
     const month = useMonthStore(s => s.month);
@@ -18,20 +24,40 @@ export const MonthSelector = ({scrollY, comparison}: Props) => {
 
     const fadeAnim = useRef(new Animated.Value(1)).current;
 
+    const isDark = variant === "dark";
+
+    /* =============================
+       THEME
+    ============================== */
+
+    const bgColor = isDark
+        ? "rgba(255,255,255,0.08)"
+        : "rgba(255,255,255,0.95)";
+
+    const textColor = isDark ? "#F9FAFB" : "#111827";
+    const iconColor = isDark ? "#D1D5DB" : "#6B7280";
+
+    /* =============================
+       SMOOTH FADE
+    ============================== */
+
     useEffect(() => {
-        Animated.sequence([
-            Animated.timing(fadeAnim, {
-                toValue: 0,
-                duration: 120,
-                useNativeDriver: true
-            }),
+        Animated.timing(fadeAnim, {
+            toValue: 0.6,
+            duration: 120,
+            useNativeDriver: true
+        }).start(() => {
             Animated.timing(fadeAnim, {
                 toValue: 1,
                 duration: 180,
                 useNativeDriver: true
-            })
-        ]).start();
+            }).start();
+        });
     }, [month, year]);
+
+    /* =============================
+       NAVIGATION
+    ============================== */
 
     const now = new Date();
 
@@ -40,32 +66,27 @@ export const MonthSelector = ({scrollY, comparison}: Props) => {
         (year === now.getFullYear() && month >= now.getMonth() + 1);
 
     const goPrevious = () => prevMonth();
-
     const goNext = () => {
-        if (isFuture) return;
-        nextMonth();
+        if (!isFuture) nextMonth();
     };
 
-    // Swipe detection
+    /* =============================
+       SWIPE
+    ============================== */
+
     const panResponder = useRef(
         PanResponder.create({
-
-            onMoveShouldSetPanResponder: (_, gestureState) =>
-                Math.abs(gestureState.dx) > 30,
-
-            onPanResponderRelease: (_, gestureState) => {
-
-                if (gestureState.dx > 60) {
-                    goPrevious();
-                }
-
-                if (gestureState.dx < -60 && !isFuture) {
-                    goNext();
-                }
+            onMoveShouldSetPanResponder: (_, g) => Math.abs(g.dx) > 30,
+            onPanResponderRelease: (_, g) => {
+                if (g.dx > 60) goPrevious();
+                if (g.dx < -60 && !isFuture) goNext();
             }
-
         })
     ).current;
+
+    /* =============================
+       SCROLL EFFECT
+    ============================== */
 
     const opacity = scrollY
         ? scrollY.interpolate({
@@ -74,6 +95,10 @@ export const MonthSelector = ({scrollY, comparison}: Props) => {
             extrapolate: "clamp"
         })
         : 1;
+
+    /* =============================
+       TREND
+    ============================== */
 
     const trendPercent =
         comparison?.change?.expense?.percent ?? null;
@@ -96,89 +121,115 @@ export const MonthSelector = ({scrollY, comparison}: Props) => {
                     ? "trending-down"
                     : "minus";
 
+    /* =============================
+       UI
+    ============================== */
+
     return (
         <Animated.View
             {...panResponder.panHandlers}
             style={[
                 styles.container,
-                {
-                    opacity,
-                    backgroundColor: "rgba(255,255,255,0.95)"
-                }
+                {opacity, backgroundColor: bgColor}
             ]}
         >
 
-            <TouchableOpacity onPress={goPrevious}>
-                <Feather name="chevron-left" size={22} color="#6B7280"/>
-            </TouchableOpacity>
+            {/* LEFT */}
+            <View style={styles.side}>
+                <TouchableOpacity onPress={goPrevious}>
+                    <Feather name="chevron-left" size={22} color={iconColor}/>
+                </TouchableOpacity>
+            </View>
 
-            <Animated.View style={{opacity: fadeAnim}}>
-                <View style={styles.centerBlock}>
-                    <Text style={styles.label}>
+            {/* CENTER */}
+            <View style={styles.center}>
+                <Animated.View style={{opacity: fadeAnim, alignItems: "center"}}>
+
+                    <Text style={[styles.label, {color: textColor}]}>
                         {monthNames[month - 1]} {year}
                     </Text>
 
-                    {trendPercent !== null && (
-                        <View style={styles.trendRow}>
-                            <Feather
-                                name={trendIcon as any}
-                                size={14}
-                                color={trendColor}
-                            />
-                            <Text style={[
-                                styles.trendText,
-                                {color: trendColor}
-                            ]}>
-                                {Math.abs(trendPercent)}%
-                            </Text>
-                        </View>
-                    )}
-                </View>
-            </Animated.View>
+                    <View style={styles.trendRow}>
+                        {trendPercent !== null ? (
+                            <View style={styles.trendContent}>
+                                <Feather
+                                    name={trendIcon as any}
+                                    size={14}
+                                    color={trendColor}
+                                />
+                                <Text style={[styles.trendText, {color: trendColor}]}>
+                                    {Math.abs(trendPercent)}%
+                                </Text>
+                            </View>
+                        ) : (
+                            <Text style={{opacity: 0}}>0%</Text>
+                        )}
+                    </View>
 
-            <TouchableOpacity
-                onPress={goNext}
-                disabled={isFuture}
-                style={{opacity: isFuture ? 0.3 : 1}}
-            >
-                <Feather name="chevron-right" size={22} color="#6B7280"/>
-            </TouchableOpacity>
+                </Animated.View>
+            </View>
+
+            {/* RIGHT */}
+            <View style={styles.side}>
+                <TouchableOpacity
+                    onPress={goNext}
+                    disabled={isFuture}
+                    style={{opacity: isFuture ? 0.3 : 1}}
+                >
+                    <Feather name="chevron-right" size={22} color={iconColor}/>
+                </TouchableOpacity>
+            </View>
 
         </Animated.View>
     );
 };
 
+/* =============================
+   STYLES
+============================= */
+
 const styles = StyleSheet.create({
 
     container: {
         flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
         paddingVertical: 10,
         paddingHorizontal: 12,
         borderRadius: 16,
-        backgroundColor: "rgba(255,255,255,0.08)",
+    },
+
+    side: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    center: {
+        flex: 6,
+        alignItems: "center",
+        justifyContent: "space-between",
     },
 
     label: {
         fontSize: 15,
         fontWeight: "600",
-        color: "#111827",
-    },
-
-    centerBlock: {
-        alignItems: "center",
+        justifyContent: "center",
     },
 
     trendRow: {
+        height: 16,
+        justifyContent: "center",
+        alignItems: "center",
+        marginTop: 2,
+    },
+
+    trendContent: {
         flexDirection: "row",
         alignItems: "center",
-        marginTop: 4,
     },
 
     trendText: {
         fontSize: 12,
         marginLeft: 4,
     },
-
 });

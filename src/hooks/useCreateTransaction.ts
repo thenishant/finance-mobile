@@ -1,51 +1,65 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {transactionService} from "../services/transaction.service";
-import {useTransactionDraft} from "../stores/useTransactionDraft";
+import {TransactionType} from "../types/transaction";
+import {PaymentMethod} from "../types/payment";
+
+type CreateTransactionInput = {
+    type: TransactionType;
+    amount: number;
+    date: string;
+    categoryId?: string;
+    paymentMethod: PaymentMethod;
+    note?: string;
+    fromAccountId?: string;
+    toAccountId?: string;
+};
 
 export const useCreateTransaction = () => {
 
     const queryClient = useQueryClient();
-    const draft = useTransactionDraft();
 
-    return useMutation({
+    return useMutation<any, Error, CreateTransactionInput>({
 
-        mutationFn: () =>
-            transactionService.create({
+        mutationFn: (data) => {
 
-                transactionType: draft.transactionType,
-                paymentMethod: draft.paymentMethod,
-                amount: Number(draft.amount),
-                date: draft.date.toISOString(),
+            if (!data.type) {
+                throw new Error("Transaction type is required");
+            }
 
-                categoryId:
-                    draft.transactionType !== "TRANSFER"
-                        ? draft.selectedCategory?.id
-                        : undefined,
+            if (!data.amount || data.amount <= 0) {
+                throw new Error("Invalid amount");
+            }
 
-                fromAccountId:
-                    draft.transactionType !== "INCOME"
-                        ? draft.selectedAccount?.id
-                        : undefined,
+            if (
+                (data.type === "EXPENSE" || data.type === "INVESTMENT") &&
+                !data.fromAccountId
+            ) {
+                throw new Error("fromAccountId required");
+            }
 
-                toAccountId:
-                    draft.transactionType === "TRANSFER" ||
-                    draft.transactionType === "INCOME"
-                        ? draft.selectedToAccount?.id
-                        : undefined,
+            if (data.type === "INCOME" && !data.toAccountId) {
+                throw new Error("toAccountId required");
+            }
 
-                note: draft.note
-            }),
+            if (data.type === "TRANSFER") {
+                if (!data.fromAccountId || !data.toAccountId) {
+                    throw new Error("Both accounts required");
+                }
+
+                if (data.fromAccountId === data.toAccountId) {
+                    throw new Error("Cannot transfer to same account");
+                }
+            }
+
+            if (data.type !== "TRANSFER" && !data.categoryId) {
+                throw new Error("categoryId required");
+            }
+            return transactionService.create(data);
+        },
 
         onSuccess: () => {
-            queryClient.invalidateQueries({
-                queryKey: ["transactions"],
-            });
-
-            queryClient.invalidateQueries({
-                queryKey: ["accounts"],
-            });
-
-            draft.reset();
-        }
+            queryClient.invalidateQueries({queryKey: ["transactions"]});
+            queryClient.invalidateQueries({queryKey: ["accounts"]});
+        },
     });
 };

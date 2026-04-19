@@ -1,88 +1,156 @@
-import React, {useEffect, useRef} from "react";
+import React, {useEffect, useRef, useState} from "react";
 import {Animated, StyleSheet, Text, View} from "react-native";
-import Svg, {Circle} from "react-native-svg";
-
-const AnimatedCircle = Animated.createAnimatedComponent(Circle);
 
 export const ProgressRing = ({goal}: any) => {
+    const progress = goal?.progress ?? 0;
+    const percent = goal?.percent ?? 0;
+
+    const safeProgress = Math.min(progress, 1);
 
     const animated = useRef(new Animated.Value(0)).current;
+    const scale = useRef(new Animated.Value(1)).current;
 
-    const size = 120;
-    const strokeWidth = 10;
-    const radius = (size - strokeWidth) / 2;
-    const circumference = 2 * Math.PI * radius;
-
-    const percent = goal.percent ?? 0;
+    const [displayPercent, setDisplayPercent] = useState(0);
 
     useEffect(() => {
+        // reset animation
+        animated.setValue(0);
+
+        const listener = animated.addListener(({value}) => {
+            setDisplayPercent(Math.round(value * percent));
+        });
+
         Animated.timing(animated, {
-            toValue: percent,
-            duration: 500,
-            useNativeDriver: false
+            toValue: 1,
+            duration: 700,
+            useNativeDriver: false,
         }).start();
+
+        // 🎉 pop animation when goal achieved
+        if (percent >= 100) {
+            Animated.sequence([
+                Animated.timing(scale, {
+                    toValue: 1.08,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+                Animated.timing(scale, {
+                    toValue: 1,
+                    duration: 150,
+                    useNativeDriver: true,
+                }),
+            ]).start();
+        }
+
+        return () => {
+            animated.removeAllListeners();
+        };
     }, [percent]);
 
-    const strokeDashoffset = animated.interpolate({
-        inputRange: [0, 100],
-        outputRange: [circumference, 0]
-    });
+    const isCompleted = percent >= 100;
+
+    const color = isCompleted ? "#10B981" : "#3B82F6";
 
     return (
-        <View style={styles.container}>
+        <Animated.View
+            style={[
+                styles.container,
+                {transform: [{scale}]}
+            ]}
+        >
+            {/* Ring Wrapper */}
+            <View style={styles.ringWrapper}>
 
-            <Svg width={size} height={size}>
+                {/* Background ring */}
+                <View style={styles.ringBg}/>
 
-                <Circle
-                    stroke="#E5E7EB"
-                    fill="none"
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    strokeWidth={strokeWidth}
+                {/* Progress ring (visual effect only) */}
+                <Animated.View
+                    style={[
+                        styles.ring,
+                        {
+                            borderColor: color,
+                            opacity: animated.interpolate({
+                                inputRange: [0, 1],
+                                outputRange: [0.3, 1],
+                            }),
+                        },
+                    ]}
                 />
 
-                <AnimatedCircle
-                    stroke="#10B981"
-                    fill="none"
-                    cx={size / 2}
-                    cy={size / 2}
-                    r={radius}
-                    strokeWidth={strokeWidth}
-                    strokeDasharray={`${circumference} ${circumference}`}
-                    strokeDashoffset={strokeDashoffset}
-                    strokeLinecap="round"
-                />
+                {/* Center content */}
+                <View style={styles.center}>
+                    <Text style={[styles.percent, {color}]}>
+                        {displayPercent}%
+                    </Text>
 
-            </Svg>
-
-            <View style={styles.center}>
-                <Text style={styles.percent}>
-                    {percent}%
-                </Text>
+                    <Text style={styles.label}>
+                        invested
+                    </Text>
+                </View>
             </View>
 
-        </View>
+            {/* 🎉 Badge */}
+            {isCompleted && (
+                <Text style={styles.badge}>
+                    🎉 Goal Achieved
+                </Text>
+            )}
+        </Animated.View>
     );
 };
 
 const styles = StyleSheet.create({
-
     container: {
         alignItems: "center",
         justifyContent: "center",
-        marginTop: 16
+        marginBottom: 16
+    },
+
+    ringWrapper: {
+        width: 140,
+        height: 140,
+        alignItems: "center",
+        justifyContent: "center"
+    },
+
+    ringBg: {
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        borderWidth: 12,
+        borderColor: "#E5E7EB",
+        position: "absolute"
+    },
+
+    ring: {
+        width: 140,
+        height: 140,
+        borderRadius: 70,
+        borderWidth: 12,
+        position: "absolute"
     },
 
     center: {
-        position: "absolute",
         alignItems: "center",
         justifyContent: "center"
     },
 
     percent: {
-        fontSize: 20,
+        fontSize: 26,
         fontWeight: "700"
-    }
+    },
 
+    label: {
+        fontSize: 12,
+        color: "#6B7280",
+        marginTop: 2
+    },
+
+    badge: {
+        marginTop: 10,
+        fontSize: 13,
+        fontWeight: "600",
+        color: "#10B981"
+    }
 });

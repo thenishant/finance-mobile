@@ -4,7 +4,7 @@ import {Transaction, TransactionType} from "../types/transaction";
 import {unwrap} from "./base";
 
 type CreateTransactionPayload = {
-    transactionType: TransactionType;
+    type: TransactionType;
     paymentMethod: PaymentMethod;
     amount: number;
     date: string;
@@ -19,7 +19,7 @@ export const transactionService = {
     async create(data: CreateTransactionPayload): Promise<Transaction> {
 
         const payload = clean({
-            type: data.transactionType,
+            type: data.type,
             paymentMethod: data.paymentMethod,
             amount: data.amount,
             date: data.date,
@@ -44,11 +44,7 @@ export const transactionService = {
     }
 };
 
-/* =============================
-   🔥 HELPER (KEY PART)
-============================= */
-
-function clean<T extends Record<string, any>>(obj: T): { [p: string]: any } {
+function clean<T extends Record<string, any>>(obj: T) {
     return Object.fromEntries(
         Object.entries(obj).filter(([, v]) => v !== undefined)
     );

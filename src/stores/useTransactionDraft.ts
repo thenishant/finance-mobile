@@ -25,7 +25,7 @@ type TransactionDraft = {
 };
 
 export const useTransactionDraft = create<TransactionDraft>((set) => ({
-    transactionType: "EXPENSE",
+    transactionType: "EXPENSE" as TransactionType,
     amount: "",
     note: "",
     paymentMethod: "CASH",

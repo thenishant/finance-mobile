@@ -8,11 +8,17 @@ import {StatsRow} from "../ui/StatsRow";
 import {RemainingInvestment} from "../ui/RemainingInvestment";
 import {Button} from "../ui";
 
-export const SetGoalSheet = ({
-                                 visible,
-                                 income,
-                                 onClose
-                             }: any) => {
+import {useSetInvestmentGoal} from "../../hooks/useSetInvestmentGoal";
+import {useMonthStore} from "../../stores/useMonthStore";
+import {useToastStore} from "../../stores/useToastStore";
+
+export const SetInvestmentGoalSheet = ({visible, income, onClose}: any) => {
+
+    const {mutate, isPending} = useSetInvestmentGoal();
+    const {month} = useMonthStore();
+    const {show} = useToastStore();
+
+    const year = new Date().getFullYear();
 
     const presets = ["10", "20", "30", "40"];
 
@@ -28,28 +34,40 @@ export const SetGoalSheet = ({
                 const percent = Number(value);
                 if (!percent) return;
 
-                console.log("Saving goal:", percent);
+                mutate(
+                    {
+                        year,
+                        month,
+                        goalPercent: percent
+                    },
+                    {
+                        onSuccess: () => {
+                            show("🎯 Goal set successfully");
+                            onClose();
+                        }
+                    }
+                );
             }}
             onClose={onClose}
+            // loading={isPending} // optional if your sheet supports it
             renderPreview={(value) => {
 
                 const percent = Number(value) || 0;
-
                 if (!percent) return null;
 
                 const goalAmount = income * percent / 100;
 
-                const previewGoal = {
-                    percent,
-                    goalAmount,
-                    invested: 0,
-                    remaining: goalAmount,
-                    progress: 0
-                };
-
                 return (
                     <>
-                        <ProgressRing goal={previewGoal}/>
+                        <ProgressRing
+                            goal={{
+                                percent,
+                                goalAmount,
+                                invested: 0,
+                                remaining: goalAmount,
+                                progress: 0
+                            }}
+                        />
 
                         <Text style={styles.previewText}>
                             ₹{goalAmount.toLocaleString()} per month

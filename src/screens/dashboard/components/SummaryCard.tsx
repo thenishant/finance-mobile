@@ -67,7 +67,6 @@ const styles = StyleSheet.create({
 
     summaryCard: {
         backgroundColor: "#fff",
-        // marginHorizontal: 16,
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
         paddingVertical: 16,

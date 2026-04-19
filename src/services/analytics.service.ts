@@ -1,6 +1,7 @@
 import {api} from "./api";
 import {unwrap} from "./base";
 import {MonthlyAnalytics} from "../types/api.types";
+import {YearAnalytics} from "../types/analytics";
 
 const EMPTY_ANALYTICS: MonthlyAnalytics = {
     totalIncome: 0,
@@ -28,12 +29,13 @@ export const analyticsService = {
         return unwrap(res) ?? null;
     },
 
-    async getYearly(year: number) {
+
+    async getYearly(year: number): Promise<YearAnalytics> {
         const res = await api.get("/analytics/year", {
             params: {year},
         });
 
-        return unwrap(res) ?? {
+        return unwrap<YearAnalytics>(res) ?? {
             total: {
                 totalIncome: 0,
                 totalExpense: 0,

@@ -11,19 +11,17 @@ import {useDashboard} from "../../hooks/useDashboard";
 import {useAccounts} from "../../hooks/useAccounts";
 import {formatCurrencyCompact} from "../../utils/formatCurrency";
 import {DashboardSkeleton} from "./components/DashboardSkeleton";
+import {BudgetCard} from "./components/BudgetCard";
+import {DailySpendCard} from "./components/DailySpend";
 
 const DashboardScreen = () => {
 
     const year = useMonthStore(s => s.year);
     const month = useMonthStore(s => s.month);
-
     const scrollY = useRef(new Animated.Value(0)).current;
-
-    const {data, isLoading, isRefetching, refetch, error} =
-        useDashboard(year, month);
+    const {data, isLoading, isRefetching, refetch, error} = useDashboard(year, month);
 
     const {data: accounts = []} = useAccounts();
-
     const analytics = data?.monthly;
     const comparison = data?.comparison;
 
@@ -39,13 +37,19 @@ const DashboardScreen = () => {
         );
     }
 
-    const isEmpty =
-        !analytics.totalIncome &&
-        !analytics.totalExpense &&
-        !analytics.totalInvestment;
+    const isEmpty = !analytics.totalIncome && !analytics.totalExpense && !analytics.totalInvestment;
+    const spent = analytics.totalExpense ?? 0;
+
+    const budget = Math.max(analytics.totalIncome * 0.6, 1);
+    const days = new Date(year, month, 0).getDate();
+    const today = new Date().getDate();
+    const elapsedDays = year === new Date().getFullYear() && month === new Date().getMonth() + 1 ? today : days;
+    const dailySpend = elapsedDays > 0 ? spent / elapsedDays : 0;
 
     return (
-        <SafeAreaView style={styles.container}>
+        <View style={styles.container}>
+
+            <SafeAreaView edges={["top"]} style={styles.topSafeArea}/>
 
             <Animated.ScrollView
                 contentContainerStyle={styles.content}
@@ -62,12 +66,13 @@ const DashboardScreen = () => {
                 scrollEventThrottle={16}
             >
 
-                {/* 🔥 DARK SECTION (INSIDE SCROLL) */}
+                {/* HEADER */}
                 <View style={styles.topSection}>
 
                     <MonthSelector
-                        comparison={comparison}
+                        variant="dark"
                         scrollY={scrollY}
+                        comparison={comparison}
                     />
 
                     <TotalBalanceHero accounts={accounts}/>
@@ -85,24 +90,32 @@ const DashboardScreen = () => {
                     </View>
                 ) : (
                     <View style={styles.summaryWrapper}>
+
                         <SummaryCard
                             analytics={analytics}
                             comparison={comparison}
                             formatCurrency={formatCurrencyCompact}
                         />
+
+                        <View style={styles.section}>
+                            <BudgetCard spent={spent} budget={budget}/>
+                        </View>
+
+                        <View style={styles.section}>
+                            <DailySpendCard amount={dailySpend}/>
+                        </View>
+
                     </View>
                 )}
 
             </Animated.ScrollView>
 
-        </SafeAreaView>
+        </View>
     );
 };
 
 export default DashboardScreen;
-
 const styles = StyleSheet.create({
-
     container: {
         flex: 1,
         backgroundColor: "#F3F4F6",
@@ -115,11 +128,15 @@ const styles = StyleSheet.create({
     topSection: {
         backgroundColor: "#0F172A",
         paddingHorizontal: 16,
-        paddingBottom: 40, // 🔥 space for overlap
+        paddingBottom: 40,
+    },
+
+    topSafeArea: {
+        backgroundColor: "#0F172A",
     },
 
     summaryWrapper: {
-        marginTop: -28, // 🔥 now this works perfectly
+        marginTop: -28,
     },
 
     center: {
@@ -148,5 +165,97 @@ const styles = StyleSheet.create({
         color: "#6B7280",
         marginTop: 6,
     },
+    card: {
+        backgroundColor: "#fff",
+        borderRadius: 16,
+        padding: 16,
+        marginTop: 16,
+    },
 
+    title: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#6B7280",
+        marginBottom: 8,
+    },
+
+    amount: {
+        fontSize: 22,
+        fontWeight: "700",
+        color: "#111827",
+    },
+
+    sub: {
+        fontSize: 14,
+        color: "#9CA3AF",
+    },
+
+    bigNumber: {
+        fontSize: 26,
+        fontWeight: "700",
+        color: "#111827",
+    },
+
+    caption: {
+        fontSize: 12,
+        color: "#6B7280",
+        marginTop: 6,
+    },
+
+    row: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+
+    rowBetween: {
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
+    },
+
+    iconBox: {
+        width: 36,
+        height: 36,
+        borderRadius: 10,
+        backgroundColor: "#F3F4F6",
+        justifyContent: "center",
+        alignItems: "center",
+    },
+
+    merchant: {
+        fontSize: 14,
+        fontWeight: "600",
+        color: "#111827",
+    },
+
+    expenseAmount: {
+        fontSize: 16,
+        fontWeight: "700",
+        color: "#EF4444",
+    },
+
+    statusGreen: {
+        fontSize: 12,
+        color: "#10B981",
+        fontWeight: "600",
+    },
+
+    progressBg: {
+        height: 8,
+        backgroundColor: "#E5E7EB",
+        borderRadius: 6,
+        marginTop: 10,
+        overflow: "hidden",
+    },
+
+    progressFill: {
+        height: "100%",
+        backgroundColor: "#10B981",
+        borderRadius: 6,
+    },
+
+    section: {
+        // marginTop: 1,
+    },
 });

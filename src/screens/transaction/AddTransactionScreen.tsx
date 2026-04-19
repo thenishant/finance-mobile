@@ -1,5 +1,5 @@
 import React, {memo, useEffect, useRef, useState} from "react";
-import {Animated, Modal, Pressable, StyleSheet, Text, View,} from "react-native";
+import {Animated, Modal, Pressable, StyleSheet, Text, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Calendar} from "react-native-calendars";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -44,6 +44,8 @@ const AddTransactionScreen = () => {
 
     const date = useTransactionDraft(s => s.date);
     const setDate = useTransactionDraft(s => s.setDate);
+    const [isSubmitting, setIsSubmitting] = useState(false);
+    const reset = useTransactionDraft(s => s.reset);
 
     /* =============================
        Animation
@@ -85,6 +87,60 @@ const AddTransactionScreen = () => {
             : null;
 
     /* =============================
+       SUBMIT HANDLER (FINAL)
+    ============================== */
+
+    const handleSubmit = () => {
+        if (isSubmitting) return; // ✅ HARD BLOCK
+
+        const amt = Number(amount);
+
+        if (!amt || amt <= 0) {
+            alert("Enter valid amount");
+            return;
+        }
+
+        if (!selectedAccount) {
+            alert("Select account");
+            return;
+        }
+
+        if (transactionType === "TRANSFER") {
+            alert("Transfer not supported yet");
+            return;
+        }
+
+        if (!selectedCategory) {
+            alert("Select category");
+            return;
+        }
+
+        setIsSubmitting(true); // 🔥 LOCK
+
+        const payload = {
+            type: transactionType,
+            amount: amt,
+            date: date.toISOString(),
+            paymentMethod,
+            note: note || undefined,
+            categoryId: selectedCategory.id,
+            ...(transactionType === "INCOME"
+                ? {toAccountId: selectedAccount.id}
+                : {fromAccountId: selectedAccount.id}),
+        };
+
+        mutation.mutate(payload, {
+            onSuccess: () => {
+                reset();        // ✅ clear form
+                setIsSubmitting(false);
+            },
+            onError: () => {
+                setIsSubmitting(false); // 🔓 UNLOCK
+            },
+        });
+    };
+
+    /* =============================
        UI
     ============================== */
 
@@ -95,7 +151,6 @@ const AddTransactionScreen = () => {
                 keyboardShouldPersistTaps="handled"
                 contentContainerStyle={styles.container}
             >
-                {/* ===== Amount ===== */}
                 <View style={styles.amountSection}>
                     <AmountInput
                         value={amount}
@@ -103,23 +158,15 @@ const AddTransactionScreen = () => {
                     />
                 </View>
 
-                {/* ===== Type ===== */}
                 <TransactionTypeSection
                     value={transactionType}
                     onChange={setTransactionType}
                 />
 
-                {/* ===== Card ===== */}
                 <View style={styles.card}>
-
-                    {/* Account */}
                     <Row
                         label="Account"
-                        value={
-                            selectedAccount
-                                ? selectedAccount.name
-                                : "Select"
-                        }
+                        value={selectedAccount ? selectedAccount.name : "Select"}
                         subValue={
                             selectedAccount
                                 ? remaining !== null
@@ -127,20 +174,13 @@ const AddTransactionScreen = () => {
                                     : `₹${selectedAccount.balance.toLocaleString()}`
                                 : undefined
                         }
-                        onPress={() =>
-                            navigation.navigate("SelectAccount")
-                        }
+                        onPress={() => navigation.navigate("SelectAccount")}
                     />
 
-                    {/* Category */}
                     {transactionType !== "TRANSFER" && (
                         <Row
                             label="Category"
-                            value={
-                                selectedCategory
-                                    ? selectedCategory.name
-                                    : "Select"
-                            }
+                            value={selectedCategory ? selectedCategory.name : "Select"}
                             onPress={() =>
                                 navigation.navigate("SelectCategory", {
                                     type: transactionType,
@@ -149,22 +189,18 @@ const AddTransactionScreen = () => {
                         />
                     )}
 
-                    {/* Date */}
                     <Row
                         label="Date"
                         value={displayDate}
                         onPress={() => setCalendarVisible(true)}
                     />
 
-                    {/* Payment */}
                     <PaymentSection
                         value={paymentMethod}
                         onChange={setPaymentMethod}
                     />
-
                 </View>
 
-                {/* Note */}
                 <Input
                     placeholder="Add note..."
                     value={note}
@@ -184,24 +220,16 @@ const AddTransactionScreen = () => {
                     styles.footer,
                     {
                         transform: [
-                            {
-                                scale: mutation.isPending ? 0.98 : 1,
-                            },
+                            {scale: mutation.isPending ? 0.98 : 1},
                         ],
                     },
                 ]}
             >
                 <Button
-                    title={
-                        mutation.isPending
-                            ? "Saving..."
-                            : "Save Transaction"
-                    }
-                    onPress={mutation.mutate}
-                    disabled={mutation.isPending}
-                    style={{
-                        backgroundColor: theme.primary,
-                    }}
+                    title={mutation.isPending ? "Saving..." : "Save Transaction"}
+                    onPress={handleSubmit}
+                    disabled={mutation.isPending || isSubmitting}
+                    style={{backgroundColor: theme.primary}}
                 />
             </Animated.View>
 
@@ -251,10 +279,7 @@ const Row = memo(
 
             <View style={styles.right}>
                 <Text style={styles.rowValue}>{value} ›</Text>
-
-                {subValue && (
-                    <Text style={styles.rowSub}>{subValue}</Text>
-                )}
+                {subValue && <Text style={styles.rowSub}>{subValue}</Text>}
             </View>
         </Pressable>
     )
@@ -265,23 +290,19 @@ const Row = memo(
 ============================= */
 
 const styles = StyleSheet.create({
-
     container: {
         paddingBottom: 120,
         gap: 24,
     },
-
     amountSection: {
         alignItems: "center",
     },
-
     card: {
         backgroundColor: "#fff",
         borderRadius: 16,
         paddingVertical: 8,
         elevation: 2,
     },
-
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
@@ -290,27 +311,22 @@ const styles = StyleSheet.create({
         borderBottomWidth: 1,
         borderBottomColor: "#F3F4F6",
     },
-
     rowLabel: {
         fontSize: 16,
         color: "#6B7280",
     },
-
     right: {
         alignItems: "flex-end",
     },
-
     rowValue: {
         fontSize: 16,
         fontWeight: "600",
     },
-
     rowSub: {
         fontSize: 12,
         color: "#6B7280",
         marginTop: 2,
     },
-
     footer: {
         position: "absolute",
         bottom: 0,
@@ -321,22 +337,18 @@ const styles = StyleSheet.create({
         borderTopWidth: 1,
         borderTopColor: "#E5E7EB",
     },
-
     error: {
         color: "red",
     },
-
     overlay: {
         flex: 1,
         backgroundColor: "rgba(0,0,0,0.4)",
     },
-
     calendarWrapper: {
         position: "absolute",
         bottom: 0,
         width: "100%",
     },
-
     sheet: {
         backgroundColor: "#fff",
         borderTopLeftRadius: 24,

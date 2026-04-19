@@ -16,19 +16,15 @@ const statusColors: any = {
     red: "#EF4444"
 };
 
-export const InvestmentFeature = ({
-                                      goal,
-                                      month,
-                                      months,
-                                      onSetGoal,
-                                      onMonthPress
-                                  }: any) => {
+export const SetInvestmentGoalScreen = ({goal, month, months, onSetGoal, onMonthPress}: any) => {
 
     const investment = month?.investment ?? {};
-
     const invested = investment?.invested ?? 0;
     const goalAmount = investment?.goalAmount ?? 0;
     const remaining = investment?.remaining ?? 0;
+    const progress = investment?.progress ?? 0;
+    const percent = Math.round(progress * 100);
+    const capped = Math.min(progress, 1);
 
     if (!goal) {
         return (
@@ -49,7 +45,12 @@ export const InvestmentFeature = ({
         <>
             <View style={styles.summary}>
 
-                <ProgressRing goal={goal}/>
+                <ProgressRing
+                    goal={{
+                        percent,
+                        progress
+                    }}
+                />
 
                 {month && (
                     <>
@@ -59,15 +60,13 @@ export const InvestmentFeature = ({
 
                         <StatsRow
                             items={[
-                                {label: "Saved", value: invested, color: "#10B981"},
+                                {label: "Invested", value: invested, color: "#10B981"},
                                 {label: "Goal", value: goalAmount, color: "#2563EB"},
                             ]}
                         />
-
                         <RemainingInvestment remaining={remaining}/>
                     </>
                 )}
-
             </View>
 
             <Streak months={months}/>
