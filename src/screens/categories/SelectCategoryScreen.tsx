@@ -161,10 +161,6 @@ const CategorySheet = ({parent, onClose, onSelect, type}: any) => {
     );
 };
 
-/* =============================
-   STYLES
-============================= */
-
 const styles = StyleSheet.create({
 
     /* GRID */
@@ -196,8 +192,6 @@ const styles = StyleSheet.create({
         textAlign: "center",
     },
 
-    /* SHEET */
-
     overlay: {
         flex: 1,
         justifyContent: "flex-end",
@@ -205,7 +199,7 @@ const styles = StyleSheet.create({
 
     backdrop: {
         ...StyleSheet.absoluteFillObject,
-        backgroundColor: "rgba(0,0,0,0.3)",
+        backgroundColor: "transparent",
     },
 
     sheet: {
