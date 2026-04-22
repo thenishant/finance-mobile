@@ -12,7 +12,6 @@ import {useAccounts} from "../../hooks/useAccounts";
 import {useDailySpendingTrends} from "../../hooks/useDailySpendingTrends";
 import {formatCurrencyCompact} from "../../utils/formatCurrency";
 import {DashboardSkeleton} from "./components/DashboardSkeleton";
-import {BudgetCard} from "./components/BudgetCard";
 import {DailySpendCard} from "./components/DailySpend";
 import {SpendingTrendsCard} from "./components/SpendingTrendsCard";
 
@@ -99,11 +98,6 @@ const DashboardScreen = () => {
                             comparison={comparison}
                             formatCurrency={formatCurrencyCompact}
                         />
-
-
-                        <View style={styles.section}>
-                            <BudgetCard spent={spent} budget={budget}/>
-                        </View>
 
                         <View style={styles.section}>
                             <DailySpendCard amount={dailySpend}/>
