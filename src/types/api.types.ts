@@ -1,13 +1,22 @@
+import {FinancialAccountType} from "./financialAccount";
+
 export interface User {
     id: string;
     email: string;
 }
 
-export interface Account {
+export interface FinancialAccount {
     id: string;
     name: string;
-    type: "SAVING" | "CURRENT" | "INVESTMENT";
-    balance: number;
+    nickname?: string;
+    type: FinancialAccountType;
+    provider?: string;
+    institutionName?: string;
+    last4?: string;
+    currentBalance: string;
+    availableBalance?: string;
+    creditLimit?: string;
+    isArchived: boolean;
 }
 
 export interface Category {

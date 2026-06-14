@@ -1,8 +1,11 @@
-import React from "react";
+import React, {useState} from "react";
 import {Alert, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {useAuth} from "../../hooks/useAuth";
 
 const AccountsScreen = () => {
+    const [gmailConnected, setGmailConnected] = useState(false);
+    const [gmailEmail, setGmailEmail] = useState<string | null>(null);
+    const [loading, setLoading] = useState(false);
     const {logout} = useAuth();
 
     const handleLogout = () => {

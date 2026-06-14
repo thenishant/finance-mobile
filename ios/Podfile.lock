@@ -3,7 +3,7 @@ PODS:
     - ExpoModulesCore
   - EXConstants (18.0.13):
     - ExpoModulesCore
-  - Expo (54.0.33):
+  - Expo (54.0.35):
     - ExpoModulesCore
     - hermes-engine
     - RCTRequired
@@ -28,15 +28,13 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - ExpoAsset (12.0.12):
+  - ExpoAsset (12.0.13):
     - ExpoModulesCore
   - ExpoBlur (15.0.8):
     - ExpoModulesCore
-  - ExpoCrypto (15.0.8):
+  - ExpoCrypto (15.0.9):
     - ExpoModulesCore
-  - ExpoFileSystem (19.0.21):
-    - ExpoModulesCore
-  - ExpoFont (55.0.4):
+  - ExpoFileSystem (19.0.23):
     - ExpoModulesCore
   - ExpoImage (3.0.11):
     - ExpoModulesCore
@@ -49,9 +47,9 @@ PODS:
     - ExpoModulesCore
   - ExpoLinearGradient (15.0.8):
     - ExpoModulesCore
-  - ExpoLinking (8.0.11):
+  - ExpoLinking (8.0.12):
     - ExpoModulesCore
-  - ExpoModulesCore (3.0.29):
+  - ExpoModulesCore (3.0.30):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -76,7 +74,7 @@ PODS:
     - Yoga
   - ExpoSecureStore (15.0.8):
     - ExpoModulesCore
-  - ExpoWebBrowser (15.0.10):
+  - ExpoWebBrowser (15.0.11):
     - ExpoModulesCore
   - FBLazyVector (0.81.5)
   - hermes-engine (0.81.5):
@@ -1962,7 +1960,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNSVG (15.15.4):
+  - RNSVG (15.12.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -1983,9 +1981,9 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
-    - RNSVG/common (= 15.15.4)
+    - RNSVG/common (= 15.12.1)
     - Yoga
-  - RNSVG/common (15.15.4):
+  - RNSVG/common (15.12.1):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2007,32 +2005,7 @@ PODS:
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
     - Yoga
-  - RNWorklets (0.8.1):
-    - hermes-engine
-    - RCTRequired
-    - RCTTypeSafety
-    - React-Core
-    - React-Core-prebuilt
-    - React-debug
-    - React-Fabric
-    - React-featureflags
-    - React-graphics
-    - React-hermes
-    - React-ImageManager
-    - React-jsi
-    - React-NativeModulesApple
-    - React-RCTFabric
-    - React-renderercss
-    - React-rendererdebug
-    - React-utils
-    - ReactCodegen
-    - ReactCommon/turbomodule/bridging
-    - ReactCommon/turbomodule/core
-    - ReactNativeDependencies
-    - RNWorklets/apple (= 0.8.1)
-    - RNWorklets/common (= 0.8.1)
-    - Yoga
-  - RNWorklets/apple (0.8.1):
+  - RNWorklets (0.8.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2054,8 +2027,33 @@ PODS:
     - ReactCommon/turbomodule/bridging
     - ReactCommon/turbomodule/core
     - ReactNativeDependencies
+    - RNWorklets/apple (= 0.8.3)
+    - RNWorklets/common (= 0.8.3)
     - Yoga
-  - RNWorklets/common (0.8.1):
+  - RNWorklets/apple (0.8.3):
+    - hermes-engine
+    - RCTRequired
+    - RCTTypeSafety
+    - React-Core
+    - React-Core-prebuilt
+    - React-debug
+    - React-Fabric
+    - React-featureflags
+    - React-graphics
+    - React-hermes
+    - React-ImageManager
+    - React-jsi
+    - React-NativeModulesApple
+    - React-RCTFabric
+    - React-renderercss
+    - React-rendererdebug
+    - React-utils
+    - ReactCodegen
+    - ReactCommon/turbomodule/bridging
+    - ReactCommon/turbomodule/core
+    - ReactNativeDependencies
+    - Yoga
+  - RNWorklets/common (0.8.3):
     - hermes-engine
     - RCTRequired
     - RCTTypeSafety
@@ -2099,7 +2097,6 @@ DEPENDENCIES:
   - ExpoBlur (from `../node_modules/expo-blur/ios`)
   - ExpoCrypto (from `../node_modules/expo-auth-session/node_modules/expo-crypto/ios`)
   - ExpoFileSystem (from `../node_modules/expo/node_modules/expo-file-system/ios`)
-  - ExpoFont (from `../node_modules/expo-font/ios`)
   - ExpoImage (from `../node_modules/expo-image/ios`)
   - ExpoKeepAwake (from `../node_modules/expo/node_modules/expo-keep-awake/ios`)
   - ExpoLinearGradient (from `../node_modules/expo-linear-gradient/ios`)
@@ -2208,8 +2205,6 @@ EXTERNAL SOURCES:
     :path: "../node_modules/expo-auth-session/node_modules/expo-crypto/ios"
   ExpoFileSystem:
     :path: "../node_modules/expo/node_modules/expo-file-system/ios"
-  ExpoFont:
-    :path: "../node_modules/expo-font/ios"
   ExpoImage:
     :path: "../node_modules/expo-image/ios"
   ExpoKeepAwake:
@@ -2377,19 +2372,18 @@ EXTERNAL SOURCES:
 SPEC CHECKSUMS:
   EXApplication: 1e98d4b1dccdf30627f92917f4b2c5a53c330e5f
   EXConstants: fce59a631a06c4151602843667f7cfe35f81e271
-  Expo: aadbcc8c6c14ff3105a9154f1683cb1424ff0d2a
-  ExpoAsset: f867e55ceb428aab99e1e8c082b5aee7c159ea18
+  Expo: edf5879dd9f83d2aa5b05d012412c810bc182ac1
+  ExpoAsset: 9e5a7c9c0a9fb83ad5b2bb365141f2bd7f289b66
   ExpoBlur: b90747a3f22a8b6ceffd9cb0dc41a4184efdc656
-  ExpoCrypto: b6105ebaa15d6b38a811e71e43b52cd934945322
-  ExpoFileSystem: 858a44267a3e6e9057e0888ad7c7cfbf55d52063
-  ExpoFont: 1aa465cf9f8ac6b670405becba8b15473581b2dd
+  ExpoCrypto: e2a2c4c748aac8485e5675f027b7901f511d43ff
+  ExpoFileSystem: a8e7fb1e958471764fb48d281cf9fa81a9e4d77c
   ExpoImage: 686f972bff29525733aa13357f6691dc90aa03d8
   ExpoKeepAwake: 55f75eca6499bb9e4231ebad6f3e9cb8f99c0296
   ExpoLinearGradient: 809102bdb979f590083af49f7fa4805cd931bd58
-  ExpoLinking: 8f0aaf69aa56f832913030503b6263dc6f647f37
-  ExpoModulesCore: f3da4f1ab5a8375d0beafab763739dbee8446583
+  ExpoLinking: 2ef632ad5013e3f1568fae9408d56ab9af5efc55
+  ExpoModulesCore: 9e6a5514828e7dd5ded9e99d33557be2d284e660
   ExpoSecureStore: d32f751874a2ceb5aaeebeb3578e165c1ba2b24a
-  ExpoWebBrowser: 17b064c621789e41d4816c95c93f429b84971f52
+  ExpoWebBrowser: 970dd4c64c29c955c3af664c8058ba768a4c9187
   FBLazyVector: e95a291ad2dadb88e42b06e0c5fb8262de53ec12
   hermes-engine: 9f4dfe93326146a1c99eb535b1cb0b857a3cd172
   libavif: 5f8e715bea24debec477006f21ef9e95432e254d
@@ -2464,8 +2458,8 @@ SPEC CHECKSUMS:
   RNGestureHandler: 2914750df066d89bf9d8f48a10ad5f0051108ac3
   RNReanimated: 41f496c18437fd0aa841234917af84e98fd5b9a2
   RNScreens: d8d6f1792f6e7ac12b0190d33d8d390efc0c1845
-  RNSVG: f2641bf17a3e397882659348d7668667a0805f00
-  RNWorklets: bf1b71c9d21741508451cc31240eba37366831d9
+  RNSVG: 31d6639663c249b7d5abc9728dde2041eb2a3c34
+  RNWorklets: e31a7cd9e9b3d3cf8cb79a1c5f01e6573b5476f9
   SDWebImage: e9fc87c1aab89a8ab1bbd74eba378c6f53be8abf
   SDWebImageAVIFCoder: afe194a084e851f70228e4be35ef651df0fc5c57
   SDWebImageSVGCoder: 15a300a97ec1c8ac958f009c02220ac0402e936c

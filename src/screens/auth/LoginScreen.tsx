@@ -40,6 +40,19 @@ const LoginScreen = ({navigation}: Props) => {
                         // console.log("Login context updated");
 
                     } catch (err) {
+
+                        console.log("GOOGLE BACKEND ERROR:", err);
+
+                        if ((err as any)?.response) {
+
+                            console.log(
+                                "GOOGLE BACKEND RESPONSE:",
+
+                                (err as any).response.data
+                            );
+
+                        }
+
                     }
                 }
             }
@@ -78,6 +91,7 @@ const LoginScreen = ({navigation}: Props) => {
                     redirectTo
                 );
 
+                console.log(error)
                 if (result.type === "success" && result.url) {
                     // 🔥 Extract tokens from URL
                     const params = new URLSearchParams(

@@ -7,7 +7,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 
 import {AppStackParamList} from "../../navigation/AppStack";
 import {accountService} from "../../services/account.service";
-import {ACCOUNT_TYPES, AccountType} from "../../types/account";
+import {ACCOUNT_TYPES, AccountType} from "../../types/financialAccount";
 
 type Nav = NativeStackNavigationProp<AppStackParamList>;
 

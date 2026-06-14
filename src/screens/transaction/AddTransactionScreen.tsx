@@ -10,7 +10,6 @@ import {Screen} from "../../components/ui/Screen";
 import {Button, Input} from "../../components/ui";
 import {AmountInput} from "../../components/ui/AmountInput";
 import {TransactionTypeSection} from "../../components/features/transactions/TransactionTypeSection";
-import {PaymentSection} from "../../components/features/transactions/PaymentSection";
 
 import {useTransactionDraft} from "../../stores/useTransactionDraft";
 import {useCreateTransaction} from "../../hooks/useCreateTransaction";
@@ -23,10 +22,6 @@ const AddTransactionScreen = () => {
     const navigation = useNavigation<Nav>();
     const mutation = useCreateTransaction();
 
-    /* =============================
-       Zustand
-    ============================== */
-
     const transactionType = useTransactionDraft(s => s.transactionType);
     const setTransactionType = useTransactionDraft(s => s.setTransactionType);
 
@@ -35,22 +30,15 @@ const AddTransactionScreen = () => {
 
     const note = useTransactionDraft(s => s.note);
     const setNote = useTransactionDraft(s => s.setNote);
+    const sourceAccount = useTransactionDraft(s => s.sourceAccount);
+    const destinationAccount = useTransactionDraft(s => s.destinationAccount);
 
-    const selectedAccount = useTransactionDraft(s => s.selectedAccount);
     const selectedCategory = useTransactionDraft(s => s.selectedCategory);
-
-    const paymentMethod = useTransactionDraft(s => s.paymentMethod);
-    const setPaymentMethod = useTransactionDraft(s => s.setPaymentMethod);
 
     const date = useTransactionDraft(s => s.date);
     const setDate = useTransactionDraft(s => s.setDate);
     const [isSubmitting, setIsSubmitting] = useState(false);
     const reset = useTransactionDraft(s => s.reset);
-
-    /* =============================
-       Animation
-    ============================== */
-
     const colorAnim = useRef(new Animated.Value(0)).current;
 
     useEffect(() => {
@@ -60,35 +48,19 @@ const AddTransactionScreen = () => {
             useNativeDriver: false,
         }).start(() => colorAnim.setValue(0));
     }, [transactionType]);
-
     const theme = transactionColors[transactionType];
-
-    /* =============================
-       Calendar
-    ============================== */
-
     const [calendarVisible, setCalendarVisible] = useState(false);
-
     const displayDate = date.toLocaleDateString("en-IN", {
         day: "numeric",
         month: "short",
         year: "numeric",
     });
 
-    /* =============================
-       Balance Logic
-    ============================== */
-
     const numericAmount = Number(amount || 0);
 
-    const remaining =
-        selectedAccount && numericAmount
-            ? selectedAccount.balance - numericAmount
-            : null;
-
-    /* =============================
-       SUBMIT HANDLER (FINAL)
-    ============================== */
+    const remaining = sourceAccount && numericAmount
+        ? Number(sourceAccount.currentBalance) - numericAmount
+        : null;
 
     const handleSubmit = () => {
         if (isSubmitting) return; // ✅ HARD BLOCK
@@ -100,13 +72,8 @@ const AddTransactionScreen = () => {
             return;
         }
 
-        if (!selectedAccount) {
+        if (!sourceAccount) {
             alert("Select account");
-            return;
-        }
-
-        if (transactionType === "TRANSFER") {
-            alert("Transfer not supported yet");
             return;
         }
 
@@ -121,12 +88,17 @@ const AddTransactionScreen = () => {
             type: transactionType,
             amount: amt,
             date: date.toISOString(),
-            paymentMethod,
             note: note || undefined,
-            categoryId: selectedCategory.id,
-            ...(transactionType === "INCOME"
-                ? {toAccountId: selectedAccount.id}
-                : {fromAccountId: selectedAccount.id}),
+
+            categoryId:
+                transactionType === "TRANSFER"
+                    ? undefined
+                    : selectedCategory?.id,
+            sourceAccountId:
+            sourceAccount?.id,
+
+            destinationAccountId:
+                transactionType === "INCOME" ? sourceAccount?.id : destinationAccount?.id,
         };
 
         mutation.mutate(payload, {
@@ -139,10 +111,6 @@ const AddTransactionScreen = () => {
             },
         });
     };
-
-    /* =============================
-       UI
-    ============================== */
 
     return (
         <Screen>
@@ -165,16 +133,22 @@ const AddTransactionScreen = () => {
 
                 <View style={styles.card}>
                     <Row
-                        label="Account"
-                        value={selectedAccount ? selectedAccount.name : "Select"}
+                        label={
+                            transactionType === "INCOME"
+                                ? "Destination"
+                                : "Source"
+                        }
+                        value={sourceAccount?.name ?? "Select account"}
                         subValue={
-                            selectedAccount
-                                ? remaining !== null
-                                    ? `₹${selectedAccount.balance.toLocaleString()} → ₹${remaining.toLocaleString()}`
-                                    : `₹${selectedAccount.balance.toLocaleString()}`
+                            sourceAccount
+                                ? `${sourceAccount.type.replace("_", " ")}`
                                 : undefined
                         }
-                        onPress={() => navigation.navigate("SelectAccount")}
+                        onPress={() =>
+                            navigation.navigate("SelectAccount", {
+                                mode: "destination",
+                            })
+                        }
                     />
 
                     {transactionType !== "TRANSFER" && (
@@ -189,15 +163,52 @@ const AddTransactionScreen = () => {
                         />
                     )}
 
+                    {transactionType === "TRANSFER" ? (
+                        <>
+                            <Row
+                                label="From"
+                                value={sourceAccount?.name ?? "Select"}
+                                onPress={() =>
+                                    navigation.navigate("SelectAccount", {
+                                        mode: "source",
+                                    })
+                                }
+                            />
+                            <Row
+                                label="To"
+                                value={destinationAccount?.name ?? "Select"}
+                                onPress={() =>
+                                    navigation.navigate("SelectAccount", {
+                                        mode: "destination",
+                                    })
+                                }
+                            />
+                        </>
+                    ) : (
+                        <Row
+                            label={
+                                transactionType === "INCOME"
+                                    ? "Destination"
+                                    : "Source"
+                            }
+                            value={sourceAccount?.name ?? "Select"}
+                            subValue={
+                                sourceAccount
+                                    ? sourceAccount.type.replaceAll("_", " ")
+                                    : undefined
+                            }
+                            onPress={() =>
+                                navigation.navigate("SelectAccount", {
+                                    mode: "source",
+                                })
+                            }
+                        />
+                    )}
+
                     <Row
                         label="Date"
                         value={displayDate}
                         onPress={() => setCalendarVisible(true)}
-                    />
-
-                    <PaymentSection
-                        value={paymentMethod}
-                        onChange={setPaymentMethod}
                     />
                 </View>
 
@@ -258,10 +269,6 @@ const AddTransactionScreen = () => {
 
 export default AddTransactionScreen;
 
-/* =============================
-   Row Component
-============================= */
-
 const Row = memo(
     ({
          label,
@@ -274,34 +281,59 @@ const Row = memo(
         subValue?: string;
         onPress: () => void;
     }) => (
-        <Pressable style={styles.row} onPress={onPress}>
-            <Text style={styles.rowLabel}>{label}</Text>
+        <Pressable style={styles.row}>
 
-            <View style={styles.right}>
-                <Text style={styles.rowValue}>{value} ›</Text>
-                {subValue && <Text style={styles.rowSub}>{subValue}</Text>}
+            <View>
+
+                <Text style={styles.rowLabel}>{label}</Text>
+
+                {subValue && (
+
+                    <Text style={styles.rowSub}>
+
+                        {subValue}
+
+                    </Text>
+
+                )}
+
             </View>
+
+            <View style={styles.rowRight}>
+
+                <Text style={styles.rowValue}>{value}</Text>
+
+                <Text style={styles.chevron}>›</Text>
+
+            </View>
+
         </Pressable>
     )
 );
 
-/* =============================
-   Styles
-============================= */
-
 const styles = StyleSheet.create({
     container: {
+
         paddingBottom: 120,
-        gap: 24,
+
+        paddingHorizontal: 20,
+
+        gap: 20,
+
     },
     amountSection: {
+
+        paddingTop: 24,
+
+        paddingBottom: 8,
+
         alignItems: "center",
+
     },
     card: {
         backgroundColor: "#fff",
-        borderRadius: 16,
-        paddingVertical: 8,
-        elevation: 2,
+        borderRadius: 20,
+        overflow: "hidden",
     },
     row: {
         flexDirection: "row",

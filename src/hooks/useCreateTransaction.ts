@@ -1,65 +1,104 @@
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 import {transactionService} from "../services/transaction.service";
-import {TransactionType} from "../types/transaction";
-import {PaymentMethod} from "../types/payment";
+import {Transaction, TransactionType} from "../types/transaction";
 
 type CreateTransactionInput = {
     type: TransactionType;
     amount: number;
     date: string;
+
     categoryId?: string;
-    paymentMethod: PaymentMethod;
+
+    sourceAccountId?: string;
+    destinationAccountId?: string;
+
     note?: string;
-    fromAccountId?: string;
-    toAccountId?: string;
+};
+
+const validateTransaction = (
+    data: CreateTransactionInput
+) => {
+    if (!data.type) {
+        throw new Error("Transaction type is required");
+    }
+
+    if (!data.amount || data.amount <= 0) {
+        throw new Error("Invalid amount");
+    }
+
+    if (
+        (data.type === "EXPENSE" ||
+            data.type === "INVESTMENT") &&
+        !data.sourceAccountId
+    ) {
+        throw new Error("sourceAccountId required");
+    }
+
+    if (
+        data.type === "INCOME" &&
+        !data.destinationAccountId
+    ) {
+        throw new Error("destinationAccountId required");
+    }
+
+    if (data.type === "TRANSFER") {
+        if (
+            !data.sourceAccountId ||
+            !data.destinationAccountId
+        ) {
+            throw new Error("Both accounts required");
+        }
+
+        if (
+            data.sourceAccountId ===
+            data.destinationAccountId
+        ) {
+            throw new Error(
+                "Cannot transfer to same account"
+            );
+        }
+    }
+
+    if (
+        data.type !== "TRANSFER" &&
+        !data.categoryId
+    ) {
+        throw new Error("categoryId required");
+    }
 };
 
 export const useCreateTransaction = () => {
-
     const queryClient = useQueryClient();
 
-    return useMutation<any, Error, CreateTransactionInput>({
+    return useMutation<
+        Transaction,
+        Error,
+        CreateTransactionInput
+    >({
+        mutationFn: async (data) => {
+            validateTransaction(data);
 
-        mutationFn: (data) => {
-
-            if (!data.type) {
-                throw new Error("Transaction type is required");
-            }
-
-            if (!data.amount || data.amount <= 0) {
-                throw new Error("Invalid amount");
-            }
-
-            if (
-                (data.type === "EXPENSE" || data.type === "INVESTMENT") &&
-                !data.fromAccountId
-            ) {
-                throw new Error("fromAccountId required");
-            }
-
-            if (data.type === "INCOME" && !data.toAccountId) {
-                throw new Error("toAccountId required");
-            }
-
-            if (data.type === "TRANSFER") {
-                if (!data.fromAccountId || !data.toAccountId) {
-                    throw new Error("Both accounts required");
-                }
-
-                if (data.fromAccountId === data.toAccountId) {
-                    throw new Error("Cannot transfer to same account");
-                }
-            }
-
-            if (data.type !== "TRANSFER" && !data.categoryId) {
-                throw new Error("categoryId required");
-            }
             return transactionService.create(data);
         },
 
-        onSuccess: () => {
-            queryClient.invalidateQueries({queryKey: ["transactions"]});
-            queryClient.invalidateQueries({queryKey: ["accounts"]});
+        onSuccess: async () => {
+            await Promise.all([
+                queryClient.invalidateQueries({
+                    queryKey: ["transactions"],
+                }),
+
+                queryClient.invalidateQueries({
+                    queryKey: ["financial-accounts"],
+                }),
+
+                queryClient.invalidateQueries({
+                    queryKey: ["monthly-analytics"],
+                }),
+
+                queryClient.invalidateQueries({
+                    queryKey: ["yearly-analytics"],
+                }),
+            ]);
         },
     });
 };

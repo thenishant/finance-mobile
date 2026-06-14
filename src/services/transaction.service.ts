@@ -1,51 +1,70 @@
 import {api} from "./api";
-import {PaymentMethod} from "../types/payment";
 import {Transaction, TransactionType} from "../types/transaction";
 import {unwrap} from "./base";
 
-type CreateTransactionPayload = {
+export type CreateTransactionPayload = {
     type: TransactionType;
-    paymentMethod: PaymentMethod;
     amount: number;
     date: string;
+
     categoryId?: string;
-    fromAccountId?: string;
-    toAccountId?: string;
+
+    sourceAccountId?: string;
+    destinationAccountId?: string;
+
     note?: string;
 };
 
 export const transactionService = {
-
-    async create(data: CreateTransactionPayload): Promise<Transaction> {
-
+    async create(
+        data: CreateTransactionPayload
+    ): Promise<Transaction> {
         const payload = clean({
             type: data.type,
-            paymentMethod: data.paymentMethod,
             amount: data.amount,
             date: data.date,
+
             categoryId: data.categoryId,
-            fromAccountId: data.fromAccountId,
-            toAccountId: data.toAccountId,
+
+            sourceAccountId: data.sourceAccountId,
+            destinationAccountId: data.destinationAccountId,
+
             note: data.note,
         });
 
-        const res = await api.post("/transactions", payload);
+        const res = await api.post(
+            "/transactions",
+            payload
+        );
 
         return unwrap<Transaction>(res);
     },
 
     async getAll(): Promise<Transaction[]> {
         const res = await api.get("/transactions");
+
         return unwrap<Transaction[]>(res);
     },
 
-    async delete(id: string) {
+    async delete(id: string): Promise<void> {
         await api.delete(`/transactions/${id}`);
-    }
+    },
+
+    async restore(id: string): Promise<void> {
+        await api.post(
+            `/transactions/${id}/restore`
+        );
+    },
 };
 
-function clean<T extends Record<string, any>>(obj: T) {
+function clean<T extends Record<string, unknown>>(
+    obj: T
+): Partial<T> {
     return Object.fromEntries(
-        Object.entries(obj).filter(([, v]) => v !== undefined)
-    );
+        Object.entries(obj).filter(
+            ([, value]) =>
+                value !== undefined &&
+                value !== null
+        )
+    ) as Partial<T>;
 }

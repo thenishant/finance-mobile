@@ -1,14 +1,14 @@
 import {useAuth} from "./useAuth";
-import {accountService} from "../services/account.service";
 import {useQuery} from "@tanstack/react-query";
+import {FinancialAccount} from "../types/api.types";
+import {financialAccountService} from "../services/account.service";
 
 export const useAccounts = () => {
     const {token} = useAuth();
 
-    return useQuery({
-        queryKey: ["accounts"],
-        queryFn: () => accountService.getAll(token!),
+    return useQuery<FinancialAccount[]>({
+        queryKey: ["financial-accounts"],
+        queryFn: () => financialAccountService.getAll(),
         enabled: !!token,
-        staleTime: 0
     });
 };
