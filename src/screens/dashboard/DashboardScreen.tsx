@@ -54,11 +54,15 @@ const DashboardScreen = () => {
             <SafeAreaView edges={["top"]} style={styles.topSafeArea}/>
 
             <Animated.ScrollView
+                style={styles.scrollView}
                 contentContainerStyle={styles.content}
                 refreshControl={
                     <RefreshControl
                         refreshing={isRefetching}
                         onRefresh={refetch}
+                        tintColor="#FFFFFF"
+                        progressBackgroundColor="#0F172A"
+                        colors={["#FFFFFF"]}
                     />
                 }
                 onScroll={Animated.event(
@@ -66,6 +70,7 @@ const DashboardScreen = () => {
                     {useNativeDriver: false}
                 )}
                 scrollEventThrottle={16}
+                showsVerticalScrollIndicator={false}
             >
 
                 {/* HEADER */}
@@ -82,7 +87,7 @@ const DashboardScreen = () => {
                 </View>
 
                 {isEmpty ? (
-                    <View style={styles.empty}>
+                    <View style={styles.emptyCard}>
                         <Text style={styles.emptyTitle}>
                             No transactions yet
                         </Text>
@@ -91,7 +96,7 @@ const DashboardScreen = () => {
                         </Text>
                     </View>
                 ) : (
-                    <View style={styles.summaryWrapper}>
+                    <View style={styles.contentSection}>
 
                         <SummaryCard
                             analytics={analytics}
@@ -119,11 +124,18 @@ export default DashboardScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F3F4F6",
+        backgroundColor: "#0F172A",
+    },
+
+    scrollView: {
+        flex: 1,
+        backgroundColor: "#0F172A",
     },
 
     content: {
         paddingBottom: 60,
+        backgroundColor: "#F8FAFC",
+        flexGrow: 1,
     },
 
     topSection: {
@@ -136,8 +148,12 @@ const styles = StyleSheet.create({
         backgroundColor: "#0F172A",
     },
 
-    summaryWrapper: {
-        marginTop: -28,
+    contentSection: {
+        marginTop: -24,
+        backgroundColor: "#F8FAFC",
+        borderTopLeftRadius: 24,
+        borderTopRightRadius: 24,
+        paddingTop: 16,
     },
 
     center: {
@@ -150,113 +166,30 @@ const styles = StyleSheet.create({
         color: "#EF4444",
     },
 
-    empty: {
-        marginTop: 80,
+    emptyCard: {
+        marginTop: 24,
+        marginHorizontal: 16,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 20,
+        paddingVertical: 40,
+        paddingHorizontal: 24,
         alignItems: "center",
     },
 
     emptyTitle: {
-        fontSize: 18,
-        fontWeight: "600",
+        fontSize: 20,
+        fontWeight: "700",
         color: "#111827",
     },
 
     emptySub: {
         fontSize: 14,
         color: "#6B7280",
-        marginTop: 6,
-    },
-    card: {
-        backgroundColor: "#fff",
-        borderRadius: 16,
-        padding: 16,
-        marginTop: 16,
-    },
-
-    title: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#6B7280",
-        marginBottom: 8,
-    },
-
-    amount: {
-        fontSize: 22,
-        fontWeight: "700",
-        color: "#111827",
-    },
-
-    sub: {
-        fontSize: 14,
-        color: "#9CA3AF",
-    },
-
-    bigNumber: {
-        fontSize: 26,
-        fontWeight: "700",
-        color: "#111827",
-    },
-
-    caption: {
-        fontSize: 12,
-        color: "#6B7280",
-        marginTop: 6,
-    },
-
-    row: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 12,
-    },
-
-    rowBetween: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-    },
-
-    iconBox: {
-        width: 36,
-        height: 36,
-        borderRadius: 10,
-        backgroundColor: "#F3F4F6",
-        justifyContent: "center",
-        alignItems: "center",
-    },
-
-    merchant: {
-        fontSize: 14,
-        fontWeight: "600",
-        color: "#111827",
-    },
-
-    expenseAmount: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#EF4444",
-    },
-
-    statusGreen: {
-        fontSize: 12,
-        color: "#10B981",
-        fontWeight: "600",
-    },
-
-    progressBg: {
-        height: 8,
-        backgroundColor: "#E5E7EB",
-        borderRadius: 6,
-        marginTop: 10,
-        overflow: "hidden",
-    },
-
-    progressFill: {
-        height: "100%",
-        backgroundColor: "#10B981",
-        borderRadius: 6,
+        marginTop: 8,
+        textAlign: "center",
     },
 
     section: {
-        // marginTop: 1,
+        marginTop: 0,
     },
 });

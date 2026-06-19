@@ -8,7 +8,7 @@ type Props = {
 
 export const Screen: React.FC<Props> = ({children}) => {
     return (
-        <SafeAreaView style={styles.container}>
+        <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
             <View style={styles.inner}>
                 {children}
             </View>
@@ -23,6 +23,5 @@ const styles = StyleSheet.create({
     },
     inner: {
         flex: 1,
-        paddingHorizontal: 20,
     },
 });

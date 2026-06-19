@@ -1,5 +1,12 @@
 import React from "react";
-import {StyleSheet, Text, TouchableOpacity, View, ViewStyle,} from "react-native";
+import {
+    Pressable,
+    StyleSheet,
+    Text,
+    View,
+    ViewStyle,
+} from "react-native";
+
 import {colors} from "../../design/colors";
 
 interface Props {
@@ -15,43 +22,53 @@ export const Button = ({
                            title,
                            onPress,
                            variant = "primary",
-                           disabled,
+                           disabled = false,
                            style,
                            leftIcon,
                        }: Props) => {
     return (
-        <TouchableOpacity
+        <Pressable
             onPress={onPress}
             disabled={disabled}
-            style={[
+            style={({pressed}) => [
                 styles.base,
                 styles[variant],
-                disabled && {opacity: 0.5},
+                pressed && !disabled && styles.pressed,
+                disabled && styles.disabled,
                 style,
             ]}
         >
             <View style={styles.row}>
-                {leftIcon && <View style={styles.icon}>{leftIcon}</View>}
+                {leftIcon && (
+                    <View style={styles.icon}>
+                        {leftIcon}
+                    </View>
+                )}
 
                 <Text
                     style={[
                         styles.text,
-                        variant !== "primary" && styles.secondaryText,
+                        variant !== "primary" &&
+                        styles.darkText,
                     ]}
                 >
                     {title}
                 </Text>
             </View>
-        </TouchableOpacity>
+        </Pressable>
     );
 };
 
 const styles = StyleSheet.create({
     base: {
-        paddingVertical: 14,
-        paddingHorizontal: 16,
+        height: 54,
+
         borderRadius: 16,
-        alignSelf: "stretch",
+
+        alignItems: "center",
+        justifyContent: "center",
+
+        paddingHorizontal: 20,
     },
 
     row: {
@@ -66,10 +83,23 @@ const styles = StyleSheet.create({
 
     primary: {
         backgroundColor: colors.primary,
+
+        shadowColor: "#000",
+        shadowOpacity: 0.08,
+        shadowRadius: 12,
+        shadowOffset: {
+            width: 0,
+            height: 4,
+        },
+
+        elevation: 3,
     },
 
     secondary: {
-        backgroundColor: "#F3F4F6",
+        backgroundColor: "#F8FAFC",
+
+        borderWidth: 1,
+        borderColor: "#E5E7EB",
     },
 
     ghost: {
@@ -77,12 +107,22 @@ const styles = StyleSheet.create({
     },
 
     text: {
+        fontSize: 15,
+        fontWeight: "700",
         color: "#FFFFFF",
-        fontWeight: "600",
-        fontSize: 16,
+        letterSpacing: 0.2,
     },
 
-    secondaryText: {
+    darkText: {
         color: "#111827",
+    },
+
+    pressed: {
+        opacity: 0.9,
+        transform: [{scale: 0.98}],
+    },
+
+    disabled: {
+        opacity: 0.45,
     },
 });

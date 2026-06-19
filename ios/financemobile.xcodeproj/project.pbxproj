@@ -7,26 +7,26 @@
 	objects = {
 
 /* Begin PBXBuildFile section */
+		029AA9E2F5957E7D73A783AB /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 0DC62D2CB04BCBD9375CE697 /* PrivacyInfo.xcprivacy */; };
 		13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */ = {isa = PBXBuildFile; fileRef = 13B07FB51A68108700A75B9A /* Images.xcassets */; };
+		28567B1F010C8C47ED58F6EE /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 00BB40AFE5CBD1F7A6733429 /* ExpoModulesProvider.swift */; };
 		3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */ = {isa = PBXBuildFile; fileRef = AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */; };
-		B593AE24F131F977C1103828 /* ExpoModulesProvider.swift in Sources */ = {isa = PBXBuildFile; fileRef = 9EC54E2E06FD9F7F08B6EE2B /* ExpoModulesProvider.swift */; };
-		B5B080D1CE6B9D1F196A9DB0 /* PrivacyInfo.xcprivacy in Resources */ = {isa = PBXBuildFile; fileRef = 8500F6C6872489A5E5E02914 /* PrivacyInfo.xcprivacy */; };
+		64092D38C05E4F6D987A2C1F /* libPods-financemobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = A1FDCD2F6D9FEFC949D0CCCD /* libPods-financemobile.a */; };
 		BB2F792D24A3F905000567C9 /* Expo.plist in Resources */ = {isa = PBXBuildFile; fileRef = BB2F792C24A3F905000567C9 /* Expo.plist */; };
-		E592FD040E98B82520319FCC /* libPods-financemobile.a in Frameworks */ = {isa = PBXBuildFile; fileRef = 099FAC4B07B33ECE361819FD /* libPods-financemobile.a */; };
 		F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */ = {isa = PBXBuildFile; fileRef = F11748412D0307B40044C1D9 /* AppDelegate.swift */; };
 /* End PBXBuildFile section */
 
 /* Begin PBXFileReference section */
-		099FAC4B07B33ECE361819FD /* libPods-financemobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-financemobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
-		0DED65B95415931F0DB719D0 /* Pods-financemobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-financemobile.debug.xcconfig"; path = "Target Support Files/Pods-financemobile/Pods-financemobile.debug.xcconfig"; sourceTree = "<group>"; };
+		00BB40AFE5CBD1F7A6733429 /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-financemobile/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		0DC62D2CB04BCBD9375CE697 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xml; name = PrivacyInfo.xcprivacy; path = financemobile/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
 		13B07F961A680F5B00A75B9A /* financemobile.app */ = {isa = PBXFileReference; explicitFileType = wrapper.application; includeInIndex = 0; path = financemobile.app; sourceTree = BUILT_PRODUCTS_DIR; };
 		13B07FB51A68108700A75B9A /* Images.xcassets */ = {isa = PBXFileReference; lastKnownFileType = folder.assetcatalog; name = Images.xcassets; path = financemobile/Images.xcassets; sourceTree = "<group>"; };
 		13B07FB61A68108700A75B9A /* Info.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; name = Info.plist; path = financemobile/Info.plist; sourceTree = "<group>"; };
-		8500F6C6872489A5E5E02914 /* PrivacyInfo.xcprivacy */ = {isa = PBXFileReference; includeInIndex = 1; name = PrivacyInfo.xcprivacy; path = financemobile/PrivacyInfo.xcprivacy; sourceTree = "<group>"; };
-		8B5E652CD8ED4F5901B148CA /* Pods-financemobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-financemobile.release.xcconfig"; path = "Target Support Files/Pods-financemobile/Pods-financemobile.release.xcconfig"; sourceTree = "<group>"; };
-		9EC54E2E06FD9F7F08B6EE2B /* ExpoModulesProvider.swift */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = sourcecode.swift; name = ExpoModulesProvider.swift; path = "Pods/Target Support Files/Pods-financemobile/ExpoModulesProvider.swift"; sourceTree = "<group>"; };
+		89A1DA196A29ED7E5467BE9A /* Pods-financemobile.debug.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-financemobile.debug.xcconfig"; path = "Target Support Files/Pods-financemobile/Pods-financemobile.debug.xcconfig"; sourceTree = "<group>"; };
+		A1FDCD2F6D9FEFC949D0CCCD /* libPods-financemobile.a */ = {isa = PBXFileReference; explicitFileType = archive.ar; includeInIndex = 0; path = "libPods-financemobile.a"; sourceTree = BUILT_PRODUCTS_DIR; };
 		AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = file.storyboard; name = SplashScreen.storyboard; path = financemobile/SplashScreen.storyboard; sourceTree = "<group>"; };
 		BB2F792C24A3F905000567C9 /* Expo.plist */ = {isa = PBXFileReference; fileEncoding = 4; lastKnownFileType = text.plist.xml; path = Expo.plist; sourceTree = "<group>"; };
+		C8D9635913436E9F7E3AA594 /* Pods-financemobile.release.xcconfig */ = {isa = PBXFileReference; includeInIndex = 1; lastKnownFileType = text.xcconfig; name = "Pods-financemobile.release.xcconfig"; path = "Target Support Files/Pods-financemobile/Pods-financemobile.release.xcconfig"; sourceTree = "<group>"; };
 		ED297162215061F000B7C4FE /* JavaScriptCore.framework */ = {isa = PBXFileReference; lastKnownFileType = wrapper.framework; name = JavaScriptCore.framework; path = System/Library/Frameworks/JavaScriptCore.framework; sourceTree = SDKROOT; };
 		F11748412D0307B40044C1D9 /* AppDelegate.swift */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.swift; name = AppDelegate.swift; path = financemobile/AppDelegate.swift; sourceTree = "<group>"; };
 		F11748442D0722820044C1D9 /* financemobile-Bridging-Header.h */ = {isa = PBXFileReference; lastKnownFileType = sourcecode.c.h; name = "financemobile-Bridging-Header.h"; path = "financemobile/financemobile-Bridging-Header.h"; sourceTree = "<group>"; };
@@ -37,23 +37,13 @@
 			isa = PBXFrameworksBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
-				E592FD040E98B82520319FCC /* libPods-financemobile.a in Frameworks */,
+				64092D38C05E4F6D987A2C1F /* libPods-financemobile.a in Frameworks */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
 /* End PBXFrameworksBuildPhase section */
 
 /* Begin PBXGroup section */
-		0D2B40D79C42BCA764318B07 /* Pods */ = {
-			isa = PBXGroup;
-			children = (
-				0DED65B95415931F0DB719D0 /* Pods-financemobile.debug.xcconfig */,
-				8B5E652CD8ED4F5901B148CA /* Pods-financemobile.release.xcconfig */,
-			);
-			name = Pods;
-			path = Pods;
-			sourceTree = "<group>";
-		};
 		13B07FAE1A68108700A75B9A /* financemobile */ = {
 			isa = PBXGroup;
 			children = (
@@ -63,16 +53,25 @@
 				13B07FB51A68108700A75B9A /* Images.xcassets */,
 				13B07FB61A68108700A75B9A /* Info.plist */,
 				AA286B85B6C04FC6940260E9 /* SplashScreen.storyboard */,
-				8500F6C6872489A5E5E02914 /* PrivacyInfo.xcprivacy */,
+				0DC62D2CB04BCBD9375CE697 /* PrivacyInfo.xcprivacy */,
 			);
 			name = financemobile;
+			sourceTree = "<group>";
+		};
+		2D0DC0D2E265B4F2A35D6BD3 /* Pods */ = {
+			isa = PBXGroup;
+			children = (
+				89A1DA196A29ED7E5467BE9A /* Pods-financemobile.debug.xcconfig */,
+				C8D9635913436E9F7E3AA594 /* Pods-financemobile.release.xcconfig */,
+			);
+			path = Pods;
 			sourceTree = "<group>";
 		};
 		2D16E6871FA4F8E400B85C8A /* Frameworks */ = {
 			isa = PBXGroup;
 			children = (
 				ED297162215061F000B7C4FE /* JavaScriptCore.framework */,
-				099FAC4B07B33ECE361819FD /* libPods-financemobile.a */,
+				A1FDCD2F6D9FEFC949D0CCCD /* libPods-financemobile.a */,
 			);
 			name = Frameworks;
 			sourceTree = "<group>";
@@ -91,8 +90,8 @@
 				832341AE1AAA6A7D00B99B32 /* Libraries */,
 				83CBBA001A601CBA00E9B192 /* Products */,
 				2D16E6871FA4F8E400B85C8A /* Frameworks */,
-				E125908E84C748B15E3D9779 /* ExpoModulesProviders */,
-				0D2B40D79C42BCA764318B07 /* Pods */,
+				2D0DC0D2E265B4F2A35D6BD3 /* Pods */,
+				FA20470A3646F5C96C391273 /* ExpoModulesProviders */,
 			);
 			indentWidth = 2;
 			sourceTree = "<group>";
@@ -107,6 +106,14 @@
 			name = Products;
 			sourceTree = "<group>";
 		};
+		9ECB3383BBCFFC542DCEAC5C /* financemobile */ = {
+			isa = PBXGroup;
+			children = (
+				00BB40AFE5CBD1F7A6733429 /* ExpoModulesProvider.swift */,
+			);
+			name = financemobile;
+			sourceTree = "<group>";
+		};
 		BB2F792B24A3F905000567C9 /* Supporting */ = {
 			isa = PBXGroup;
 			children = (
@@ -116,18 +123,10 @@
 			path = financemobile/Supporting;
 			sourceTree = "<group>";
 		};
-		C25A85ECFE72605D891E941F /* financemobile */ = {
+		FA20470A3646F5C96C391273 /* ExpoModulesProviders */ = {
 			isa = PBXGroup;
 			children = (
-				9EC54E2E06FD9F7F08B6EE2B /* ExpoModulesProvider.swift */,
-			);
-			name = financemobile;
-			sourceTree = "<group>";
-		};
-		E125908E84C748B15E3D9779 /* ExpoModulesProviders */ = {
-			isa = PBXGroup;
-			children = (
-				C25A85ECFE72605D891E941F /* financemobile */,
+				9ECB3383BBCFFC542DCEAC5C /* financemobile */,
 			);
 			name = ExpoModulesProviders;
 			sourceTree = "<group>";
@@ -139,14 +138,14 @@
 			isa = PBXNativeTarget;
 			buildConfigurationList = 13B07F931A680F5B00A75B9A /* Build configuration list for PBXNativeTarget "financemobile" */;
 			buildPhases = (
-				BE7011973E3F99EB6AD03207 /* [CP] Check Pods Manifest.lock */,
-				955774B5B7DEFBECEABABCC3 /* [Expo] Configure project */,
+				1587EC9919506EDCD263476A /* [CP] Check Pods Manifest.lock */,
+				3EE1FA7041810EB375166897 /* [Expo] Configure project */,
 				13B07F871A680F5B00A75B9A /* Sources */,
 				13B07F8C1A680F5B00A75B9A /* Frameworks */,
 				13B07F8E1A680F5B00A75B9A /* Resources */,
 				00DD1BFF1BD5951E006B06BC /* Bundle React Native code and images */,
-				731E230C16EE012094A3648B /* [CP] Embed Pods Frameworks */,
-				F62E890C4FEDD31D1EF9C53D /* [CP] Copy Pods Resources */,
+				DB68420FCBB32B0F9B066381 /* [CP] Embed Pods Frameworks */,
+				66D2787FE432C74E513B81A7 /* [CP] Copy Pods Resources */,
 			);
 			buildRules = (
 			);
@@ -196,7 +195,7 @@
 				BB2F792D24A3F905000567C9 /* Expo.plist in Resources */,
 				13B07FBF1A68108700A75B9A /* Images.xcassets in Resources */,
 				3E461D99554A48A4959DE609 /* SplashScreen.storyboard in Resources */,
-				B5B080D1CE6B9D1F196A9DB0 /* PrivacyInfo.xcprivacy in Resources */,
+				029AA9E2F5957E7D73A783AB /* PrivacyInfo.xcprivacy in Resources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -220,29 +219,29 @@
 			shellPath = /bin/sh;
 			shellScript = "if [[ -f \"$PODS_ROOT/../.xcode.env\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env\"\nfi\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n# The project root by default is one level up from the ios directory\nexport PROJECT_ROOT=\"$PROJECT_DIR\"/..\n\nif [[ \"$CONFIGURATION\" = *Debug* ]]; then\n  export SKIP_BUNDLING=1\nfi\nif [[ -z \"$ENTRY_FILE\" ]]; then\n  # Set the entry JS file using the bundler's entry resolution.\n  export ENTRY_FILE=\"$(\"$NODE_BINARY\" -e \"require('expo/scripts/resolveAppEntry')\" \"$PROJECT_ROOT\" ios absolute | tail -n 1)\"\nfi\n\nif [[ -z \"$CLI_PATH\" ]]; then\n  # Use Expo CLI\n  export CLI_PATH=\"$(\"$NODE_BINARY\" --print \"require.resolve('@expo/cli', { paths: [require.resolve('expo/package.json')] })\")\"\nfi\nif [[ -z \"$BUNDLE_COMMAND\" ]]; then\n  # Default Expo CLI command for bundling\n  export BUNDLE_COMMAND=\"export:embed\"\nfi\n\n# Source .xcode.env.updates if it exists to allow\n# SKIP_BUNDLING to be unset if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.updates\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.updates\"\nfi\n# Source local changes to allow overrides\n# if needed\nif [[ -f \"$PODS_ROOT/../.xcode.env.local\" ]]; then\n  source \"$PODS_ROOT/../.xcode.env.local\"\nfi\n\n`\"$NODE_BINARY\" --print \"require('path').dirname(require.resolve('react-native/package.json')) + '/scripts/react-native-xcode.sh'\"`\n\n";
 		};
-		731E230C16EE012094A3648B /* [CP] Embed Pods Frameworks */ = {
+		1587EC9919506EDCD263476A /* [CP] Check Pods Manifest.lock */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
 			);
-			inputPaths = (
-				"${PODS_ROOT}/Target Support Files/Pods-financemobile/Pods-financemobile-frameworks.sh",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
-				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			inputFileListPaths = (
 			);
-			name = "[CP] Embed Pods Frameworks";
+			inputPaths = (
+				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
+				"${PODS_ROOT}/Manifest.lock",
+			);
+			name = "[CP] Check Pods Manifest.lock";
+			outputFileListPaths = (
+			);
 			outputPaths = (
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
-				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+				"$(DERIVED_FILE_DIR)/Pods-financemobile-checkManifestLockResult.txt",
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 			shellPath = /bin/sh;
-			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-financemobile/Pods-financemobile-frameworks.sh\"\n";
+			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
 			showEnvVarsInLog = 0;
 		};
-		955774B5B7DEFBECEABABCC3 /* [Expo] Configure project */ = {
+		3EE1FA7041810EB375166897 /* [Expo] Configure project */ = {
 			isa = PBXShellScriptBuildPhase;
 			alwaysOutOfDate = 1;
 			buildActionMask = 2147483647;
@@ -266,29 +265,7 @@
 			shellPath = /bin/sh;
 			shellScript = "# This script configures Expo modules and generates the modules provider file.\nbash -l -c \"./Pods/Target\\ Support\\ Files/Pods-financemobile/expo-configure-project.sh\"\n";
 		};
-		BE7011973E3F99EB6AD03207 /* [CP] Check Pods Manifest.lock */ = {
-			isa = PBXShellScriptBuildPhase;
-			buildActionMask = 2147483647;
-			files = (
-			);
-			inputFileListPaths = (
-			);
-			inputPaths = (
-				"${PODS_PODFILE_DIR_PATH}/Podfile.lock",
-				"${PODS_ROOT}/Manifest.lock",
-			);
-			name = "[CP] Check Pods Manifest.lock";
-			outputFileListPaths = (
-			);
-			outputPaths = (
-				"$(DERIVED_FILE_DIR)/Pods-financemobile-checkManifestLockResult.txt",
-			);
-			runOnlyForDeploymentPostprocessing = 0;
-			shellPath = /bin/sh;
-			shellScript = "diff \"${PODS_PODFILE_DIR_PATH}/Podfile.lock\" \"${PODS_ROOT}/Manifest.lock\" > /dev/null\nif [ $? != 0 ] ; then\n    # print error to STDERR\n    echo \"error: The sandbox is not in sync with the Podfile.lock. Run 'pod install' or update your CocoaPods installation.\" >&2\n    exit 1\nfi\n# This output is used by Xcode 'outputs' to avoid re-running this script phase.\necho \"SUCCESS\" > \"${SCRIPT_OUTPUT_FILE_0}\"\n";
-			showEnvVarsInLog = 0;
-		};
-		F62E890C4FEDD31D1EF9C53D /* [CP] Copy Pods Resources */ = {
+		66D2787FE432C74E513B81A7 /* [CP] Copy Pods Resources */ = {
 			isa = PBXShellScriptBuildPhase;
 			buildActionMask = 2147483647;
 			files = (
@@ -322,6 +299,28 @@
 			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-financemobile/Pods-financemobile-resources.sh\"\n";
 			showEnvVarsInLog = 0;
 		};
+		DB68420FCBB32B0F9B066381 /* [CP] Embed Pods Frameworks */ = {
+			isa = PBXShellScriptBuildPhase;
+			buildActionMask = 2147483647;
+			files = (
+			);
+			inputPaths = (
+				"${PODS_ROOT}/Target Support Files/Pods-financemobile/Pods-financemobile-frameworks.sh",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/React-Core-prebuilt/React.framework/React",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/ReactNativeDependencies/ReactNativeDependencies.framework/ReactNativeDependencies",
+				"${PODS_XCFRAMEWORKS_BUILD_DIR}/hermes-engine/Pre-built/hermes.framework/hermes",
+			);
+			name = "[CP] Embed Pods Frameworks";
+			outputPaths = (
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/React.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/ReactNativeDependencies.framework",
+				"${TARGET_BUILD_DIR}/${FRAMEWORKS_FOLDER_PATH}/hermes.framework",
+			);
+			runOnlyForDeploymentPostprocessing = 0;
+			shellPath = /bin/sh;
+			shellScript = "\"${PODS_ROOT}/Target Support Files/Pods-financemobile/Pods-financemobile-frameworks.sh\"\n";
+			showEnvVarsInLog = 0;
+		};
 /* End PBXShellScriptBuildPhase section */
 
 /* Begin PBXSourcesBuildPhase section */
@@ -330,7 +329,7 @@
 			buildActionMask = 2147483647;
 			files = (
 				F11748422D0307B40044C1D9 /* AppDelegate.swift in Sources */,
-				B593AE24F131F977C1103828 /* ExpoModulesProvider.swift in Sources */,
+				28567B1F010C8C47ED58F6EE /* ExpoModulesProvider.swift in Sources */,
 			);
 			runOnlyForDeploymentPostprocessing = 0;
 		};
@@ -339,12 +338,13 @@
 /* Begin XCBuildConfiguration section */
 		13B07F941A680F5B00A75B9A /* Debug */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 0DED65B95415931F0DB719D0 /* Pods-financemobile.debug.xcconfig */;
+			baseConfigurationReference = 89A1DA196A29ED7E5467BE9A /* Pods-financemobile.debug.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = financemobile/financemobile.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P58ZF5TDT5;
 				ENABLE_BITCODE = NO;
 				GCC_PREPROCESSOR_DEFINITIONS = (
 					"$(inherited)",
@@ -375,12 +375,13 @@
 		};
 		13B07F951A680F5B00A75B9A /* Release */ = {
 			isa = XCBuildConfiguration;
-			baseConfigurationReference = 8B5E652CD8ED4F5901B148CA /* Pods-financemobile.release.xcconfig */;
+			baseConfigurationReference = C8D9635913436E9F7E3AA594 /* Pods-financemobile.release.xcconfig */;
 			buildSettings = {
 				ASSETCATALOG_COMPILER_APPICON_NAME = AppIcon;
 				CLANG_ENABLE_MODULES = YES;
 				CODE_SIGN_ENTITLEMENTS = financemobile/financemobile.entitlements;
 				CURRENT_PROJECT_VERSION = 1;
+				DEVELOPMENT_TEAM = P58ZF5TDT5;
 				INFOPLIST_FILE = financemobile/Info.plist;
 				IPHONEOS_DEPLOYMENT_TARGET = 15.1;
 				LD_RUNPATH_SEARCH_PATHS = (

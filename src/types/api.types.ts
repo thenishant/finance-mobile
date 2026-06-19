@@ -13,7 +13,7 @@ export interface FinancialAccount {
     provider?: string;
     institutionName?: string;
     last4?: string;
-    currentBalance: string;
+    balance: string;
     availableBalance?: string;
     creditLimit?: string;
     isArchived: boolean;

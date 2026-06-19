@@ -33,38 +33,55 @@ export const TotalBalanceHero = ({accounts = []}: any) => {
 
                 <View style={styles.header}>
                     <Text style={styles.label}>
-                        Total Balance
+                        Net Worth
                     </Text>
 
-                    <Pressable onPress={() => setHidden(!hidden)}>
+                    <View style={styles.actions}>
+                        <Pressable onPress={() => setHidden(!hidden)}>
+                            <Ionicons
+                                name={hidden ? "eye-off" : "eye"}
+                                size={18}
+                                color="#CBD5E1"
+                            />
+                        </Pressable>
+
                         <Ionicons
-                            name={hidden ? "eye-off" : "eye"}
+                            name={expanded ? "chevron-up" : "chevron-down"}
                             size={18}
-                            color="#9CA3AF"
+                            color="#CBD5E1"
                         />
-                    </Pressable>
+                    </View>
                 </View>
 
                 <Text style={styles.amount}>
                     {format(total)}
                 </Text>
 
-                <Text style={styles.sub}>
-                    Tap to {expanded ? "hide" : "view"} accounts
-                </Text>
-
             </Pressable>
 
             {expanded && (
                 <View style={styles.list}>
-                    {accounts.map((acc: any) => (
-                        <View key={acc.id} style={styles.item}>
-                            <Text style={styles.name}>
-                                {acc.name}
-                            </Text>
-                            <Text style={styles.value}>
-                                {format(Number(acc.balance))}
-                            </Text>
+                    {accounts.map((acc: any, index: number) => (
+                        <View key={acc.id}>
+                            <View style={styles.item}>
+                                <View>
+                                    <Text style={styles.name}>
+                                        {acc.name}
+                                    </Text>
+
+                                    <Text style={styles.last4}>
+                                        •••• {acc.last4}
+                                    </Text>
+                                </View>
+
+                                <Text style={styles.value}>
+                                    {format(Number(acc.balance))}
+                                </Text>
+                            </View>
+
+                            {index < accounts.length - 1 && (
+                                <View style={styles.divider}/>
+                            )}
                         </View>
                     ))}
                 </View>
@@ -92,21 +109,15 @@ const styles = StyleSheet.create({
 
     amount: {
         color: "#fff",
-        fontSize: 40,
-        fontWeight: "700",
-        marginTop: 6,
-        letterSpacing: 1,
-    },
-
-    sub: {
-        color: "#64748B",
-        fontSize: 12,
-        marginTop: 6,
+        fontSize: 42,
+        fontWeight: "600",
+        marginTop: 8,
+        letterSpacing: -1,
     },
 
     list: {
         backgroundColor: "#fff",
-        marginTop: 14,
+        marginTop: 12,
         borderRadius: 20,
         padding: 16,
     },
@@ -114,7 +125,7 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingVertical: 14,
+        paddingVertical: 10,
     },
 
     name: {
@@ -123,5 +134,22 @@ const styles = StyleSheet.create({
 
     value: {
         fontWeight: "600",
+    },
+
+    actions: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 12,
+    },
+
+    last4: {
+        marginTop: 4,
+        fontSize: 12,
+        color: "#9CA3AF",
+    },
+
+    divider: {
+        height: 1,
+        backgroundColor: "#F3F4F6",
     },
 });

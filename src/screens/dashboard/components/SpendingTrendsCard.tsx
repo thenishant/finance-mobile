@@ -17,31 +17,44 @@ export const SpendingTrendsCard = ({data, isLoading}: SpendingTrendsCardProps) =
         );
     }
 
-    const maxAmount = Math.max(...data.map(d => d.amount), 1);
-    const avgAmount = data.reduce((sum, d) => sum + d.amount, 0) / data.length;
+    const last10Days = data.slice(-7);
+
+    const maxAmount = Math.max(...last10Days.map(d => d.amount), 1);
+    const avgAmount =
+        last10Days.reduce((sum, d) => sum + d.amount, 0) /
+        Math.max(last10Days.length, 1);
 
     return (
         <View style={styles.card}>
 
             <View style={styles.header}>
-                <Text style={styles.title}>Spending Trends</Text>
-                <Text style={styles.subtitle}>Last 7 days</Text>
+                <View>
+                    <Text style={styles.title}>Spending Trends</Text>
+                    <Text style={styles.subtitle}>Last 7 days</Text>
+                </View>
+
+                <View style={styles.avgBadge}>
+                    <Text style={styles.avgLabel}>Avg</Text>
+                    <Text style={styles.avgValue}>₹{Math.round(avgAmount)}</Text>
+                </View>
             </View>
 
             <View style={styles.chartContainer}>
-                {data.map((item, index) => {
+                {last10Days.map((item, index) => {
                     const percentage = maxAmount > 0 ? (item.amount / maxAmount) * 100 : 0;
                     const isAboveAvg = item.amount > avgAmount;
 
                     return (
                         <View key={index} style={styles.barWrapper}>
                             <View style={styles.barContainer}>
+                                <View style={styles.barTrack}/>
+
                                 <View
                                     style={[
                                         styles.bar,
                                         {
                                             height: `${Math.max(percentage, 5)}%`,
-                                            backgroundColor: isAboveAvg ? "#EF4444" : "#3B82F6"
+                                            backgroundColor: isAboveAvg ? "#EF4444" : "#2563EB"
                                         }
                                     ]}
                                 />
@@ -60,28 +73,47 @@ export const SpendingTrendsCard = ({data, isLoading}: SpendingTrendsCardProps) =
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#fff",
-        padding: 18,
+        backgroundColor: "#FFFFFF",
+        padding: 20,
+        borderColor: "#F3F4F6",
     },
     header: {
-        marginBottom: 16,
+        marginBottom: 20,
+        flexDirection: "row",
+        justifyContent: "space-between",
+        alignItems: "center",
     },
     title: {
-        fontSize: 13,
-        fontWeight: "600",
-        color: "#6B7280",
+        fontSize: 18,
+        fontWeight: "700",
+        color: "#111827",
     },
     subtitle: {
-        fontSize: 12,
-        color: "#9CA3AF",
-        marginTop: 2,
+        fontSize: 13,
+        color: "#6B7280",
+        marginTop: 4,
+    },
+    avgBadge: {
+        backgroundColor: "#F8FAFC",
+        borderRadius: 16,
+        paddingHorizontal: 12,
+        paddingVertical: 8,
+        alignItems: "center",
+    },
+    avgLabel: {
+        fontSize: 11,
+        color: "#6B7280",
+    },
+    avgValue: {
+        fontSize: 14,
+        fontWeight: "700",
+        color: "#111827",
     },
     chartContainer: {
         flexDirection: "row",
         alignItems: "flex-end",
         justifyContent: "space-between",
-        height: 120,
-        marginBottom: 12,
+        height: 140,
     },
     barWrapper: {
         flex: 1,
@@ -91,46 +123,34 @@ const styles = StyleSheet.create({
     },
     barContainer: {
         width: "100%",
-        height: 100,
+        height: 120,
         justifyContent: "flex-end",
         alignItems: "center",
+        position: "relative",
+    },
+    barTrack: {
+        position: "absolute",
+        bottom: 0,
+        width: "100%",
+        height: "100%",
+        backgroundColor: "#F8FAFC",
+        borderRadius: 10,
     },
     bar: {
         width: "100%",
-        minHeight: 4,
-        borderRadius: 4,
+        minHeight: 6,
+        borderRadius: 10,
     },
     day: {
         fontSize: 11,
-        fontWeight: "600",
+        fontWeight: "700",
         color: "#6B7280",
-        marginTop: 8,
+        marginTop: 10,
     },
     amount: {
         fontSize: 10,
         color: "#9CA3AF",
-        marginTop: 2,
-    },
-    legend: {
-        flexDirection: "row",
-        gap: 16,
-        paddingTop: 12,
-        borderTopWidth: 1,
-        borderTopColor: "#F3F4F6",
-    },
-    legendItem: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 6,
-    },
-    dot: {
-        width: 8,
-        height: 8,
-        borderRadius: 4,
-    },
-    legendText: {
-        fontSize: 11,
-        color: "#6B7280",
+        marginTop: 4,
     },
     shimmer: {
         height: 100,
@@ -139,5 +159,3 @@ const styles = StyleSheet.create({
         marginTop: 12,
     },
 });
-
-

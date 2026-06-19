@@ -8,7 +8,7 @@ export const transactionColors = {
         light: "#FEE2E2",
     },
     INVESTMENT: {
-        primary: "#2563EB",
+        primary: "#eb8825",
         light: "#DBEAFE",
     },
     TRANSFER: {

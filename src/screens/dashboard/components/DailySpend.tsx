@@ -18,13 +18,7 @@ export const DailySpendCard = ({amount}: any) => {
 const styles = StyleSheet.create({
     card: {
         backgroundColor: "#fff",
-        // borderRadius: 20,
         padding: 18,
-        // shadowColor: "#000",
-        // shadowOpacity: 0.04,
-        // shadowRadius: 12,
-        // shadowOffset: {width: 0, height: 6},
-        // elevation: 3,
     },
     title: {
         fontSize: 12,
@@ -33,7 +27,7 @@ const styles = StyleSheet.create({
         marginBottom: 10,
     },
     big: {
-        fontSize: 24,
+        fontSize: 28,
         fontWeight: "700",
         color: "#0F172A",
     }

@@ -1,30 +1,32 @@
 import React, {useEffect} from "react";
 import {createNativeStackNavigator} from "@react-navigation/native-stack";
+import {useQueryClient} from "@tanstack/react-query";
+
 import {MainTabs} from "./MainTabs";
 import AddTransactionScreen from "../screens/transaction/AddTransactionScreen";
-import {Button} from "../components/ui";
 import {SelectCategoryScreen} from "../screens/categories/SelectCategoryScreen";
 import {SelectAccountScreen} from "../screens/transaction/SelectFinancialAccountScreen";
 import {CreateAccountScreen} from "../screens/transaction/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
 import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
 
+import {Button} from "../components/ui";
 import {TransactionType} from "../types/transaction";
-import {useQueryClient} from "@tanstack/react-query";
 import {transactionService} from "../services/transaction.service";
 
 export type AppStackParamList = {
     Tabs: undefined;
     AddTransaction: undefined;
-    SelectCategory: { type: TransactionType; };
-    SelectAccount: { mode: "source" | "destination"; };
+    SelectCategory: { type: TransactionType };
+    SelectAccount: { mode: "source" | "destination" };
     ManageCategories: undefined;
     CreateAccount: undefined;
     CreateCategory: { type: TransactionType };
     Investment: undefined;
 };
 
-const Stack = createNativeStackNavigator<AppStackParamList>();
+const Stack =
+    createNativeStackNavigator<AppStackParamList>();
 
 export const AppStack = () => {
     const queryClient = useQueryClient();
@@ -37,11 +39,18 @@ export const AppStack = () => {
     }, []);
 
     return (
-        <Stack.Navigator>
+        <Stack.Navigator
+            screenOptions={{
+                headerTitleAlign: "center",
+                headerBackButtonDisplayMode: "minimal",
+            }}
+        >
             <Stack.Screen
                 name="Tabs"
                 component={MainTabs}
-                options={{headerShown: false}}
+                options={{
+                    headerShown: false,
+                }}
             />
 
             <Stack.Screen
@@ -49,12 +58,13 @@ export const AppStack = () => {
                 component={AddTransactionScreen}
                 options={({navigation}) => ({
                     title: "Add Transaction",
-                    headerTitleAlign: "center",
                     headerLeft: () => (
                         <Button
                             title="✕"
                             variant="ghost"
-                            onPress={() => navigation.goBack()}
+                            onPress={() =>
+                                navigation.goBack()
+                            }
                         />
                     ),
                 })}
@@ -63,25 +73,33 @@ export const AppStack = () => {
             <Stack.Screen
                 name="SelectAccount"
                 component={SelectAccountScreen}
-                options={{title: "Select Account"}}
+                options={{
+                    title: "Select Account",
+                }}
             />
 
             <Stack.Screen
                 name="SelectCategory"
                 component={SelectCategoryScreen}
-                options={{title: "Select Category"}}
+                options={{
+                    title: "Select Category",
+                }}
             />
 
             <Stack.Screen
                 name="CreateAccount"
                 component={CreateAccountScreen}
-                options={{title: "Create Account"}}
+                options={{
+                    title: "Create Account",
+                }}
             />
 
             <Stack.Screen
                 name="CreateCategory"
                 component={CreateCategoryScreen}
-                options={{title: "Create Category"}}
+                options={{
+                    title: "Create Category",
+                }}
             />
 
             <Stack.Screen
@@ -89,10 +107,8 @@ export const AppStack = () => {
                 component={InvestmentScreen}
                 options={{
                     title: "Investment",
-                    headerTitleAlign: "center"
                 }}
             />
-
         </Stack.Navigator>
     );
 };

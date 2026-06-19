@@ -1,4 +1,4 @@
-import React, {useEffect, useRef} from "react";
+import React, {useRef} from "react";
 import {Animated, PanResponder, StyleSheet, Text, TouchableOpacity, View} from "react-native";
 import {Feather} from "@expo/vector-icons";
 
@@ -22,7 +22,6 @@ export const MonthSelector = ({
     const prevMonth = useMonthStore(s => s.prevMonth);
     const nextMonth = useMonthStore(s => s.nextMonth);
 
-    const fadeAnim = useRef(new Animated.Value(1)).current;
 
     const isDark = variant === "dark";
 
@@ -30,30 +29,9 @@ export const MonthSelector = ({
        THEME
     ============================== */
 
-    const bgColor = isDark
-        ? "rgba(255,255,255,0.08)"
-        : "rgba(255,255,255,0.95)";
-
     const textColor = isDark ? "#F9FAFB" : "#111827";
     const iconColor = isDark ? "#D1D5DB" : "#6B7280";
 
-    /* =============================
-       SMOOTH FADE
-    ============================== */
-
-    useEffect(() => {
-        Animated.timing(fadeAnim, {
-            toValue: 0.6,
-            duration: 120,
-            useNativeDriver: true
-        }).start(() => {
-            Animated.timing(fadeAnim, {
-                toValue: 1,
-                duration: 180,
-                useNativeDriver: true
-            }).start();
-        });
-    }, [month, year]);
 
     /* =============================
        NAVIGATION
@@ -83,18 +61,6 @@ export const MonthSelector = ({
             }
         })
     ).current;
-
-    /* =============================
-       SCROLL EFFECT
-    ============================== */
-
-    const opacity = scrollY
-        ? scrollY.interpolate({
-            inputRange: [0, 100],
-            outputRange: [1, 0.9],
-            extrapolate: "clamp"
-        })
-        : 1;
 
     /* =============================
        TREND
@@ -128,10 +94,7 @@ export const MonthSelector = ({
     return (
         <Animated.View
             {...panResponder.panHandlers}
-            style={[
-                styles.container,
-                {opacity, backgroundColor: bgColor}
-            ]}
+            style={styles.container}
         >
 
             {/* LEFT */}
@@ -143,30 +106,27 @@ export const MonthSelector = ({
 
             {/* CENTER */}
             <View style={styles.center}>
-                <Animated.View style={{opacity: fadeAnim, alignItems: "center"}}>
+                <View style={styles.pill}>
 
                     <Text style={[styles.label, {color: textColor}]}>
                         {monthNames[month - 1]} {year}
                     </Text>
 
-                    <View style={styles.trendRow}>
-                        {trendPercent !== null ? (
-                            <View style={styles.trendContent}>
-                                <Feather
-                                    name={trendIcon as any}
-                                    size={14}
-                                    color={trendColor}
-                                />
-                                <Text style={[styles.trendText, {color: trendColor}]}>
-                                    {Math.abs(trendPercent)}%
-                                </Text>
-                            </View>
-                        ) : (
-                            <Text style={{opacity: 0}}>0%</Text>
-                        )}
-                    </View>
+                    {trendPercent !== null && (
+                        <View style={[styles.trendBadge, {backgroundColor: `${trendColor}15`}]}>
+                            <Feather
+                                name={trendIcon as any}
+                                size={12}
+                                color={trendColor}
+                            />
 
-                </Animated.View>
+                            <Text style={[styles.trendText, {color: trendColor}]}>
+                                {Math.abs(trendPercent)}%
+                            </Text>
+                        </View>
+                    )}
+
+                </View>
             </View>
 
             {/* RIGHT */}
@@ -193,9 +153,10 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        paddingVertical: 10,
-        paddingHorizontal: 12,
-        borderRadius: 16,
+        paddingVertical: 8,
+        paddingHorizontal: 8,
+        borderRadius: 20,
+        backgroundColor: "transparent",
     },
 
     side: {
@@ -207,29 +168,34 @@ const styles = StyleSheet.create({
     center: {
         flex: 6,
         alignItems: "center",
-        justifyContent: "space-between",
+        justifyContent: "center",
     },
 
     label: {
-        fontSize: 15,
-        fontWeight: "600",
-        justifyContent: "center",
-    },
-
-    trendRow: {
-        height: 16,
-        justifyContent: "center",
-        alignItems: "center",
-        marginTop: 2,
-    },
-
-    trendContent: {
-        flexDirection: "row",
-        alignItems: "center",
+        fontSize: 16,
+        fontWeight: "700",
     },
 
     trendText: {
-        fontSize: 12,
-        marginLeft: 4,
+        fontSize: 11,
+        fontWeight: "700",
+    },
+
+    pill: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 999,
+    },
+
+    trendBadge: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 4,
+        paddingHorizontal: 8,
+        paddingVertical: 4,
+        borderRadius: 999,
     },
 });

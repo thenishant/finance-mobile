@@ -1,5 +1,5 @@
-import React, {memo, useEffect, useRef, useState} from "react";
-import {Animated, Modal, Pressable, StyleSheet, Text, View} from "react-native";
+import React, {memo, useState} from "react";
+import {Modal, Pressable, StyleSheet, Text, View} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {Calendar} from "react-native-calendars";
 import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
@@ -37,17 +37,8 @@ const AddTransactionScreen = () => {
 
     const date = useTransactionDraft(s => s.date);
     const setDate = useTransactionDraft(s => s.setDate);
-    const [isSubmitting, setIsSubmitting] = useState(false);
     const reset = useTransactionDraft(s => s.reset);
-    const colorAnim = useRef(new Animated.Value(0)).current;
 
-    useEffect(() => {
-        Animated.timing(colorAnim, {
-            toValue: 1,
-            duration: 250,
-            useNativeDriver: false,
-        }).start(() => colorAnim.setValue(0));
-    }, [transactionType]);
     const theme = transactionColors[transactionType];
     const [calendarVisible, setCalendarVisible] = useState(false);
     const displayDate = date.toLocaleDateString("en-IN", {
@@ -56,60 +47,51 @@ const AddTransactionScreen = () => {
         year: "numeric",
     });
 
-    const numericAmount = Number(amount || 0);
-
-    const remaining = sourceAccount && numericAmount
-        ? Number(sourceAccount.currentBalance) - numericAmount
-        : null;
-
     const handleSubmit = () => {
-        if (isSubmitting) return; // ✅ HARD BLOCK
-
         const amt = Number(amount);
-
         if (!amt || amt <= 0) {
             alert("Enter valid amount");
             return;
         }
+        if (transactionType === "TRANSFER") {
+            if (!sourceAccount || !destinationAccount) {
+                alert("Select source and destination accounts");
+                return;
+            }
 
-        if (!sourceAccount) {
-            alert("Select account");
-            return;
+            if (sourceAccount.id === destinationAccount.id) {
+                alert("Cannot transfer to same account");
+                return;
+            }
+        } else {
+            if (!sourceAccount) {
+                alert("Select account");
+                return;
+            }
+
+            if (!selectedCategory) {
+                alert("Select category");
+                return;
+            }
         }
 
-        if (!selectedCategory) {
-            alert("Select category");
-            return;
-        }
-
-        setIsSubmitting(true); // 🔥 LOCK
-
-        const payload = {
-            type: transactionType,
-            amount: amt,
-            date: date.toISOString(),
-            note: note || undefined,
-
-            categoryId:
-                transactionType === "TRANSFER"
-                    ? undefined
-                    : selectedCategory?.id,
-            sourceAccountId:
-            sourceAccount?.id,
-
-            destinationAccountId:
-                transactionType === "INCOME" ? sourceAccount?.id : destinationAccount?.id,
-        };
-
-        mutation.mutate(payload, {
-            onSuccess: () => {
-                reset();        // ✅ clear form
-                setIsSubmitting(false);
+        mutation.mutate({
+                type: transactionType,
+                amount: amt,
+                date: date.toISOString(),
+                note: note || undefined,
+                categoryId: transactionType === "TRANSFER" ? undefined : selectedCategory?.id,
+                sourceAccountId: transactionType === "INCOME" ? undefined : sourceAccount?.id,
+                destinationAccountId: transactionType === "INCOME" ? sourceAccount?.id : transactionType === "TRANSFER"
+                    ? destinationAccount?.id : undefined
             },
-            onError: () => {
-                setIsSubmitting(false); // 🔓 UNLOCK
-            },
-        });
+            {
+                onSuccess: () => {
+                    reset();
+                    navigation.goBack();
+                },
+            }
+        );
     };
 
     return (
@@ -126,39 +108,28 @@ const AddTransactionScreen = () => {
                     />
                 </View>
 
-                <TransactionTypeSection
-                    value={transactionType}
-                    onChange={setTransactionType}
-                />
-
                 <View style={styles.card}>
-                    <Row
-                        label={
-                            transactionType === "INCOME"
-                                ? "Destination"
-                                : "Source"
-                        }
-                        value={sourceAccount?.name ?? "Select account"}
-                        subValue={
-                            sourceAccount
-                                ? `${sourceAccount.type.replace("_", " ")}`
-                                : undefined
-                        }
-                        onPress={() =>
-                            navigation.navigate("SelectAccount", {
-                                mode: "destination",
-                            })
-                        }
-                    />
+                    <View style={styles.typeSection}>
+                        <TransactionTypeSection
+                            value={transactionType}
+                            onChange={setTransactionType}
+                        />
+                    </View>
 
                     {transactionType !== "TRANSFER" && (
                         <Row
                             label="Category"
-                            value={selectedCategory ? selectedCategory.name : "Select"}
+                            value={
+                                selectedCategory?.name ??
+                                "Select"
+                            }
                             onPress={() =>
-                                navigation.navigate("SelectCategory", {
-                                    type: transactionType,
-                                })
+                                navigation.navigate(
+                                    "SelectCategory",
+                                    {
+                                        type: transactionType,
+                                    }
+                                )
                             }
                         />
                     )}
@@ -166,21 +137,48 @@ const AddTransactionScreen = () => {
                     {transactionType === "TRANSFER" ? (
                         <>
                             <Row
-                                label="From"
-                                value={sourceAccount?.name ?? "Select"}
+                                label="From Account"
+                                value={
+                                    sourceAccount?.name ??
+                                    "Select"
+                                }
+                                subValue={
+                                    sourceAccount
+                                        ? `₹${Number(
+                                            sourceAccount.balance
+                                        ).toLocaleString("en-IN")}`
+                                        : undefined
+                                }
                                 onPress={() =>
-                                    navigation.navigate("SelectAccount", {
-                                        mode: "source",
-                                    })
+                                    navigation.navigate(
+                                        "SelectAccount",
+                                        {
+                                            mode: "source",
+                                        }
+                                    )
                                 }
                             />
+
                             <Row
-                                label="To"
-                                value={destinationAccount?.name ?? "Select"}
+                                label="To Account"
+                                value={
+                                    destinationAccount?.name ??
+                                    "Select"
+                                }
+                                subValue={
+                                    destinationAccount
+                                        ? `₹${Number(
+                                            destinationAccount.balance
+                                        ).toLocaleString("en-IN")}`
+                                        : undefined
+                                }
                                 onPress={() =>
-                                    navigation.navigate("SelectAccount", {
-                                        mode: "destination",
-                                    })
+                                    navigation.navigate(
+                                        "SelectAccount",
+                                        {
+                                            mode: "destination",
+                                        }
+                                    )
                                 }
                             />
                         </>
@@ -188,19 +186,24 @@ const AddTransactionScreen = () => {
                         <Row
                             label={
                                 transactionType === "INCOME"
-                                    ? "Destination"
-                                    : "Source"
+                                    ? "Destination Account"
+                                    : "Source Account"
                             }
                             value={sourceAccount?.name ?? "Select"}
                             subValue={
                                 sourceAccount
-                                    ? sourceAccount.type.replaceAll("_", " ")
+                                    ? `₹${Number(
+                                        sourceAccount.balance
+                                    ).toLocaleString("en-IN")}`
                                     : undefined
                             }
                             onPress={() =>
-                                navigation.navigate("SelectAccount", {
-                                    mode: "source",
-                                })
+                                navigation.navigate(
+                                    "SelectAccount",
+                                    {
+                                        mode: "source",
+                                    }
+                                )
                             }
                         />
                     )}
@@ -208,7 +211,9 @@ const AddTransactionScreen = () => {
                     <Row
                         label="Date"
                         value={displayDate}
-                        onPress={() => setCalendarVisible(true)}
+                        onPress={() =>
+                            setCalendarVisible(true)
+                        }
                     />
                 </View>
 
@@ -225,26 +230,20 @@ const AddTransactionScreen = () => {
                 )}
             </KeyboardAwareScrollView>
 
-            {/* Footer */}
-            <Animated.View
-                style={[
-                    styles.footer,
-                    {
-                        transform: [
-                            {scale: mutation.isPending ? 0.98 : 1},
-                        ],
-                    },
-                ]}
-            >
+            <View style={styles.footer}>
                 <Button
                     title={mutation.isPending ? "Saving..." : "Save Transaction"}
                     onPress={handleSubmit}
-                    disabled={mutation.isPending || isSubmitting}
-                    style={{backgroundColor: theme.primary}}
-                />
-            </Animated.View>
+                    disabled={mutation.isPending}
+                    style={{
+                        height: 50,
+                        borderRadius: 14,
+                        backgroundColor: theme.primary,
+                    }}
 
-            {/* Calendar */}
+                />
+            </View>
+
             <Modal transparent animationType="fade" visible={calendarVisible}>
                 <Pressable
                     style={styles.overlay}
@@ -281,100 +280,103 @@ const Row = memo(
         subValue?: string;
         onPress: () => void;
     }) => (
-        <Pressable style={styles.row}>
-
+        <Pressable style={styles.row}
+                   onPress={onPress}>
             <View>
-
                 <Text style={styles.rowLabel}>{label}</Text>
-
                 {subValue && (
-
                     <Text style={styles.rowSub}>
-
                         {subValue}
-
                     </Text>
-
                 )}
-
             </View>
-
             <View style={styles.rowRight}>
-
                 <Text style={styles.rowValue}>{value}</Text>
-
                 <Text style={styles.chevron}>›</Text>
-
             </View>
-
         </Pressable>
     )
 );
 
 const styles = StyleSheet.create({
     container: {
-
-        paddingBottom: 120,
-
-        paddingHorizontal: 20,
-
-        gap: 20,
-
+        paddingHorizontal: 8,
+        paddingBottom: 90,
+        gap: 8,
     },
     amountSection: {
-
-        paddingTop: 24,
-
-        paddingBottom: 8,
-
         alignItems: "center",
-
+        paddingBottom: 2
     },
     card: {
-        backgroundColor: "#fff",
-        borderRadius: 20,
+        backgroundColor: "#FFFFFF",
+        borderRadius: 18,
         overflow: "hidden",
+        borderWidth: 1,
+        borderColor: "#F3F4F6",
+        shadowColor: "#d8dce4",
+        shadowOpacity: 0.04,
+        shadowRadius: 20,
+        shadowOffset: {
+            width: 0,
+            height: 8,
+        },
+        elevation: 3,
+    },
+    typeSection: {
+        padding: 8,
     },
     row: {
         flexDirection: "row",
         justifyContent: "space-between",
-        paddingVertical: 16,
+        alignItems: "center",
         paddingHorizontal: 16,
+        paddingVertical: 22,
         borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
+        borderBottomColor: "#F8FAFC",
     },
     rowLabel: {
-        fontSize: 16,
+        fontSize: 15,
+        fontWeight: "500",
         color: "#6B7280",
-    },
-    right: {
-        alignItems: "flex-end",
     },
     rowValue: {
-        fontSize: 16,
+        fontSize: 15,
         fontWeight: "600",
+        color: "#111827",
     },
     rowSub: {
-        fontSize: 12,
-        color: "#6B7280",
         marginTop: 2,
+        fontSize: 12,
+        color: "#9CA3AF",
+    },
+    rowRight: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 6,
+    },
+    chevron: {
+        fontSize: 16,
+        color: "#D1D5DB",
     },
     footer: {
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        padding: 16,
-        backgroundColor: "#fff",
+        paddingHorizontal: 16,
+        paddingVertical: 10,
+        backgroundColor: "rgba(255,255,255,0.98)",
         borderTopWidth: 1,
-        borderTopColor: "#E5E7EB",
+        borderTopColor: "#F3F4F6",
     },
     error: {
-        color: "red",
+        color: "#DC2626",
+        fontSize: 13,
     },
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.4)",
+        backgroundColor: "rgba(0,0,0,0.35)",
     },
     calendarWrapper: {
         position: "absolute",
@@ -382,9 +384,12 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     sheet: {
-        backgroundColor: "#fff",
+        backgroundColor: "#FFFFFF",
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        padding: 16,
+
+        paddingHorizontal: 12,
+        paddingTop: 12,
+        paddingBottom: 24,
     },
 });

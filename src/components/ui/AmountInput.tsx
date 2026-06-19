@@ -1,8 +1,13 @@
 import React, {useMemo} from "react";
-import {StyleSheet, Text, TextInput, View} from "react-native";
+import {
+    StyleSheet,
+    Text,
+    TextInput,
+    View,
+} from "react-native";
 
 type Props = {
-    value: string; // raw numeric string (no commas)
+    value: string;
     onChangeText: (value: string) => void;
     currency?: string;
 };
@@ -13,39 +18,43 @@ const formatIndianNumber = (value: string) => {
     const num = value.replace(/[^0-9]/g, "");
     if (!num) return "";
 
-    const lastThree = num.substring(num.length - 3);
-    const otherNumbers = num.substring(0, num.length - 3);
+    const lastThree = num.slice(-3);
+    const otherNumbers = num.slice(0, -3);
 
-    if (otherNumbers !== "") {
-        return (
-            otherNumbers.replace(/\B(?=(\d{2})+(?!\d))/g, ",") +
-            "," +
-            lastThree
-        );
-    }
-
-    return lastThree;
+    return otherNumbers
+        ? `${otherNumbers.replace(
+            /\B(?=(\d{2})+(?!\d))/g,
+            ","
+        )},${lastThree}`
+        : lastThree;
 };
 
-export const AmountInput: React.FC<Props> = ({
-                                                 value,
-                                                 onChangeText,
-                                                 currency = "₹",
-                                             }) => {
-
-    const formattedValue = useMemo(() => {
-        return formatIndianNumber(value);
-    }, [value]);
+export const AmountInput = ({
+                                value,
+                                onChangeText,
+                                currency = "₹",
+                            }: Props) => {
+    const formattedValue = useMemo(
+        () => formatIndianNumber(value),
+        [value]
+    );
 
     const handleChange = (text: string) => {
-        const clean = text.replace(/[^0-9]/g, "");
-        onChangeText(clean);
+        onChangeText(
+            text.replace(/[^0-9]/g, "")
+        );
     };
 
     return (
-        <View style={styles.wrapper}>
-            <View style={styles.inner}>
-                <Text style={styles.currency}>{currency}</Text>
+        <View style={styles.container}>
+            <Text style={styles.label}>
+                Amount
+            </Text>
+
+            <View style={styles.amountRow}>
+                <Text style={styles.currency}>
+                    {currency}
+                </Text>
 
                 <TextInput
                     value={formattedValue}
@@ -54,6 +63,7 @@ export const AmountInput: React.FC<Props> = ({
                     placeholder="0"
                     placeholderTextColor="#D1D5DB"
                     style={styles.input}
+                    selectionColor="#111827"
                 />
             </View>
         </View>
@@ -61,25 +71,40 @@ export const AmountInput: React.FC<Props> = ({
 };
 
 const styles = StyleSheet.create({
-    wrapper: {
+    container: {
         alignItems: "center",
+        marginTop: 30
+    },
+
+    label: {
+        fontSize: 12,
+        fontWeight: "700",
+        letterSpacing: 1.2,
+        textTransform: "uppercase",
+        color: "#9CA3AF",
+    },
+
+    amountRow: {
+        flexDirection: "row",
+        alignItems: "flex-end",
         justifyContent: "center",
     },
-    inner: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
+
     currency: {
-        fontSize: 42,
-        color: "#9CA3AF",
+        fontSize: 34,
+        fontWeight: "500",
+        color: "#D1D5DB",
         marginRight: 6,
-        fontWeight: "400",
+        marginBottom: 8,
     },
+
     input: {
-        fontSize: 48,
-        fontWeight: "700",
-        textAlign: "center",
-        minWidth: 10,
+        fontSize: 42,
+        fontWeight: "800",
         color: "#111827",
+        textAlign: "center",
+        minWidth: 60,
+        padding: 0,
+        letterSpacing: -1,
     },
 });
