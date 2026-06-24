@@ -1,7 +1,7 @@
 import React from "react";
 import {View} from "react-native";
-import {PAYMENT_METHODS, PaymentMethod} from "../../../types/payment";
-import {PillGroup} from "../../ui";
+import {PAYMENT_METHODS, PaymentMethod} from "../../types/payment";
+import {PillGroup} from "../ui";
 
 interface Props {
     value: PaymentMethod;

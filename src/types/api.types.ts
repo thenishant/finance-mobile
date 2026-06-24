@@ -13,9 +13,9 @@ export interface FinancialAccount {
     provider?: string;
     institutionName?: string;
     last4?: string;
-    balance: string;
-    availableBalance?: string;
-    creditLimit?: string;
+    balance?: string;
+    availableBalance?: string | null;
+    creditLimit?: string | null;
     isArchived: boolean;
 }
 

@@ -1,38 +1,50 @@
 import React from "react";
 import {Modal, Pressable, StyleSheet, Text, View} from "react-native";
 
-import {ValuePickerSheet} from "../ui/ValuePickerSheet";
-import {ProgressRing} from "../ui/ProgressRing";
-import {monthNames} from "../../utils/months";
-import {StatsRow} from "../ui/StatsRow";
-import {RemainingInvestment} from "../ui/RemainingInvestment";
-import {Button} from "../ui";
+import {ValuePickerSheet} from "../../../components/ui/ValuePickerSheet";
+import {monthNames} from "../../../utils/months";
+import {StatsRow} from "../../../components/ui/StatsRow";
+import {RemainingInvestment} from "../../../components/ui/RemainingInvestment";
+import {Button} from "../../../components/ui";
 
-import {useSetInvestmentGoal} from "../../hooks/useSetInvestmentGoal";
-import {useMonthStore} from "../../stores/useMonthStore";
-import {useToastStore} from "../../stores/useToastStore";
+import {useSetInvestmentGoal} from "../../../hooks/useSetInvestmentGoal";
+import {useToastStore} from "../../../stores/useToastStore";
+import {useMonthStore} from "../../../stores/useMonthStore";
 
-export const SetInvestmentGoalSheet = ({visible, income, onClose}: any) => {
+type SetInvestmentGoalSheetProps = {
+    visible: boolean;
+    income: number;
+    onClose: () => void;
+};
+
+export const SetInvestmentGoalSheet = ({
+                                           visible,
+                                           income,
+                                           onClose,
+                                       }: SetInvestmentGoalSheetProps) => {
 
     const {mutate, isPending} = useSetInvestmentGoal();
-    const {month} = useMonthStore();
     const {show} = useToastStore();
+    const {month} = useMonthStore();
 
     const year = new Date().getFullYear();
 
-    const presets = ["10", "20", "30", "40"];
+    const presets = ["10", "15", "20", "30"];
 
     return (
         <ValuePickerSheet
             visible={visible}
             title="Set Investment Goal"
-            subtitle="Choose % of income to invest"
+            subtitle="How much of your income would you like to invest each month?"
             presets={presets}
             placeholder="Enter percent"
             onSave={(value) => {
 
                 const percent = Number(value);
-                if (!percent) return;
+
+                if (percent <= 0) {
+                    return;
+                }
 
                 mutate(
                     {
@@ -42,7 +54,7 @@ export const SetInvestmentGoalSheet = ({visible, income, onClose}: any) => {
                     },
                     {
                         onSuccess: () => {
-                            show("🎯 Goal set successfully");
+                            show("Investment goal saved");
                             onClose();
                         }
                     }
@@ -59,19 +71,15 @@ export const SetInvestmentGoalSheet = ({visible, income, onClose}: any) => {
 
                 return (
                     <>
-                        <ProgressRing
-                            goal={{
-                                percent,
-                                goalAmount,
-                                invested: 0,
-                                remaining: goalAmount,
-                                progress: 0
-                            }}
-                        />
+                        <View style={styles.previewCard}>
+                            <Text style={styles.previewLabel}>
+                                Monthly Investment Target
+                            </Text>
 
-                        <Text style={styles.previewText}>
-                            ₹{goalAmount.toLocaleString()} per month
-                        </Text>
+                            <Text style={styles.previewAmount}>
+                                ₹{goalAmount.toLocaleString("en-IN")}
+                            </Text>
+                        </View>
                     </>
                 );
             }}
@@ -115,7 +123,7 @@ export const MonthDetailsSheet = ({visible, month, onClose}: any) => {
                     <View style={styles.handle}/>
 
                     <Text style={styles.title}>
-                        {monthNames[(month.month ?? 1) - 1]} Details
+                        {monthNames[(month.month ?? 1) - 1]} Investment Summary
                     </Text>
 
                     <View style={styles.progressBar}>
@@ -128,7 +136,7 @@ export const MonthDetailsSheet = ({visible, month, onClose}: any) => {
                     </View>
 
                     <Text style={styles.progressText}>
-                        {percent}% of goal reached
+                        {invested.toLocaleString("en-IN")} of {goalAmount.toLocaleString("en-IN")} invested
                     </Text>
 
                     <StatsRow
@@ -158,10 +166,29 @@ export const MonthDetailsSheet = ({visible, month, onClose}: any) => {
 
 const styles = StyleSheet.create({
 
+    previewCard: {
+        marginTop: 12,
+        padding: 20,
+        borderRadius: 20,
+        backgroundColor: "#F9FAFB",
+        alignItems: "center",
+    },
+
+    previewLabel: {
+        fontSize: 12,
+        color: "#6B7280",
+        marginBottom: 6,
+    },
+
+    previewAmount: {
+        fontSize: 28,
+        fontWeight: "800",
+        color: "#111827",
+        letterSpacing: -0.5,
+    },
+
     previewText: {
-        marginTop: 6,
-        fontWeight: "600",
-        color: "#374151"
+        display: "none",
     },
     overlay: {
         flex: 1,
@@ -177,8 +204,8 @@ const styles = StyleSheet.create({
         backgroundColor: "#fff",
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
-        padding: 20,
-        paddingBottom: 30
+        padding: 24,
+        paddingBottom: 24
     },
 
     handle: {
@@ -191,9 +218,10 @@ const styles = StyleSheet.create({
     },
 
     title: {
-        fontSize: 18,
+        fontSize: 20,
         fontWeight: "700",
-        marginBottom: 16
+        color: "#111827",
+        marginBottom: 16,
     },
 
     progressBar: {
@@ -210,8 +238,9 @@ const styles = StyleSheet.create({
     },
 
     progressText: {
-        fontSize: 12,
+        fontSize: 13,
         color: "#6B7280",
-        marginBottom: 16
+        marginBottom: 16,
+        textAlign: "center",
     }
 })

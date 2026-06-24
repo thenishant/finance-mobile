@@ -1,17 +1,18 @@
 import React from "react";
+import {StyleSheet} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {StyleSheet, View} from "react-native";
 
 type Props = {
     children: React.ReactNode;
 };
 
-export const Screen: React.FC<Props> = ({children}) => {
+export const Screen = ({children}: Props) => {
     return (
-        <SafeAreaView style={styles.container} edges={["left", "right", "bottom"]}>
-            <View style={styles.inner}>
-                {children}
-            </View>
+        <SafeAreaView
+            style={styles.container}
+            edges={["left", "right", "bottom"]}
+        >
+            {children}
         </SafeAreaView>
     );
 };
@@ -20,8 +21,5 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         backgroundColor: "#F9FAFB",
-    },
-    inner: {
-        flex: 1,
     },
 });

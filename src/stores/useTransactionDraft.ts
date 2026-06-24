@@ -25,67 +25,36 @@ type TransactionDraft = {
     reset: () => void;
 };
 
+const createInitialState = () => ({
+    transactionType: "EXPENSE" as TransactionType,
+    amount: "",
+    note: "",
+    date: new Date(),
+    sourceAccount: null,
+    destinationAccount: null,
+    selectedCategory: null,
+});
+
 export const useTransactionDraft =
     create<TransactionDraft>((set) => ({
-        transactionType: "EXPENSE",
-
-        amount: "",
-        note: "",
-        date: new Date(),
-
-        sourceAccount: null,
-        destinationAccount: null,
-
-        selectedCategory: null,
+        ...createInitialState(),
 
         setTransactionType: (transactionType) =>
             set({
                 transactionType,
-
-                destinationAccount:
-                    transactionType === "TRANSFER"
-                        ? null
-                        : undefined,
-
-                selectedCategory:
-                    transactionType === "TRANSFER"
-                        ? null
-                        : undefined,
+                selectedCategory: null,
+                destinationAccount: transactionType === "TRANSFER" ? null : null,
             }),
 
-        setAmount: (amount) =>
-            set({amount}),
-
-        setNote: (note) =>
-            set({note}),
-
-        setDate: (date) =>
-            set({date}),
-
-        setSourceAccount: (sourceAccount) =>
-            set({sourceAccount}),
-
-        setDestinationAccount: (
-            destinationAccount
-        ) =>
+        setAmount: (amount) => set({amount}),
+        setNote: (note) => set({note}),
+        setDate: (date) => set({date}),
+        setSourceAccount: (sourceAccount) => set({sourceAccount}),
+        setDestinationAccount: (destinationAccount) =>
             set({destinationAccount}),
-
-        setSelectedCategory: (
-            selectedCategory
-        ) =>
+        setSelectedCategory: (selectedCategory) =>
             set({selectedCategory}),
 
         reset: () =>
-            set({
-                transactionType: "EXPENSE",
-
-                amount: "",
-                note: "",
-                date: new Date(),
-
-                sourceAccount: null,
-                destinationAccount: null,
-
-                selectedCategory: null,
-            }),
+            set(createInitialState()),
     }));

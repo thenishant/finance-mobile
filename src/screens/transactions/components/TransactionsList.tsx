@@ -1,7 +1,17 @@
 import React from "react";
-import {ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View,} from "react-native";
+import {
+    ActivityIndicator,
+    FlatList,
+    RefreshControl,
+    StyleSheet,
+    Text,
+    View,
+} from "react-native";
 import {TransactionGroup} from "./TransactionGroup";
-import {GroupedTransaction} from "../../../types/transaction";
+import {
+    GroupedTransaction,
+    Transaction,
+} from "../../../types/transaction";
 
 interface Props {
     data: GroupedTransaction[];
@@ -9,6 +19,7 @@ interface Props {
     refreshing: boolean;
     onRefresh: () => void;
     onDelete: (id: string) => void;
+    onPress: (transaction: Transaction) => void;
 }
 
 export const TransactionList = ({
@@ -17,6 +28,7 @@ export const TransactionList = ({
                                     refreshing,
                                     onRefresh,
                                     onDelete,
+                                    onPress,
                                 }: Props) => {
     if (isLoading) {
         return (
@@ -38,9 +50,10 @@ export const TransactionList = ({
 
     return (
         <FlatList
-            contentContainerStyle={styles.content}
             data={data}
             keyExtractor={(item) => item.date}
+            contentContainerStyle={styles.content}
+            showsVerticalScrollIndicator={false}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
@@ -52,6 +65,7 @@ export const TransactionList = ({
                     date={item.date}
                     transactions={item.transactions}
                     onDelete={onDelete}
+                    onPress={onPress}
                 />
             )}
         />
@@ -60,17 +74,21 @@ export const TransactionList = ({
 
 const styles = StyleSheet.create({
     content: {
-        padding: 16,
-        paddingBottom: 80,
-        backgroundColor: "#F5F7FA",
+        paddingHorizontal: 16,
+        paddingTop: 12,
+        paddingBottom: 100,
+        backgroundColor: "#F8FAFC",
     },
+
     center: {
         flex: 1,
         justifyContent: "center",
         alignItems: "center",
     },
+
     emptyText: {
-        fontSize: 14,
-        color: "#6B7280",
+        fontSize: 15,
+        fontWeight: "600",
+        color: "#64748B",
     },
 });

@@ -100,6 +100,8 @@ const LoginScreen = ({navigation}: Props) => {
 
                     const access_token = params.get("access_token");
                     const refresh_token = params.get("refresh_token");
+                    console.log(access_token)
+                    console.log(refresh_token)
 
                     if (!access_token || !refresh_token) {
                         throw new Error("Missing tokens from OAuth redirect");
@@ -110,6 +112,7 @@ const LoginScreen = ({navigation}: Props) => {
                             access_token,
                             refresh_token,
                         });
+
 
                     if (sessionError) throw sessionError;
                 }

@@ -3,10 +3,10 @@ import {createNativeStackNavigator} from "@react-navigation/native-stack";
 import {useQueryClient} from "@tanstack/react-query";
 
 import {MainTabs} from "./MainTabs";
-import AddTransactionScreen from "../screens/transaction/AddTransactionScreen";
+import AddTransactionScreen from "../screens/transactions/AddTransactionScreen";
 import {SelectCategoryScreen} from "../screens/categories/SelectCategoryScreen";
-import {SelectAccountScreen} from "../screens/transaction/SelectFinancialAccountScreen";
-import {CreateAccountScreen} from "../screens/transaction/CreateAccountScreen";
+import {SelectAccountScreen} from "../screens/accounts/SelectFinancialAccountScreen";
+import {CreateAccountScreen} from "../screens/accounts/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
 import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
 
@@ -16,7 +16,7 @@ import {transactionService} from "../services/transaction.service";
 
 export type AppStackParamList = {
     Tabs: undefined;
-    AddTransaction: undefined;
+    AddTransaction: { mode?: "create" | "edit"; transactionId?: string; } | undefined;
     SelectCategory: { type: TransactionType };
     SelectAccount: { mode: "source" | "destination" };
     ManageCategories: undefined;

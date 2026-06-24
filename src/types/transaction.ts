@@ -1,8 +1,11 @@
+import {LeafCategory} from "./category";
+import {FinancialAccount} from "./api.types";
+
 export const TRANSACTION_TYPES = [
     "EXPENSE",
     "INCOME",
     "TRANSFER",
-    "INVESTMENT"
+    "INVESTMENT",
 ] as const;
 
 export type TransactionType =
@@ -13,22 +16,10 @@ export interface Transaction {
     type: TransactionType;
     amount: string;
     date: string;
-    category?: {
-        id: string;
-        name: string;
-        parent?: {
-            id: string;
-            name: string;
-        };
-    };
-    fromAccount?: {
-        id: string;
-        name: string;
-    };
-    toAccount?: {
-        id: string;
-        name: string;
-    };
+    note?: string;
+    category?: LeafCategory;
+    sourceAccount?: FinancialAccount | null;
+    destinationAccount?: FinancialAccount | null;
 }
 
 export interface GroupedTransaction {

@@ -5,10 +5,10 @@ import {useAnalytics} from "../../hooks/useAnalytics";
 import {useYearAnalytics} from "../../hooks/useYearlyAnalytics";
 
 import {MonthSelector} from "../../components/ui/MonthSelector";
-import {SetInvestmentGoalScreen} from "../../components/investment/SetInvestmentGoalScreen";
+import {SetInvestmentGoalScreen} from "./components/SetInvestmentGoalScreen";
 
 import {useMonthStore} from "../../stores/useMonthStore";
-import {MonthDetailsSheet, SetInvestmentGoalSheet} from "../../components/investment/SetInvestmentGoalSheet";
+import {MonthDetailsSheet, SetInvestmentGoalSheet} from "./components/SetInvestmentGoalSheet";
 
 import {SafeAreaView} from "react-native-safe-area-context";
 
@@ -55,7 +55,6 @@ export const InvestmentScreen = () => {
 
                 {/* CONTENT */}
                 <SetInvestmentGoalScreen
-                    goal={data?.investmentGoal}
                     month={activeMonth}
                     months={months}
                     onSetGoal={() => setGoalOpen(true)}

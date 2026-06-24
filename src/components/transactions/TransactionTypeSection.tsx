@@ -6,8 +6,8 @@ import {
     View,
 } from "react-native";
 
-import {TransactionType} from "../../../types/transaction";
-import {transactionColors} from "../../../design/transactionColors";
+import {TransactionType} from "../../types/transaction";
+import {transactionColors} from "../../design/transactionColors";
 
 interface Props {
     value: TransactionType;

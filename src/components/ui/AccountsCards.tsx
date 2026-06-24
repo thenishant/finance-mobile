@@ -3,7 +3,7 @@ import {Pressable, StyleSheet, Text, View} from "react-native";
 import {LinearGradient} from "expo-linear-gradient";
 import {Ionicons} from "@expo/vector-icons";
 
-import Animated, {FadeIn, FadeOut, Layout, useAnimatedStyle, useSharedValue, withTiming} from "react-native-reanimated";
+import Animated, {FadeIn, FadeOut} from "react-native-reanimated";
 import {Image} from "expo-image";
 import {getBankLogo} from "../../utils/bankMapper";
 
@@ -22,8 +22,6 @@ export const AccountsCard = ({accounts = []}: Props) => {
     const [hidden, setHidden] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
-    const rotate = useSharedValue(0);
-
     if (!accounts.length) return null;
 
     const total = accounts.reduce(
@@ -35,17 +33,8 @@ export const AccountsCard = ({accounts = []}: Props) => {
         hidden ? "••••" : `₹${value.toLocaleString()}`;
 
     const toggleExpand = () => {
-        const next = !expanded;
-        setExpanded(next);
-
-        rotate.value = withTiming(next ? 180 : 0, {
-            duration: 250
-        });
+        setExpanded(prev => !prev);
     };
-
-    const iconStyle = useAnimatedStyle(() => ({
-        transform: [{rotate: `${rotate.value}deg`}],
-    }));
 
     return (
         <View style={styles.container}>
@@ -66,13 +55,13 @@ export const AccountsCard = ({accounts = []}: Props) => {
                             </Text>
 
                             {/* 🔥 CHEVRON */}
-                            <Animated.View style={[styles.chevron, iconStyle]}>
+                            <View style={styles.chevron}>
                                 <Ionicons
-                                    name="chevron-down"
+                                    name={expanded ? "chevron-up" : "chevron-down"}
                                     size={16}
                                     color="#9CA3AF"
                                 />
-                            </Animated.View>
+                            </View>
 
                         </View>
 
@@ -97,7 +86,6 @@ export const AccountsCard = ({accounts = []}: Props) => {
             {/* 🔥 EXPANDABLE LIST (NO HEIGHT BUGS) */}
             {expanded && (
                 <Animated.View
-                    layout={Layout.springify().damping(18)}
                     entering={FadeIn.duration(200)}
                     exiting={FadeOut.duration(150)}
                     style={styles.list}
@@ -136,12 +124,7 @@ export const AccountsCard = ({accounts = []}: Props) => {
 
 const styles = StyleSheet.create({
 
-    container: {
-        marginTop: 16
-    },
-
-    /* HERO */
-
+    container: {},
     hero: {
         marginHorizontal: 16,
         borderRadius: 20,
@@ -170,8 +153,6 @@ const styles = StyleSheet.create({
         fontWeight: "700",
         marginTop: 6
     },
-
-    /* LIST */
     list: {
         backgroundColor: "#fff",
         marginHorizontal: 16,
@@ -202,5 +183,4 @@ const styles = StyleSheet.create({
         height: 26,
         marginRight: 10,
     },
-
 });

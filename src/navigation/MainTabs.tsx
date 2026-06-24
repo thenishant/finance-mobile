@@ -8,7 +8,7 @@ import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 import DashboardScreen from "../screens/dashboard/DashboardScreen";
 import AccountsScreen from "../screens/accounts/AccountsScreen";
-import TransactionListScreen from "../screens/transaction/TransactionListScreen";
+import TransactionListScreen from "../screens/transactions/TransactionListScreen";
 import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
 import {AppStackParamList} from "./AppStack";
 
@@ -82,7 +82,9 @@ export const MainTabs = () => {
                 listeners={{
                     tabPress: (e) => {
                         e.preventDefault();
-                        navigation.navigate("AddTransaction");
+                        navigation.navigate("AddTransaction", {
+                            mode: "create",
+                        });
                     },
                 }}
             />

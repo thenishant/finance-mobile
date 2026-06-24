@@ -1,36 +1,39 @@
 import React from "react";
 import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
 
-import {StatsRow} from "../ui/StatsRow";
-import {RemainingInvestment} from "../ui/RemainingInvestment";
-import {Button} from "../ui";
+import {StatsRow} from "../../../components/ui/StatsRow";
+import {RemainingInvestment} from "../../../components/ui/RemainingInvestment";
+import {Button} from "../../../components/ui";
 
-import {monthNames} from "../../utils/months";
-import {ProgressRing} from "../ui/ProgressRing";
-import {useToastStore} from "../../stores/useToastStore";
+import {monthNames} from "../../../utils/months";
+import {useToastStore} from "../../../stores/useToastStore";
 
-const statusColors: any = {
+const statusColors = {
     green: "#10B981",
     yellow: "#F59E0B",
     orange: "#FB923C",
-    red: "#EF4444"
-};
+    red: "#EF4444",
+} as const;
 
-export const SetInvestmentGoalScreen = ({goal, month, months, onSetGoal, onMonthPress}: any) => {
+export const SetInvestmentGoalScreen = ({month, months, onSetGoal, onMonthPress}: any) => {
 
     const investment = month?.investment ?? {};
-    const invested = investment?.invested ?? 0;
-    const goalAmount = investment?.goalAmount ?? 0;
     const remaining = investment?.remaining ?? 0;
-    const progress = investment?.progress ?? 0;
-    const percent = Math.round(progress * 100);
-    const capped = Math.min(progress, 1);
 
-    if (!goal) {
+    const goalAmount = month?.investment?.goalAmount ?? 0;
+    const invested = month?.investment?.invested ?? 0;
+    const hasGoal = goalAmount > 0;
+    const hasInvestments = invested > 0;
+
+    if (!hasGoal && !hasInvestments) {
         return (
             <View style={styles.empty}>
                 <Text style={styles.emptyTitle}>
-                    No investment goal set
+                    Start Your Investment Journey
+                </Text>
+
+                <Text style={styles.emptySubtitle}>
+                    Set a monthly goal and track your progress throughout the year.
                 </Text>
 
                 <Button
@@ -41,21 +44,49 @@ export const SetInvestmentGoalScreen = ({goal, month, months, onSetGoal, onMonth
         );
     }
 
+    if (!hasGoal && hasInvestments) {
+        return (
+            <>
+                <View style={styles.empty}>
+                    <Text style={styles.emptyTitle}>
+                        Investments Found
+                    </Text>
+
+                    <Text style={styles.emptySubtitle}>
+                        You've already invested this month but no goal was configured.
+                    </Text>
+
+                    <Button
+                        title="Set Goal"
+                        onPress={onSetGoal}
+                    />
+                </View>
+
+                <Streak months={months}/>
+
+                <ActivityGrid
+                    months={months}
+                    onMonthPress={onMonthPress}
+                />
+            </>
+        );
+    }
+
     return (
         <>
-            <View style={styles.summary}>
+            <View style={styles.summaryCard}>
 
-                <ProgressRing
-                    goal={{
-                        percent,
-                        progress
-                    }}
-                />
+                <Text style={styles.summaryLabel}>
+                    Monthly Goal
+                </Text>
 
+                <Text style={styles.summaryAmount}>
+                    ₹{goalAmount.toLocaleString("en-IN")}
+                </Text>
                 {month && (
                     <>
                         <Text style={styles.monthTitle}>
-                            {monthNames[(month.month ?? 1) - 1]} Summary
+                            {monthNames[(month.month ?? 1) - 1]} Investment Summary
                         </Text>
 
                         <StatsRow
@@ -90,6 +121,10 @@ const Streak = ({months}: any) => {
 
     return (
         <View style={styles.streak}>
+            <Text style={styles.streakLabel}>
+                Consistency
+            </Text>
+
             <Text style={styles.streakText}>
                 🔥 {streak} Month Streak
             </Text>
@@ -98,18 +133,14 @@ const Streak = ({months}: any) => {
 };
 
 const ActivityGrid = ({months, onMonthPress}: any) => {
-
     const {show} = useToastStore();
-
     const handlePress = (month: any) => {
-
         const goalAmount = month?.investment?.goalAmount ?? 0;
-
-        if (goalAmount === 0) {
-            show("🔒 Set a goal to unlock this month");
+        const invested = month?.investment?.invested ?? 0;
+        if (goalAmount === 0 && invested === 0) {
+            show("Set a goal to unlock this month");
             return;
         }
-
         onMonthPress(month);
     };
 
@@ -120,14 +151,11 @@ const ActivityGrid = ({months, onMonthPress}: any) => {
 
                 const m = months?.[i] ?? {};
                 const goalAmount = m?.investment?.goalAmount ?? 0;
-                const status = m?.investment?.status;
+                const invested = m?.investment?.invested ?? 0;
+                const locked = goalAmount === 0 && invested === 0;
 
-                const locked = goalAmount === 0;
-
-                const color = locked
-                    ? "#E5E7EB"
-                    : statusColors[status] ?? "#E5E7EB";
-
+                const color = locked ?
+                    "#E5E7EB" : statusColors[(m?.investment?.status as keyof typeof statusColors) ?? "green"];
                 return (
                     <TouchableOpacity
                         key={i}
@@ -145,13 +173,6 @@ const ActivityGrid = ({months, onMonthPress}: any) => {
                                     locked && styles.disabledBox
                                 ]}
                             />
-
-                            {locked && (
-                                <Text style={styles.lock}>
-                                    🔒
-                                </Text>
-                            )}
-
                         </View>
 
                         <Text
@@ -175,23 +196,68 @@ const styles = StyleSheet.create({
 
     summary: {
         paddingHorizontal: 20,
-        marginTop: 16
+        marginTop: 12,
+    },
+    summaryCard: {
+        marginHorizontal: 20,
+        marginTop: 12,
+        padding: 20,
+        borderRadius: 20,
+        backgroundColor: "#FFFFFF",
+        borderWidth: 1,
+        borderColor: "#F3F4F6",
+        alignItems: "center",
     },
 
+    summaryLabel: {
+        fontSize: 12,
+        color: "#6B7280",
+    },
+
+    summaryAmount: {
+        fontSize: 30,
+        fontWeight: "800",
+        color: "#111827",
+        marginTop: 4,
+    },
+
+    summaryProgress: {
+        fontSize: 14,
+        color: "#6B7280",
+        marginTop: 4,
+        marginBottom: 12,
+    },
+    cell: {
+        width: "25%",
+        alignItems: "center",
+        marginBottom: 20,
+    },
     monthTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "700",
-        marginTop: 16
+        marginTop: 12,
+        color: "#111827",
     },
 
     streak: {
         marginTop: 20,
-        alignItems: "center"
+        marginHorizontal: 20,
+        paddingVertical: 14,
+        borderRadius: 16,
+        backgroundColor: "#F9FAFB",
+        alignItems: "center",
+    },
+
+    streakLabel: {
+        fontSize: 12,
+        color: "#6B7280",
+        marginBottom: 4,
     },
 
     streakText: {
         fontSize: 16,
-        fontWeight: "600"
+        fontWeight: "700",
+        color: "#111827",
     },
 
     grid: {
@@ -200,13 +266,6 @@ const styles = StyleSheet.create({
         marginTop: 20,
         paddingHorizontal: 20
     },
-
-    cell: {
-        width: "25%",
-        alignItems: "center",
-        marginBottom: 16
-    },
-
     boxWrapper: {
         position: "relative"
     },
@@ -217,14 +276,6 @@ const styles = StyleSheet.create({
         borderRadius: 6,
         marginBottom: 6
     },
-
-    lock: {
-        position: "absolute",
-        bottom: -2,
-        right: -4,
-        fontSize: 12
-    },
-
     month: {
         fontSize: 11,
         color: "#6B7280"
@@ -240,16 +291,25 @@ const styles = StyleSheet.create({
 
     empty: {
         margin: 20,
-        padding: 20,
+        padding: 24,
         backgroundColor: "#F9FAFB",
-        borderRadius: 16,
-        alignItems: "center"
+        borderRadius: 20,
+        alignItems: "center",
+    },
+
+    emptySubtitle: {
+        fontSize: 14,
+        color: "#6B7280",
+        textAlign: "center",
+        marginBottom: 16,
+        lineHeight: 20,
     },
 
     emptyTitle: {
-        fontSize: 16,
+        fontSize: 18,
         fontWeight: "700",
-        marginBottom: 12
+        marginBottom: 8,
+        color: "#111827",
     }
 
 });
