@@ -14,9 +14,10 @@ import {formatCurrencyCompact} from "../../utils/formatCurrency";
 import {DashboardSkeleton} from "./components/DashboardSkeleton";
 import {DailySpendCard} from "./components/DailySpend";
 import {SpendingTrendsCard} from "./components/SpendingTrendsCard";
+import {useNavigation} from "@react-navigation/native";
 
 const DashboardScreen = () => {
-
+    const navigation = useNavigation<any>();
     const year = useMonthStore(s => s.year);
     const month = useMonthStore(s => s.month);
     const scrollY = useRef(new Animated.Value(0)).current;
@@ -82,8 +83,14 @@ const DashboardScreen = () => {
                         comparison={comparison}
                     />
 
-                    <TotalBalanceHero accounts={accounts}/>
-
+                    <TotalBalanceHero
+                        accounts={accounts}
+                        onAccountPress={(account: { id: any; }) =>
+                            navigation.navigate("AccountDetail", {
+                                accountId: account.id,
+                            })
+                        }
+                    />
                 </View>
 
                 {isEmpty ? (

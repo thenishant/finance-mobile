@@ -67,13 +67,22 @@ export const CreateAccountScreen = () => {
         <Screen>
             <KeyboardAvoidingView
                 style={styles.container}
-                behavior={
-                    Platform.OS === "ios"
-                        ? "padding"
-                        : undefined
-                }
-            >
+                behavior={Platform.OS === "ios" ? "padding" : undefined}>
                 <View style={styles.card}>
+
+                    <View style={styles.section}>
+                        <Text style={styles.sectionTitle}>
+                            Account Type
+                        </Text>
+
+                        <PillGroup
+                            variant="grid"
+                            data={ACCOUNT_TYPE_OPTIONS}
+                            value={type}
+                            onChange={setType}
+                        />
+                    </View>
+
                     <View>
                         <Text style={styles.label}>
                             Account Name
@@ -117,19 +126,6 @@ export const CreateAccountScreen = () => {
                             />
                         </View>
                     </View>
-                </View>
-
-                <View style={styles.section}>
-                    <Text style={styles.sectionTitle}>
-                        Account Type
-                    </Text>
-
-                    <PillGroup
-                        variant="grid"
-                        data={ACCOUNT_TYPE_OPTIONS}
-                        value={type}
-                        onChange={setType}
-                    />
                 </View>
 
                 <View style={styles.footer}>

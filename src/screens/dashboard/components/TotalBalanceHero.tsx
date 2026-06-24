@@ -6,7 +6,10 @@ if (Platform.OS === "android") {
     UIManager.setLayoutAnimationEnabledExperimental?.(true);
 }
 
-export const TotalBalanceHero = ({accounts = []}: any) => {
+export const TotalBalanceHero = ({
+    accounts = [],
+    onAccountPress,
+}: any) => {
 
     const [hidden, setHidden] = useState(false);
     const [expanded, setExpanded] = useState(false);
@@ -63,22 +66,27 @@ export const TotalBalanceHero = ({accounts = []}: any) => {
                 <View style={styles.list}>
                     {accounts.map((acc: any, index: number) => (
                         <View key={acc.id}>
-                            <View style={styles.item}>
+                            <Pressable
+                                style={styles.item}
+                                onPress={() => onAccountPress?.(acc)}
+                            >
                                 <View>
                                     <Text style={styles.name}>
                                         {acc.name}
                                     </Text>
-
                                     <Text style={styles.last4}>
                                         •••• {acc.last4}
                                     </Text>
                                 </View>
-
                                 <Text style={styles.value}>
                                     {format(Number(acc.balance))}
                                 </Text>
-                            </View>
-
+                                <Ionicons
+                                    name="chevron-forward"
+                                    size={16}
+                                    color="#9CA3AF"
+                                />
+                            </Pressable>
                             {index < accounts.length - 1 && (
                                 <View style={styles.divider}/>
                             )}
@@ -125,6 +133,7 @@ const styles = StyleSheet.create({
     item: {
         flexDirection: "row",
         justifyContent: "space-between",
+        alignItems: "center",
         paddingVertical: 10,
     },
 

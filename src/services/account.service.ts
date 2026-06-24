@@ -45,14 +45,23 @@ export const financialAccountService = {
     },
 
     async delete(id: string) {
-        await api.delete(
-            `/financial-accounts/${id}`
-        );
+        await api.delete(`/financial-accounts/${id}`);
     },
 
     async archive(id: string) {
-        await api.post(
-            `/financial-accounts/${id}/archive`
-        );
+        await api.post(`/financial-accounts/${id}/archive`);
+    },
+
+    getById: async (id: string) => {
+        const response = await api.get(`/financial-accounts/${id}`);
+        return response.data.data;
+    },
+
+    getTransactions: async (id: string, limit = 5) => {
+        const response = await api.get(`/financial-accounts/${id}/transactions`, {
+            params: {limit}
+        });
+
+        return response.data.data;
     },
 };

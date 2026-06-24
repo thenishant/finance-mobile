@@ -14,6 +14,7 @@ import {Button} from "../components/ui";
 import {TransactionType} from "../types/transaction";
 import {transactionService} from "../services/transaction.service";
 import TransactionDetailScreen from "../screens/transactions/TransactionDetailScreen";
+import {AccountDetailScreen} from "../screens/accounts/AccountDetailScreen";
 
 export type AppStackParamList = {
     Tabs: undefined;
@@ -21,6 +22,7 @@ export type AppStackParamList = {
     TransactionDetail: undefined
     SelectCategory: { type: TransactionType };
     SelectAccount: { mode: "source" | "destination" };
+    AccountDetail: { accountId: string },
     ManageCategories: undefined;
     CreateAccount: undefined;
     CreateCategory: { type: TransactionType };
@@ -83,6 +85,11 @@ export const AppStack = () => {
                 options={{
                     title: "Select Account",
                 }}
+            />
+
+            <Stack.Screen
+                name="AccountDetail"
+                component={AccountDetailScreen}
             />
 
             <Stack.Screen

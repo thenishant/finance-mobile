@@ -7,7 +7,7 @@ import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 import DashboardScreen from "../screens/dashboard/DashboardScreen";
-import AccountsScreen from "../screens/accounts/AccountsScreen";
+import AccountsScreen from "../screens/auth/AccountsScreen";
 import TransactionListScreen from "../screens/transactions/TransactionListScreen";
 import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
 import {AppStackParamList} from "./AppStack";
