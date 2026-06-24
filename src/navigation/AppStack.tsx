@@ -13,10 +13,12 @@ import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
 import {Button} from "../components/ui";
 import {TransactionType} from "../types/transaction";
 import {transactionService} from "../services/transaction.service";
+import TransactionDetailScreen from "../screens/transactions/TransactionDetailScreen";
 
 export type AppStackParamList = {
     Tabs: undefined;
     AddTransaction: { mode?: "create" | "edit"; transactionId?: string; } | undefined;
+    TransactionDetail: undefined
     SelectCategory: { type: TransactionType };
     SelectAccount: { mode: "source" | "destination" };
     ManageCategories: undefined;
@@ -68,6 +70,11 @@ export const AppStack = () => {
                         />
                     ),
                 })}
+            />
+
+            <Stack.Screen
+                name="TransactionDetail"
+                component={TransactionDetailScreen}
             />
 
             <Stack.Screen

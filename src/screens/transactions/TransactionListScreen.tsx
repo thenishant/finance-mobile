@@ -67,9 +67,14 @@ const TransactionListScreen = () => {
     const handleTransactionPress = (
         transaction: Transaction
     ) => {
+        // navigation.navigate(
+        //     "AddTransaction",
+        //     {mode: "edit", transactionId: transaction.id}
+        // );
         navigation.navigate(
-            "AddTransaction",
-            {mode: "edit", transactionId: transaction.id}
+            "TransactionDetail", {
+                transactionId: transaction.id,
+            }
         );
     };
 
