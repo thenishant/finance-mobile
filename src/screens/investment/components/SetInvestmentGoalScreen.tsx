@@ -1,9 +1,9 @@
 import React from "react";
 import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
 
-import {StatsRow} from "../../../components/ui/StatsRow";
-import {RemainingInvestment} from "../../../components/ui/RemainingInvestment";
-import {Button} from "../../../components/ui";
+import {StatsRow} from "../../../components/common/ui/StatsRow";
+import {RemainingInvestment} from "../../../components/common/ui/RemainingInvestment";
+import {Button} from "../../../components/common/ui";
 
 import {monthNames} from "../../../utils/months";
 import {useToastStore} from "../../../stores/useToastStore";

@@ -1,13 +1,6 @@
 import React from "react";
-import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-    ViewStyle,
-} from "react-native";
-
-import {colors} from "../../design/colors";
+import {Pressable, StyleSheet, Text, View, ViewStyle,} from "react-native";
+import {colors} from "../../../design";
 
 interface Props {
     title: string;
@@ -35,24 +28,17 @@ export const Button = ({
                 styles[variant],
                 pressed && !disabled && styles.pressed,
                 disabled && styles.disabled,
-                style,
-            ]}
-        >
+                style
+            ]}>
             <View style={styles.row}>
-                {leftIcon && (
-                    <View style={styles.icon}>
-                        {leftIcon}
-                    </View>
-                )}
+                {leftIcon && (<View style={styles.icon}>{leftIcon}</View>)}
 
                 <Text
                     style={[
                         styles.text,
                         variant !== "primary" &&
                         styles.darkText,
-                    ]}
-                >
-                    {title}
+                    ]}>{title}
                 </Text>
             </View>
         </Pressable>
@@ -62,25 +48,19 @@ export const Button = ({
 const styles = StyleSheet.create({
     base: {
         height: 54,
-
         borderRadius: 16,
-
         alignItems: "center",
         justifyContent: "center",
-
         paddingHorizontal: 20,
     },
-
     row: {
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "center",
     },
-
     icon: {
         marginRight: 8,
     },
-
     primary: {
         backgroundColor: colors.primary,
 
@@ -91,37 +71,29 @@ const styles = StyleSheet.create({
             width: 0,
             height: 4,
         },
-
         elevation: 3,
     },
-
     secondary: {
-        backgroundColor: "#F8FAFC",
-
+        backgroundColor: colors.white,
         borderWidth: 1,
-        borderColor: "#E5E7EB",
+        borderColor: colors.grey,
     },
-
     ghost: {
         backgroundColor: "transparent",
     },
-
     text: {
         fontSize: 15,
         fontWeight: "700",
-        color: "#FFFFFF",
+        color: colors.white,
         letterSpacing: 0.2,
     },
-
     darkText: {
-        color: "#111827",
+        color: colors.darkBackground,
     },
-
     pressed: {
         opacity: 0.9,
         transform: [{scale: 0.98}],
     },
-
     disabled: {
         opacity: 0.45,
     },

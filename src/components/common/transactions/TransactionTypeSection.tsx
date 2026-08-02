@@ -1,41 +1,14 @@
 import React from "react";
-import {
-    Pressable,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import {Pressable, StyleSheet, Text, View,} from "react-native";
 
-import {TransactionType} from "../../types/transaction";
-import {transactionColors} from "../../design/transactionColors";
+import {TRANSACTION_TYPES_LABELS, TransactionType} from "../../../types/transaction";
+import {transactionColors} from "../../../design/transactionColors";
+import {colors} from "../../../design/colors";
 
 interface Props {
     value: TransactionType;
     onChange: (v: TransactionType) => void;
 }
-
-const ITEMS = [
-    {
-        value: "EXPENSE",
-        label: "Expense",
-        emoji: "↗",
-    },
-    {
-        value: "INCOME",
-        label: "Income",
-        emoji: "↙",
-    },
-    {
-        value: "TRANSFER",
-        label: "Transfer",
-        emoji: "⇄",
-    },
-    {
-        value: "INVESTMENT",
-        label: "Invest",
-        emoji: "◎",
-    },
-] as const;
 
 export const TransactionTypeSection = ({
                                            value,
@@ -43,7 +16,7 @@ export const TransactionTypeSection = ({
                                        }: Props) => {
     return (
         <View style={styles.container}>
-            {ITEMS.map(item => {
+            {TRANSACTION_TYPES_LABELS.map(item => {
                 const active =
                     item.value === value;
 
@@ -57,9 +30,7 @@ export const TransactionTypeSection = ({
                             styles.item,
                             active && {
                                 backgroundColor:
-                                transactionColors[
-                                    item.value
-                                    ].primary,
+                                transactionColors[item.value].primary,
                             },
                         ]}
                     >
@@ -91,7 +62,7 @@ export const TransactionTypeSection = ({
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        backgroundColor: "#F8FAFC",
+        backgroundColor: colors.darkBackground,
         padding: 8,
     },
     item: {
@@ -102,16 +73,16 @@ const styles = StyleSheet.create({
         borderRadius: 12,
     },
     icon: {
-        fontSize: 14,
-        marginBottom: 2,
-        color: "#6B7280",
+        fontSize: 20,
+        marginBottom: 5,
+        color: colors.white,
     },
     text: {
-        fontSize: 11,
-        fontWeight: "700",
-        color: "#6B7280",
+        fontSize: 12,
+        fontWeight: "600",
+        color: colors.white,
     },
     activeText: {
-        color: "#FFFFFF",
-    },
+        color: colors.white
+    }
 });

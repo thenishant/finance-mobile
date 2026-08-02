@@ -1,22 +1,19 @@
 import React, {useRef} from "react";
-import {
-    Alert,
-    Pressable,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-} from "react-native";
+import {Alert, Pressable, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
 import {Swipeable} from "react-native-gesture-handler";
 import {Feather} from "@expo/vector-icons";
+import {transactionColors} from "../../../design/transactionColors";
+import {TransactionType} from "../../../types/transaction";
+import {colors} from "../../../design";
 
 interface Props {
     id: string;
-    type: string;
+    type: TransactionType;
     amount: number;
     title?: string;
     category?: string;
     account?: string;
+    needsCategoryReview: boolean;
     onDelete: (id: string) => void;
     onPress: () => void;
 }
@@ -28,6 +25,7 @@ export const TransactionItem = ({
                                     title,
                                     category,
                                     account,
+                                    needsCategoryReview,
                                     onDelete,
                                     onPress,
                                 }: Props) => {
@@ -41,36 +39,16 @@ export const TransactionItem = ({
                 {
                     text: "Cancel",
                     style: "cancel",
+                }, {
+                text: "Delete",
+                style: "destructive",
+                onPress: () => {
+                    swipeRef.current?.close();
+                    onDelete(id);
                 },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: () => {
-                        swipeRef.current?.close();
-                        onDelete(id);
-                    },
-                },
+            },
             ]
         );
-    };
-
-    const getColor = () => {
-        switch (type) {
-            case "INCOME":
-                return "#16A34A";
-
-            case "EXPENSE":
-                return "#DC2626";
-
-            case "INVESTMENT":
-                return "#4F46E5";
-
-            case "TRANSFER":
-                return "#2563EB";
-
-            default:
-                return "#6B7280";
-        }
     };
 
     return (
@@ -79,49 +57,41 @@ export const TransactionItem = ({
             renderRightActions={() => (
                 <TouchableOpacity
                     style={styles.deleteButton}
-                    onPress={handleDelete}
-                >
+                    onPress={handleDelete}>
                     <Feather
                         name="trash-2"
                         size={18}
-                        color="#FFFFFF"
-                    />
+                        color="#FFFFFF"/>
                 </TouchableOpacity>
             )}
-            overshootRight={false}
-        >
+            overshootRight={false}>
             <Pressable
                 onPress={onPress}
-                android_ripple={{
-                    color: "#F1F5F9",
-                }}
-                style={styles.container}
-            >
+                android_ripple={{color: colors.white,}}
+                style={styles.container}>
                 <View style={styles.leftBlock}>
-                    <View
-                        style={[
-                            styles.dot,
-                            {
-                                backgroundColor:
-                                    getColor(),
-                            },
-                        ]}
-                    />
 
+                    <View style={[styles.dot, {backgroundColor: transactionColors[type].primary}]}/>
                     <View style={styles.content}>
-                        <Text
-                            numberOfLines={1}
-                            style={styles.category}
-                        >
-                            {title?.trim() ||
-                                category ||
-                                type}
-                        </Text>
+                        <View style={styles.titleRow}>
+                            <Text
+                                numberOfLines={1}
+                                style={styles.category}>
+                                {title?.trim() || category || type}
+                            </Text>
+
+                            {needsCategoryReview && (
+                                <View style={styles.reviewBadge}>
+                                    <Text style={styles.reviewText}>
+                                        Review
+                                    </Text>
+                                </View>
+                            )}
+                        </View>
 
                         <Text
                             numberOfLines={1}
-                            style={styles.account}
-                        >
+                            style={styles.account}>
                             {[category, account]
                                 .filter(Boolean)
                                 .join(" • ")}
@@ -129,18 +99,8 @@ export const TransactionItem = ({
                     </View>
                 </View>
 
-                <Text
-                    style={[
-                        styles.amount,
-                        {
-                            color: getColor(),
-                        },
-                    ]}
-                >
-                    ₹
-                    {amount.toLocaleString(
-                        "en-IN"
-                    )}
+                <Text style={[styles.amount, {color: transactionColors[type].primary}]}>
+                    ₹{amount.toLocaleString("en-IN")}
                 </Text>
             </Pressable>
         </Swipeable>
@@ -154,7 +114,7 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingVertical: 16,
         paddingHorizontal: 16,
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.white,
     },
 
     leftBlock: {
@@ -177,7 +137,7 @@ const styles = StyleSheet.create({
 
     account: {
         fontSize: 12,
-        color: "#64748B",
+        color: colors.grey,
         marginTop: 4,
     },
 
@@ -193,9 +153,27 @@ const styles = StyleSheet.create({
     },
 
     deleteButton: {
-        backgroundColor: "#DC2626",
         justifyContent: "center",
+        backgroundColor: colors.red,
         alignItems: "center",
         width: 72,
+    },
+    titleRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    reviewBadge: {
+        marginLeft: 8,
+        backgroundColor: "#FEF3C7",
+        borderRadius: 10,
+        paddingHorizontal: 8,
+        paddingVertical: 2,
+    },
+
+    reviewText: {
+        color: "#B45309",
+        fontSize: 10,
+        fontWeight: "700",
     },
 });

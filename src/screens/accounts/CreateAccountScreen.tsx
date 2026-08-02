@@ -10,8 +10,8 @@ import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {useMutation, useQueryClient} from "@tanstack/react-query";
 
-import {Screen} from "../../components/ui/Screen";
-import {Button, Input, PillGroup} from "../../components/ui";
+import {Screen} from "../../components/common/ui/Screen";
+import {Button, Input, PillGroup} from "../../components/common/ui";
 
 import {AppStackParamList} from "../../navigation/AppStack";
 

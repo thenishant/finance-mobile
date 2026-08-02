@@ -1,6 +1,6 @@
 import React from "react";
 import {StyleSheet, Text, View} from "react-native";
-import {monthNames} from "../../utils/months";
+import {monthNames} from "../../../utils/months";
 
 const statusLabels: Record<string, string> = {
     green: "Goal Achieved",

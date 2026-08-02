@@ -1,6 +1,6 @@
 import React from "react";
 import {StyleSheet, Text, View} from "react-native";
-import {useToastStore} from "../../stores/useToastStore";
+import {useToastStore} from "../../../stores/useToastStore";
 
 export const Toast = () => {
 

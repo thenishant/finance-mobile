@@ -2,12 +2,13 @@ import React, {useEffect, useState} from "react";
 import {FlatList, Modal, Pressable, StyleSheet, Text, View,} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 
-import {Screen} from "../../components/ui/Screen";
+import {Screen} from "../../components/common/ui/Screen";
 import {useTransactionDraft} from "../../stores/useTransactionDraft";
 import {useNavigation, useRoute} from "@react-navigation/native";
 import {useCategories} from "../../hooks/useCategories";
 import {useRecentCategories} from "../../stores/useRecentCategories";
 import {getCategoryMeta} from "../../design/categoryMeta";
+import {colors} from "../../design";
 
 export const SelectCategoryScreen = () => {
 
@@ -47,7 +48,6 @@ export const SelectCategoryScreen = () => {
 
     return (
         <Screen>
-
             {/* GRID */}
             <FlatList
                 data={filtered}
@@ -120,21 +120,16 @@ const CategorySheet = ({parent, onClose, onSelect, type}: any) => {
         <Modal
             visible={!!parent}
             transparent
-            animationType="slide"
-        >
+            animationType="slide">
             <View style={styles.overlay}>
-
                 {/* BACKDROP */}
                 <Pressable
                     style={styles.backdrop}
                     onPress={onClose}
                 />
-
                 {/* SHEET */}
                 <View style={styles.sheet}>
-
                     <View style={styles.handle}/>
-
                     <Text style={styles.sheetTitle}>
                         {parent.name}
                     </Text>
@@ -145,37 +140,28 @@ const CategorySheet = ({parent, onClose, onSelect, type}: any) => {
                         renderItem={({item}) => (
                             <Pressable
                                 style={styles.sheetItem}
-                                onPress={() => onSelect(item, parent)}
-                            >
+                                onPress={() => onSelect(item, parent)}>
                                 <Text style={styles.sheetText}>
                                     {item.name}
                                 </Text>
                             </Pressable>
                         )}
                     />
-
                 </View>
-
             </View>
         </Modal>
     );
 };
 
 const styles = StyleSheet.create({
-
-    /* GRID */
-
     grid: {
-        padding: 16,
-        paddingBottom: 100, // 👈 prevents FAB overlap
+        paddingHorizontal: 8,
     },
-
     cell: {
         width: "25%",
         alignItems: "center",
         marginBottom: 20,
     },
-
     iconWrap: {
         width: 56,
         height: 56,
@@ -184,83 +170,69 @@ const styles = StyleSheet.create({
         alignItems: "center",
         marginBottom: 6,
     },
-
     label: {
-        fontSize: 12,
+        fontSize: 14,
+        paddingTop: 8,
         fontWeight: "500",
-        color: "#111827",
+        color: colors.white,
         textAlign: "center",
     },
-
     overlay: {
         flex: 1,
         justifyContent: "flex-end",
     },
-
     backdrop: {
         ...StyleSheet.absoluteFillObject,
         backgroundColor: "transparent",
     },
-
     sheet: {
-        backgroundColor: "#fff",
+        backgroundColor: colors.darkBackground,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 20,
         paddingBottom: 30,
-
         maxHeight: "75%",
-
-        shadowColor: "#000",
-        shadowOpacity: 0.2,
+        shadowColor: colors.grey,
+        shadowOpacity: 0.7,
         shadowRadius: 20,
         shadowOffset: {width: 0, height: -6},
-        elevation: 20,
+        elevation: 30,
     },
-
     handle: {
         width: 40,
         height: 5,
-        backgroundColor: "#E5E7EB",
+        backgroundColor: colors.grey,
         borderRadius: 3,
         alignSelf: "center",
         marginBottom: 12,
     },
-
     sheetTitle: {
+        color: colors.white,
         fontSize: 16,
         fontWeight: "700",
         marginBottom: 12,
     },
-
     sheetItem: {
         paddingVertical: 14,
         borderBottomWidth: 1,
-        borderBottomColor: "#F3F4F6",
+        borderBottomColor: colors.grey,
     },
-
     sheetText: {
         fontSize: 15,
         fontWeight: "500",
-        color: "#111827",
+        color: colors.white,
     },
-
     /* FAB */
-
     fab: {
         position: "absolute",
         right: 20,
         bottom: 30,
-
         width: 56,
         height: 56,
         borderRadius: 28,
-
-        backgroundColor: "#2563EB",
-
+        backgroundColor: colors.blue,
         justifyContent: "center",
         alignItems: "center",
-
         shadowColor: "#000",
         shadowOpacity: 0.25,
         shadowRadius: 10,

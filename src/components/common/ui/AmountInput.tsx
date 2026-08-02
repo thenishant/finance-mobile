@@ -1,10 +1,6 @@
 import React, {useMemo} from "react";
-import {
-    StyleSheet,
-    Text,
-    TextInput,
-    View,
-} from "react-native";
+import {StyleSheet, Text, TextInput, View,} from "react-native";
+import {colors} from "../../../design/colors";
 
 type Props = {
     value: string;
@@ -14,19 +10,14 @@ type Props = {
 
 const formatIndianNumber = (value: string) => {
     if (!value) return "";
-
-    const num = value.replace(/[^0-9]/g, "");
-    if (!num) return "";
-
-    const lastThree = num.slice(-3);
-    const otherNumbers = num.slice(0, -3);
-
-    return otherNumbers
-        ? `${otherNumbers.replace(
-            /\B(?=(\d{2})+(?!\d))/g,
-            ","
-        )},${lastThree}`
-        : lastThree;
+    const [whole, decimal] = value.split(".");
+    const formattedWhole = Number(whole || 0).toLocaleString("en-IN");
+    if (value.endsWith(".")) {
+        return `${formattedWhole}.`;
+    }
+    return decimal !== undefined
+        ? `${formattedWhole}.${decimal}`
+        : formattedWhole;
 };
 
 export const AmountInput = ({
@@ -40,9 +31,22 @@ export const AmountInput = ({
     );
 
     const handleChange = (text: string) => {
-        onChangeText(
-            text.replace(/[^0-9]/g, "")
-        );
+        // Remove everything except digits and decimal point
+        let cleaned = text.replace(/[^\d.]/g, "");
+
+        // Allow only one decimal point
+        const parts = cleaned.split(".");
+        if (parts.length > 2) {
+            cleaned = `${parts[0]}.${parts.slice(1).join("")}`;
+        }
+
+        // Limit to 2 decimal places
+        if (cleaned.includes(".")) {
+            const [whole, decimal] = cleaned.split(".");
+            cleaned = `${whole}.${decimal.slice(0, 2)}`;
+        }
+
+        onChangeText(cleaned);
     };
 
     return (
@@ -52,18 +56,16 @@ export const AmountInput = ({
             </Text>
 
             <View style={styles.amountRow}>
-                <Text style={styles.currency}>
-                    {currency}
-                </Text>
+                <Text style={styles.currency}>{currency}</Text>
 
                 <TextInput
                     value={formattedValue}
                     onChangeText={handleChange}
                     keyboardType="numeric"
                     placeholder="0"
-                    placeholderTextColor="#D1D5DB"
+                    placeholderTextColor={colors.white}
                     style={styles.input}
-                    selectionColor="#111827"
+                    selectionColor={colors.white}
                 />
             </View>
         </View>
@@ -73,38 +75,32 @@ export const AmountInput = ({
 const styles = StyleSheet.create({
     container: {
         alignItems: "center",
-        marginTop: 30
+        margin: 10,
+        backgroundColor: colors.darkBackground,
     },
-
     label: {
         fontSize: 12,
         fontWeight: "700",
-        letterSpacing: 1.2,
         textTransform: "uppercase",
-        color: "#9CA3AF",
+        color: colors.grey,
     },
-
     amountRow: {
         flexDirection: "row",
         alignItems: "flex-end",
         justifyContent: "center",
     },
-
     currency: {
         fontSize: 34,
         fontWeight: "500",
-        color: "#D1D5DB",
+        color: colors.grey,
         marginRight: 6,
-        marginBottom: 8,
+        marginBottom: 4,
     },
-
     input: {
         fontSize: 42,
-        fontWeight: "800",
-        color: "#111827",
+        fontWeight: "500",
+        color: colors.white,
         textAlign: "center",
-        minWidth: 60,
-        padding: 0,
-        letterSpacing: -1,
+        minWidth: 40,
     },
 });

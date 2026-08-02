@@ -13,7 +13,7 @@ import {createAsyncStoragePersister} from "@tanstack/query-async-storage-persist
 import AsyncStorage from "@react-native-async-storage/async-storage";
 
 import {RootNavigator} from "./src/navigation/RootNavigator";
-import {Toast} from "./src/components/ui/Toast";
+import {Toast} from "./src/components/common/ui/Toast";
 
 const queryClient = new QueryClient({
     defaultOptions: {

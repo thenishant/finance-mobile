@@ -1,5 +1,5 @@
-import React, {useRef} from "react";
-import {Animated, StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle} from "react-native";
+import React from "react";
+import {StyleProp, StyleSheet, Text, TextStyle, TouchableOpacity, ViewStyle} from "react-native";
 
 type Props = {
     label: string;
@@ -25,32 +25,15 @@ export const Pill: React.FC<Props> = ({
                                           textStyle
                                       }) => {
 
-    const scale = useRef(new Animated.Value(1)).current;
-
     const handlePress = () => {
-
-        Animated.sequence([
-            Animated.spring(scale, {
-                toValue: 0.9,
-                useNativeDriver: true
-            }),
-            Animated.spring(scale, {
-                toValue: 1,
-                useNativeDriver: true
-            })
-        ]).start();
-
         onPress?.();
     };
-
     return (
-        <Animated.View
-            style={{transform: [{scale}]}}
-        >
+        <>
             <TouchableOpacity
-                onPress={handlePress}
+                onPress={onPress}
                 disabled={disabled}
-                activeOpacity={0.8}
+                activeOpacity={0.7}
                 style={[
                     styles.base,
                     backgroundColor
@@ -73,14 +56,14 @@ export const Pill: React.FC<Props> = ({
                     {label}
                 </Text>
             </TouchableOpacity>
-        </Animated.View>
+        </>
     );
 };
 
 const styles = StyleSheet.create({
     base: {
-        paddingVertical: 10,
-        paddingHorizontal: 18,
+        paddingVertical: 12,
+        paddingHorizontal: 22,
         borderRadius: 999,
         alignItems: "center",
         justifyContent: "center",

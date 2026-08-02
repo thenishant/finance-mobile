@@ -1,7 +1,7 @@
 import React, {useEffect, useRef, useState} from "react";
 import {Animated, Dimensions, Modal, Pressable, StyleSheet, Text, View} from "react-native";
 
-import {Button, Input, Pill} from "../ui";
+import {Button, Input, Pill} from "./index";
 
 interface Props {
     visible: boolean;

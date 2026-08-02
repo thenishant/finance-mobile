@@ -2,27 +2,26 @@ import React, {useState} from "react";
 import {LayoutAnimation, Platform, Pressable, StyleSheet, Text, UIManager, View,} from "react-native";
 import {Ionicons} from "@expo/vector-icons";
 
+import {DashboardAccount, DashboardSummary} from "../../../types/dashboard";
+
 if (Platform.OS === "android") {
     UIManager.setLayoutAnimationEnabledExperimental?.(true);
 }
 
-export const TotalBalanceHero = ({
-    accounts = [],
-    onAccountPress,
-}: any) => {
+type Props = {
+    totalBalance: number;
+    accounts: DashboardAccount[];
+    onAccountPress?: (account: DashboardAccount) => void;
+};
 
+export const TotalBalanceHero = ({totalBalance, accounts, onAccountPress,}: Props) => {
     const [hidden, setHidden] = useState(false);
     const [expanded, setExpanded] = useState(false);
 
     if (!accounts.length) return null;
 
-    const total = accounts.reduce(
-        (sum: number, acc: any) => sum + Number(acc.balance),
-        0
-    );
-
-    const format = (v: number) =>
-        hidden ? "••••" : `₹${v.toLocaleString()}`;
+    const format = (value: number) =>
+        hidden ? "••••" : `₹${value.toLocaleString()}`;
 
     const toggle = () => {
         LayoutAnimation.easeInEaseOut();
@@ -31,13 +30,9 @@ export const TotalBalanceHero = ({
 
     return (
         <View style={styles.container}>
-
             <Pressable onPress={toggle}>
-
                 <View style={styles.header}>
-                    <Text style={styles.label}>
-                        Net Worth
-                    </Text>
+                    <Text style={styles.label}>Net Worth</Text>
 
                     <View style={styles.actions}>
                         <Pressable onPress={() => setHidden(!hidden)}>
@@ -57,36 +52,39 @@ export const TotalBalanceHero = ({
                 </View>
 
                 <Text style={styles.amount}>
-                    {format(total)}
+                    {format(totalBalance)}
                 </Text>
-
             </Pressable>
 
             {expanded && (
                 <View style={styles.list}>
-                    {accounts.map((acc: any, index: number) => (
-                        <View key={acc.id}>
+                    {accounts.map((account, index) => (
+                        <View key={account.id}>
                             <Pressable
                                 style={styles.item}
-                                onPress={() => onAccountPress?.(acc)}
+                                onPress={() => onAccountPress?.(account)}
                             >
                                 <View>
                                     <Text style={styles.name}>
-                                        {acc.name}
+                                        {account.name}
                                     </Text>
+
                                     <Text style={styles.last4}>
-                                        •••• {acc.last4}
+                                        {account.last4 ? `•••• ${account.last4}` : account.type}
                                     </Text>
                                 </View>
+
                                 <Text style={styles.value}>
-                                    {format(Number(acc.balance))}
+                                    {format(Number(account.balance))}
                                 </Text>
+
                                 <Ionicons
                                     name="chevron-forward"
                                     size={16}
                                     color="#9CA3AF"
                                 />
                             </Pressable>
+
                             {index < accounts.length - 1 && (
                                 <View style={styles.divider}/>
                             )}
@@ -94,7 +92,6 @@ export const TotalBalanceHero = ({
                     ))}
                 </View>
             )}
-
         </View>
     );
 };

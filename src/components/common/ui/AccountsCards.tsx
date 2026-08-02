@@ -5,7 +5,7 @@ import {Ionicons} from "@expo/vector-icons";
 
 import Animated, {FadeIn, FadeOut} from "react-native-reanimated";
 import {Image} from "expo-image";
-import {getBankLogo} from "../../utils/bankMapper";
+import {getBankLogo} from "../../../utils/bankMapper";
 
 interface Account {
     id: string;

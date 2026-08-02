@@ -5,10 +5,10 @@ import {KeyboardAwareScrollView} from "react-native-keyboard-aware-scroll-view";
 import {RouteProp, useNavigation, useRoute} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 
-import {Screen} from "../../components/ui/Screen";
-import {Button, Input} from "../../components/ui";
-import {AmountInput} from "../../components/ui/AmountInput";
-import {TransactionTypeSection} from "../../components/transactions/TransactionTypeSection";
+import {Screen} from "../../components/common/ui/Screen";
+import {Button, Input} from "../../components/common/ui";
+import {AmountInput} from "../../components/common/ui/AmountInput";
+import {TransactionTypeSection} from "../../components/common/transactions/TransactionTypeSection";
 
 import {useTransactionDraft} from "../../stores/useTransactionDraft";
 import {useCreateTransaction} from "../../hooks/useCreateTransaction";
@@ -17,14 +17,12 @@ import {transactionColors} from "../../design/transactionColors";
 
 import {useMutation, useQuery, useQueryClient} from "@tanstack/react-query";
 import {transactionService, UpdateTransactionRequest} from "../../services/transaction.service";
-import {Transaction} from "../../types/transaction";
+import {Transaction, TRANSACTION_TYPES_LABELS} from "../../types/transaction";
+import {colors} from "../../design";
 
 type Nav = NativeStackNavigationProp<AppStackParamList>;
 
-type AddTransactionRoute = RouteProp<
-    AppStackParamList,
-    "AddTransaction"
->;
+type AddTransactionRoute = RouteProp<AppStackParamList, "AddTransaction">;
 
 const AddTransactionScreen = () => {
     const navigation = useNavigation<Nav>();
@@ -122,53 +120,30 @@ const AddTransactionScreen = () => {
         setDestinationAccount,
     ]);
 
-    const handleSubmit = () => {
-        const amt = Number(amount);
-        if (!amt || amt <= 0) {
-            Alert.alert("Enter valid amount");
-            return;
-        }
-        if (transactionType === "TRANSFER") {
-            if (!sourceAccount || !destinationAccount) {
-                Alert.alert("Select source and destination accounts");
-                return;
-            }
-
-            if (sourceAccount.id === destinationAccount.id) {
-                Alert.alert("Cannot transfer to same account");
-                return;
-            }
-        } else {
-            if (!sourceAccount) {
-                Alert.alert("Select account");
-                return;
-            }
-
-            if (!selectedCategory) {
-                Alert.alert("Select category");
-                return;
-            }
-        }
-
+    const saveTransaction = (
+        amt: number,
+        updateMerchantMapping = false
+    ) => {
         const payload: UpdateTransactionRequest = {
             type: transactionType,
             amount: amt,
             date: date.toISOString(),
             note: note || undefined,
             categoryId:
-                transactionType === "TRANSFER"
+                transactionType === TRANSACTION_TYPES_LABELS[2].value
                     ? undefined
                     : selectedCategory?.id,
             sourceAccountId:
-                transactionType === "INCOME"
+                transactionType === TRANSACTION_TYPES_LABELS[1].value
                     ? undefined
                     : sourceAccount?.id,
             destinationAccountId:
-                transactionType === "INCOME"
+                transactionType === TRANSACTION_TYPES_LABELS[1].value
                     ? sourceAccount?.id
-                    : transactionType === "TRANSFER"
+                    : transactionType === TRANSACTION_TYPES_LABELS[2].value
                         ? destinationAccount?.id
                         : undefined,
+            updateMerchantMapping,
         };
 
         if (isEdit) {
@@ -184,6 +159,79 @@ const AddTransactionScreen = () => {
                 },
             });
         }
+    };
+
+    const handleSubmit = () => {
+        const amt = Number(amount);
+
+        if (!amt || amt <= 0) {
+            Alert.alert("Enter valid amount");
+            return;
+        }
+
+        if (transactionType === TRANSACTION_TYPES_LABELS[2].value) {
+            if (!sourceAccount || !destinationAccount) {
+                Alert.alert(
+                    "Select source and destination accounts"
+                );
+                return;
+            }
+
+            if (sourceAccount.id === destinationAccount.id) {
+                Alert.alert(
+                    "Cannot transfer to same account"
+                );
+                return;
+            }
+        } else {
+            if (!sourceAccount) {
+                Alert.alert("Select account");
+                return;
+            }
+
+            if (!selectedCategory) {
+                Alert.alert("Select category");
+                return;
+            }
+        }
+
+        if (!isEdit) {
+            saveTransaction(amt);
+            return;
+        }
+
+        const categoryChanged =
+            transaction?.category?.id !==
+            selectedCategory?.id;
+
+        const shouldAskToLearn =
+            categoryChanged &&
+            !!transaction?.merchant &&
+            transaction.type !==
+            TRANSACTION_TYPES_LABELS[2].value;
+
+        if (!shouldAskToLearn) {
+            saveTransaction(amt);
+            return;
+        }
+
+        Alert.alert(
+            "Remember this merchant?",
+            `Future transactions from "${transaction!.merchant}" will automatically be categorized as "${selectedCategory!.name}".`,
+            [
+                {
+                    text: "Not now",
+                    style: "cancel",
+                    onPress: () =>
+                        saveTransaction(amt, false),
+                },
+                {
+                    text: "Remember",
+                    onPress: () =>
+                        saveTransaction(amt, true),
+                },
+            ]
+        );
     };
 
     if (isEdit && isLoading) {
@@ -218,7 +266,7 @@ const AddTransactionScreen = () => {
                         />
                     </View>
 
-                    {transactionType !== "TRANSFER" && (
+                    {transactionType !== TRANSACTION_TYPES_LABELS[2].value && (
                         <Row
                             label="Category"
                             value={
@@ -236,7 +284,7 @@ const AddTransactionScreen = () => {
                         />
                     )}
 
-                    {transactionType === "TRANSFER" ? (
+                    {transactionType === TRANSACTION_TYPES_LABELS[2].value ? (
                         <>
                             <Row
                                 label="From Account"
@@ -261,9 +309,8 @@ const AddTransactionScreen = () => {
                                 subValue={formatBalance(destinationAccount?.balance)}
                                 onPress={() =>
                                     navigation.navigate(
-                                        "SelectAccount",
-                                        {
-                                            mode: "destination",
+                                        "SelectAccount", {
+                                            mode: "destination"
                                         }
                                     )
                                 }
@@ -272,7 +319,7 @@ const AddTransactionScreen = () => {
                     ) : (
                         <Row
                             label={
-                                transactionType === "INCOME"
+                                transactionType === TRANSACTION_TYPES_LABELS[1].value
                                     ? "Destination Account"
                                     : "Source Account"
                             }
@@ -393,19 +440,21 @@ const Row = ({
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 8,
+        paddingHorizontal: 10,
         paddingBottom: 90,
         gap: 8,
     },
     amountSection: {
         alignItems: "center",
+        borderColor: colors.grey,
+        borderRadius: 16,
+        borderWidth: 1,
     },
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.darkBackground,
         borderRadius: 18,
-        overflow: "hidden",
+        borderColor: colors.grey,
         borderWidth: 1,
-        borderColor: "#F3F4F6",
     },
     typeSection: {
         padding: 8,
@@ -421,23 +470,22 @@ const styles = StyleSheet.create({
         alignItems: "center",
         paddingHorizontal: 16,
         paddingVertical: 22,
-        borderBottomWidth: 1,
-        borderBottomColor: "#F8FAFC",
+        borderColor: colors.grey,
     },
     rowLabel: {
         fontSize: 15,
         fontWeight: "500",
-        color: "#6B7280",
+        color: colors.white,
     },
     rowValue: {
         fontSize: 15,
         fontWeight: "600",
-        color: "#111827",
+        color: colors.white,
     },
     rowSub: {
         marginTop: 2,
         fontSize: 12,
-        color: "#9CA3AF",
+        color: colors.grey,
     },
     rowRight: {
         flexDirection: "row",
@@ -446,26 +494,26 @@ const styles = StyleSheet.create({
     },
     chevron: {
         fontSize: 16,
-        color: "#D1D5DB",
+        color: colors.white,
     },
     footer: {
         position: "absolute",
         bottom: 0,
         left: 0,
         right: 0,
-        paddingHorizontal: 16,
-        paddingVertical: 16,
-        backgroundColor: "rgba(255,255,255,0.98)",
+        paddingHorizontal: 24,
+        paddingVertical: 24,
+        backgroundColor: colors.darkBackground,
         borderTopWidth: 1,
-        borderTopColor: "#F3F4F6",
+        borderTopColor: colors.grey,
     },
     error: {
-        color: "#DC2626",
+        color: colors.red,
         fontSize: 13,
     },
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.35)",
+        backgroundColor: colors.darkBackground,
     },
     calendarWrapper: {
         position: "absolute",
@@ -473,7 +521,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     sheet: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.white,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         paddingHorizontal: 12,

@@ -4,13 +4,12 @@ import {StyleSheet} from "react-native";
 import {useMonthlyAnalytics} from "../../hooks/useMonthlyAnalytics";
 import {CategoryBreakdown} from "./components/CategoryBreakdown";
 import {useMonthStore} from "../../stores/useMonthStore";
-import {MonthSelector} from "../../components/ui/MonthSelector";
+import MonthSelector from "../../components/common/ui/MonthSelector";
 
 const AnalyticsScreen = () => {
     const {year, month} = useMonthStore();
 
-    const {data, isLoading} =
-        useMonthlyAnalytics(year, month);
+    const {data, isLoading} = useMonthlyAnalytics(year, month);
 
     if (!data) return null;
 

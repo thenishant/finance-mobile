@@ -2,6 +2,7 @@ import {api} from "./api";
 import {unwrap} from "./base";
 import {MonthlyAnalytics} from "../types/api.types";
 import {YearAnalytics} from "../types/analytics";
+import {DashboardComparison, DashboardResponse} from "../types/dashboard";
 
 const EMPTY_ANALYTICS: MonthlyAnalytics = {
     totalIncome: 0,
@@ -21,14 +22,23 @@ export const analyticsService = {
         return unwrap<MonthlyAnalytics>(res) ?? EMPTY_ANALYTICS;
     },
 
-    async getMonthComparison(year: number, month: number) {
+    async getMonthComparison(year: number, month: number): Promise<DashboardComparison | null> {
         const res = await api.get("/analytics/month-compare", {
             params: {year, month},
         });
-
-        return unwrap(res) ?? null;
+        return unwrap<DashboardComparison>(res) ?? null;
     },
 
+    async getDashboard(year: number, month: number): Promise<DashboardResponse> {
+        const res = await api.get("/analytics/dashboard", {
+            params: {
+                year,
+                month,
+            },
+        });
+
+        return unwrap<DashboardResponse>(res);
+    },
 
     async getYearly(year: number): Promise<YearAnalytics> {
         const res = await api.get("/analytics/year", {
@@ -46,3 +56,4 @@ export const analyticsService = {
         };
     }
 };
+

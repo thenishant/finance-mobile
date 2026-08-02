@@ -3,7 +3,7 @@ import {ActivityIndicator, Alert, StyleSheet, Text, View,} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {RouteProp, useNavigation, useRoute,} from "@react-navigation/native";
 import {useMutation, useQuery, useQueryClient,} from "@tanstack/react-query";
-import {Button} from "../../components/ui";
+import {Button} from "../../components/common/ui";
 import {transactionService} from "../../services/transaction.service";
 import {Transaction} from "../../types/transaction";
 
@@ -41,18 +41,30 @@ const formatDate = (date?: string) => {
     );
 };
 
-const DetailRow = ({label, value, isLast = false,}: {
+const DetailRow = ({label, value}: {
     label: string;
     value?: string | number | null;
-    isLast?: boolean;
 }) => (
-    <View style={[styles.row, isLast && styles.lastRow,]}>
+    <View style={styles.row}>
         <Text style={styles.label}>
             {label}
         </Text>
 
         <Text style={styles.value}>
             {value || "-"}
+        </Text>
+    </View>
+);
+
+const ReviewBanner = () => (
+    <View style={styles.reviewBanner}>
+        <Text style={styles.reviewTitle}>
+            ⚠ Review Suggested Category
+        </Text>
+
+        <Text style={styles.reviewSubtitle}>
+            We weren't completely confident about the AI-selected category.
+            Please review it and edit the transaction if needed.
         </Text>
     </View>
 );
@@ -123,13 +135,18 @@ const TransactionDetailScreen = () => {
             edges={["left", "right", "bottom"]}
             style={styles.container}>
             <View style={styles.content}>
+                {transaction.needsCategoryReview && (
+                    <ReviewBanner/>
+                )}
                 <View style={styles.hero}>
                     <Text style={[styles.amount, {color},]}>
                         ₹{Number(transaction.amount).toLocaleString("en-IN")}
                     </Text>
 
                     <Text style={styles.category}>
-                        {transaction.category?.name ?? transaction.type}
+                        {transaction.merchant?.name ??
+                            transaction.category?.name ??
+                            transaction.type}
                     </Text>
 
                     <Text style={styles.date}>
@@ -138,27 +155,46 @@ const TransactionDetailScreen = () => {
                 </View>
 
                 <View style={styles.card}>
-                    <DetailRow label="Type" value={transaction.type}
-                               isLast={!transaction.sourceAccount?.name && !transaction.note}
+                    <DetailRow
+                        label="Type"
+                        value={transaction.type}
                     />
 
-                    {transaction.sourceAccount?.name && (
+                    {transaction.merchant && (
                         <DetailRow
-                            label="Account"
-                            value={transaction.sourceAccount.name}
-                            isLast={!transaction.note}
+                            label="Merchant"
+                            value={transaction.merchant.name}
                         />
                     )}
 
-                    {transaction.note ? (
+                    {transaction.category && (
+                        <DetailRow
+                            label="Category"
+                            value={transaction.category.name}
+                        />
+                    )}
+
+                    {transaction.sourceAccount?.name && (
+                        <DetailRow
+                            label="From Account"
+                            value={transaction.sourceAccount.name}
+                        />
+                    )}
+
+                    {transaction.destinationAccount?.name && (
+                        <DetailRow
+                            label="To Account"
+                            value={transaction.destinationAccount.name}
+                        />
+                    )}
+
+                    {transaction.note && (
                         <DetailRow
                             label="Note"
                             value={transaction.note}
-                            isLast
                         />
-                    ) : null}
+                    )}
                 </View>
-
                 <View style={styles.actions}>
                     <View style={styles.actionButton}>
                         <Button
@@ -244,12 +280,9 @@ const styles = StyleSheet.create({
             "space-between",
         alignItems: "center",
         paddingVertical: 12,
-        borderBottomWidth: 1,
+        borderBottomWidth: StyleSheet.hairlineWidth,
         borderBottomColor:
             "#F3F4F6",
-    },
-    lastRow: {
-        borderBottomWidth: 0,
     },
     label: {
         fontSize: 14,
@@ -269,5 +302,25 @@ const styles = StyleSheet.create({
     },
     actionButton: {
         flex: 1,
+    },
+    reviewBanner: {
+        borderRadius: 16,
+        padding: 16,
+        marginBottom: 16,
+        borderWidth: 1,
+        backgroundColor: "#FEF3C7",
+        borderColor: "#FCD34D",
+    },
+    reviewTitle: {
+        fontSize: 15,
+        fontWeight: "700",
+        color: "#92400E",
+    },
+
+    reviewSubtitle: {
+        marginTop: 6,
+        fontSize: 13,
+        lineHeight: 18,
+        color: "#92400E",
     },
 });

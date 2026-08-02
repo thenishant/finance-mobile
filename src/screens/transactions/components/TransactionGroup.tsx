@@ -2,6 +2,7 @@ import React from "react";
 import {StyleSheet, Text, View} from "react-native";
 import {Transaction} from "../../../types/transaction";
 import {TransactionItem} from "./TransactionItem";
+import {colors} from "../../../design/colors";
 
 interface Props {
     date: string;
@@ -40,10 +41,8 @@ export const TransactionGroup = ({
                             amount={Number(t.amount)}
                             // title={t.note}
                             category={t.category?.name}
-                            account={
-                                t.sourceAccount?.name ??
-                                t.destinationAccount?.name
-                            }
+                            account={t.sourceAccount?.name ?? t.destinationAccount?.name}
+                            needsCategoryReview={t.needsCategoryReview}
                             onDelete={onDelete}
                             onPress={() => onPress(t)}
                         />
@@ -77,23 +76,22 @@ const styles = StyleSheet.create({
     date: {
         fontSize: 11,
         fontWeight: "700",
-        color: "#94A3B8",
-        textTransform: "uppercase",
+        color: colors.grey,
         letterSpacing: 0.5,
     },
 
     count: {
         fontSize: 11,
         fontWeight: "600",
-        color: "#94A3B8",
+        color: colors.grey,
     },
 
     group: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.white,
         borderRadius: 20,
         overflow: "hidden",
         borderWidth: 1,
-        borderColor: "#EEF2F7",
+        borderColor: colors.white,
     },
 
     divider: {

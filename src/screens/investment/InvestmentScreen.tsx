@@ -4,7 +4,7 @@ import {Animated, StyleSheet, View} from "react-native";
 import {useAnalytics} from "../../hooks/useAnalytics";
 import {useYearAnalytics} from "../../hooks/useYearlyAnalytics";
 
-import {MonthSelector} from "../../components/ui/MonthSelector";
+import {MonthSelector} from "../../components/common/ui/MonthSelector";
 import {SetInvestmentGoalScreen} from "./components/SetInvestmentGoalScreen";
 
 import {useMonthStore} from "../../stores/useMonthStore";

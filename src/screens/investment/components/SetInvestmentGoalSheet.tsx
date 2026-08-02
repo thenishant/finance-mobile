@@ -1,11 +1,11 @@
 import React from "react";
 import {Modal, Pressable, StyleSheet, Text, View} from "react-native";
 
-import {ValuePickerSheet} from "../../../components/ui/ValuePickerSheet";
+import {ValuePickerSheet} from "../../../components/common/ui/ValuePickerSheet";
 import {monthNames} from "../../../utils/months";
-import {StatsRow} from "../../../components/ui/StatsRow";
-import {RemainingInvestment} from "../../../components/ui/RemainingInvestment";
-import {Button} from "../../../components/ui";
+import {StatsRow} from "../../../components/common/ui/StatsRow";
+import {RemainingInvestment} from "../../../components/common/ui/RemainingInvestment";
+import {Button} from "../../../components/common/ui";
 
 import {useSetInvestmentGoal} from "../../../hooks/useSetInvestmentGoal";
 import {useToastStore} from "../../../stores/useToastStore";

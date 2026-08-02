@@ -6,16 +6,20 @@ export type CreateTransactionPayload = {
     type: TransactionType;
     amount: number;
     date: string;
-
     categoryId?: string;
-
     sourceAccountId?: string;
     destinationAccountId?: string;
-
     note?: string;
 };
 
-export type UpdateTransactionRequest = CreateTransactionPayload;
+export type UpdateTransactionRequest =
+    CreateTransactionPayload & {
+    updateMerchantMapping?: boolean;
+};
+
+export type TransactionSortBy =
+    | "date"
+    | "createdAt";
 
 export const transactionService = {
     async create(
@@ -25,12 +29,9 @@ export const transactionService = {
             type: data.type,
             amount: data.amount,
             date: data.date,
-
             categoryId: data.categoryId,
-
             sourceAccountId: data.sourceAccountId,
             destinationAccountId: data.destinationAccountId,
-
             note: data.note,
         });
 
@@ -42,9 +43,12 @@ export const transactionService = {
         return unwrap<Transaction>(res);
     },
 
-    async getAll(): Promise<Transaction[]> {
-        const res = await api.get("/transactions");
-
+    async getAll(sortBy: TransactionSortBy = "date",): Promise<Transaction[]> {
+        const res = await api.get("/transactions", {
+            params: {
+                sortBy,
+            },
+        });
         return unwrap<Transaction[]>(res);
     },
 

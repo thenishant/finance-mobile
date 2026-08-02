@@ -1,6 +1,6 @@
 import React, {useMemo, useState} from "react";
-import {Screen} from "../../components/ui/Screen";
-import {Button, Input} from "../../components/ui";
+import {Screen} from "../../components/common/ui/Screen";
+import {Button, Input} from "../../components/common/ui";
 import {StyleSheet, Text, View} from "react-native";
 import {RouteProp, useNavigation, useRoute,} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
@@ -8,6 +8,7 @@ import {useMutation, useQueryClient} from "@tanstack/react-query";
 
 import {AppStackParamList} from "../../navigation/AppStack";
 import {categoryService} from "../../services/category.service";
+import {colors} from "../../design";
 
 type Nav = NativeStackNavigationProp<AppStackParamList>;
 type RouteProps = RouteProp<AppStackParamList, "CreateCategory">;
@@ -74,24 +75,24 @@ export const CreateCategoryScreen = () => {
                         </View>
                     )}
 
+                    <Button
+                        title={mutation.isPending ? "Saving..." : "Create Category"}
+                        disabled={mutation.isPending || !category.trim()}
+                        onPress={() => {
+                            const children = subcategories
+                                .split(",")
+                                .map((item) => item.trim())
+                                .filter(Boolean);
+
+                            mutation.mutate({
+                                name: category.trim(),
+                                type,
+                                children,
+                            });
+                        }}
+                    />
                 </View>
 
-                <Button
-                    title={mutation.isPending ? "Saving..." : "Create Category"}
-                    disabled={mutation.isPending || !category.trim()}
-                    onPress={() => {
-                        const children = subcategories
-                            .split(",")
-                            .map((item) => item.trim())
-                            .filter(Boolean);
-
-                        mutation.mutate({
-                            name: category.trim(),
-                            type,
-                            children,
-                        });
-                    }}
-                />
 
             </View>
         </Screen>
@@ -100,41 +101,21 @@ export const CreateCategoryScreen = () => {
 
 const styles = StyleSheet.create({
     container: {
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        gap: 10
+        paddingHorizontal: 4,
     },
     header: {
         gap: 6,
     },
-    title: {
-        fontSize: 28,
-        fontWeight: "800",
-        color: "#111827",
-    },
-    subtitle: {
-        fontSize: 14,
-        color: "#6B7280",
-        lineHeight: 20,
-    },
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: colors.darkBackground,
         borderRadius: 22,
         padding: 16,
         gap: 16,
-        shadowColor: "#000",
-        shadowOpacity: 0.03,
-        shadowRadius: 16,
-        shadowOffset: {
-            width: 0,
-            height: 4,
-        },
-        elevation: 2,
     },
     label: {
-        fontSize: 13,
+        fontSize: 14,
         fontWeight: "600",
-        color: "#6B7280",
+        color: colors.white,
     },
     previewContainer: {
         marginTop: 4,
@@ -142,7 +123,7 @@ const styles = StyleSheet.create({
     previewTitle: {
         fontSize: 12,
         fontWeight: "700",
-        color: "#6B7280",
+        color: colors.white,
         marginBottom: 10,
     },
     chips: {
@@ -151,7 +132,7 @@ const styles = StyleSheet.create({
         gap: 8,
     },
     chip: {
-        backgroundColor: "#F8FAFC",
+        backgroundColor: colors.white,
         paddingHorizontal: 12,
         paddingVertical: 8,
         borderRadius: 999,
@@ -159,6 +140,6 @@ const styles = StyleSheet.create({
     chipText: {
         fontSize: 12,
         fontWeight: "600",
-        color: "#334155",
+        color: colors.darkBackground,
     },
 });

@@ -1,13 +1,13 @@
 import React from "react";
 import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
-import {Feather} from "@expo/vector-icons";
+import {Ionicons} from "@expo/vector-icons";
 import {StyleSheet, View} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 import DashboardScreen from "../screens/dashboard/DashboardScreen";
-import AccountsScreen from "../screens/auth/AccountsScreen";
+import SettingsScreen from "../screens/settings/SettingsScreen";
 import TransactionListScreen from "../screens/transactions/TransactionListScreen";
 import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
 import {AppStackParamList} from "./AppStack";
@@ -45,28 +45,23 @@ export const MainTabs = () => {
                 tabBarIcon: ({color}) => {
                     switch (route.name) {
                         case "Dashboard":
-                            return <Feather name="home" size={22} color={color}/>;
+                            return <Ionicons name="home" size={22} color={color}/>;
 
                         case "Transactions":
-                            return <Feather name="list" size={22} color={color}/>;
+                            return <Ionicons name="receipt-outline" size={22} color={color}/>;
 
                         case "Accounts":
-                            return (
-                                <Feather name="credit-card" size={22} color={color}/>
-                            );
+                            return <Ionicons name="wallet-outline" size={22} color={color}/>;
 
                         case "Analytics":
-                            return (
-                                <Feather name="pie-chart" size={22} color={color}/>
-                            );
+                            return <Ionicons name="pie-chart-outline" size={22} color={color}/>
 
                         case "Add":
                             return (
                                 <View style={styles.floatingButton}>
-                                    <Feather name="plus" size={26} color="#FFFFFF"/>
+                                    <Ionicons name="add" size={28} color="#FFFFFF"/>
                                 </View>
                             );
-
                         default:
                             return null;
                     }
@@ -89,7 +84,7 @@ export const MainTabs = () => {
                 }}
             />
 
-            <Tab.Screen name="Accounts" component={AccountsScreen}/>
+            <Tab.Screen name="Accounts" component={SettingsScreen}/>
             <Tab.Screen name="Analytics" component={AnalyticsScreen}/>
         </Tab.Navigator>
     );

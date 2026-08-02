@@ -1,17 +1,8 @@
 import React from "react";
-import {
-    ActivityIndicator,
-    FlatList,
-    RefreshControl,
-    StyleSheet,
-    Text,
-    View,
-} from "react-native";
+import {ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View,} from "react-native";
 import {TransactionGroup} from "./TransactionGroup";
-import {
-    GroupedTransaction,
-    Transaction,
-} from "../../../types/transaction";
+import {GroupedTransaction, Transaction,} from "../../../types/transaction";
+import {colors} from "../../../design/colors";
 
 interface Props {
     data: GroupedTransaction[];
@@ -57,18 +48,15 @@ export const TransactionList = ({
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
-                    onRefresh={onRefresh}
-                />
+                    onRefresh={onRefresh}/>
             }
             renderItem={({item}) => (
                 <TransactionGroup
                     date={item.date}
                     transactions={item.transactions}
                     onDelete={onDelete}
-                    onPress={onPress}
-                />
-            )}
-        />
+                    onPress={onPress}/>
+            )}/>
     );
 };
 
@@ -77,7 +65,7 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 12,
         paddingBottom: 100,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: colors.darkGrey,
     },
 
     center: {
@@ -89,6 +77,6 @@ const styles = StyleSheet.create({
     emptyText: {
         fontSize: 15,
         fontWeight: "600",
-        color: "#64748B",
+        color: colors.grey,
     },
 });

@@ -4,6 +4,7 @@ import {
     TextInput,
     TextInputProps,
 } from "react-native";
+import {colors} from "../../../design/colors";
 
 type Props = TextInputProps & {
     disabled?: boolean;
@@ -19,15 +20,18 @@ export const Input = ({disabled, style, ...props}: Props) => {
                 disabled && styles.disabled,
                 style,
             ]}
-            placeholderTextColor="#9CA3AF"
+            placeholderTextColor={colors.grey}
         />
     );
 };
 
 const styles = StyleSheet.create({
     input: {
-        backgroundColor: "#F3F4F6",
+        backgroundColor: colors.darkBackground,
+        borderColor: colors.grey,
+        color: colors.white,
         borderRadius: 16,
+        borderWidth: 1,
         padding: 20,
         fontSize: 15,
     },

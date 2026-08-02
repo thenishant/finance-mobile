@@ -10,7 +10,7 @@ import {CreateAccountScreen} from "../screens/accounts/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
 import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
 
-import {Button} from "../components/ui";
+import {Button} from "../components/common/ui";
 import {TransactionType} from "../types/transaction";
 import {transactionService} from "../services/transaction.service";
 import TransactionDetailScreen from "../screens/transactions/TransactionDetailScreen";

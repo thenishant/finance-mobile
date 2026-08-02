@@ -1,36 +1,29 @@
 import React, {useRef} from "react";
 import {Animated, RefreshControl, StyleSheet, Text, View,} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-
-import {MonthSelector} from "../../components/ui/MonthSelector";
 import {SummaryCard} from "./components/SummaryCard";
 import {TotalBalanceHero} from "./components/TotalBalanceHero";
-
 import {useMonthStore} from "../../stores/useMonthStore";
 import {useDashboard} from "../../hooks/useDashboard";
-import {useAccounts} from "../../hooks/useAccounts";
-import {useDailySpendingTrends} from "../../hooks/useDailySpendingTrends";
 import {formatCurrencyCompact} from "../../utils/formatCurrency";
 import {DashboardSkeleton} from "./components/DashboardSkeleton";
-import {DailySpendCard} from "./components/DailySpend";
-import {SpendingTrendsCard} from "./components/SpendingTrendsCard";
 import {useNavigation} from "@react-navigation/native";
+import {colors} from "../../design";
+import MonthSelector from "../../components/common/ui/MonthSelector";
 
 const DashboardScreen = () => {
     const navigation = useNavigation<any>();
     const year = useMonthStore(s => s.year);
     const month = useMonthStore(s => s.month);
     const scrollY = useRef(new Animated.Value(0)).current;
-    const {data, isLoading, isRefetching, refetch, error} = useDashboard(year, month);
-
-    const {data: accounts = []} = useAccounts();
-    const {data: trendData = [], isLoading: trendsLoading} = useDailySpendingTrends(7);
-    const analytics = data?.monthly;
+    const {data, isLoading, isFetching, refetch, error,} = useDashboard(year, month);
+    const summary = data?.summary;
     const comparison = data?.comparison;
+    const accounts = data?.accounts ?? [];
 
     if (isLoading) return <DashboardSkeleton/>;
 
-    if (error || !analytics) {
+    if (error || !summary) {
         return (
             <View style={styles.center}>
                 <Text style={styles.errorText}>
@@ -39,16 +32,7 @@ const DashboardScreen = () => {
             </View>
         );
     }
-
-    const isEmpty = !analytics.totalIncome && !analytics.totalExpense && !analytics.totalInvestment;
-    const spent = analytics.totalExpense ?? 0;
-
-    const budget = Math.max(analytics.totalIncome * 0.6, 1);
-    const days = new Date(year, month, 0).getDate();
-    const today = new Date().getDate();
-    const elapsedDays = year === new Date().getFullYear() && month === new Date().getMonth() + 1 ? today : days;
-    const dailySpend = elapsedDays > 0 ? spent / elapsedDays : 0;
-
+    const isEmpty = !summary?.monthlyIncome && !summary?.monthlyExpense && !summary?.monthlyInvestment;
     return (
         <View style={styles.container}>
 
@@ -59,7 +43,7 @@ const DashboardScreen = () => {
                 contentContainerStyle={styles.content}
                 refreshControl={
                     <RefreshControl
-                        refreshing={isRefetching}
+                        refreshing={isFetching}
                         onRefresh={refetch}
                         tintColor="#FFFFFF"
                         progressBackgroundColor="#0F172A"
@@ -79,13 +63,14 @@ const DashboardScreen = () => {
 
                     <MonthSelector
                         variant="dark"
-                        scrollY={scrollY}
-                        comparison={comparison}
+                        trend={comparison?.change?.expense?.percent}
+                        loading={isFetching}
                     />
 
                     <TotalBalanceHero
+                        totalBalance={summary.totalBalance}
                         accounts={accounts}
-                        onAccountPress={(account: { id: any; }) =>
+                        onAccountPress={(account) =>
                             navigation.navigate("AccountDetail", {
                                 accountId: account.id,
                             })
@@ -106,18 +91,10 @@ const DashboardScreen = () => {
                     <View style={styles.contentSection}>
 
                         <SummaryCard
-                            analytics={analytics}
+                            summary={summary}
                             comparison={comparison}
                             formatCurrency={formatCurrencyCompact}
                         />
-
-                        <View style={styles.section}>
-                            <DailySpendCard amount={dailySpend}/>
-                        </View>
-
-                        <View style={styles.section}>
-                            <SpendingTrendsCard data={trendData} isLoading={trendsLoading}/>
-                        </View>
                     </View>
                 )}
 
@@ -131,22 +108,22 @@ export default DashboardScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#0F172A",
+        backgroundColor: colors.darkBackground,
     },
 
     scrollView: {
         flex: 1,
-        backgroundColor: "#0F172A",
+        backgroundColor: colors.darkBackground,
     },
 
     content: {
         paddingBottom: 60,
-        backgroundColor: "#F8FAFC",
+        backgroundColor: colors.white,
         flexGrow: 1,
     },
 
     topSection: {
-        backgroundColor: "#0F172A",
+        backgroundColor: colors.darkBackground,
         paddingHorizontal: 16,
         paddingBottom: 40,
     },

@@ -3,21 +3,29 @@ import {StyleSheet, View} from "react-native";
 import {useNavigation} from "@react-navigation/native";
 
 import {StatBlock} from "./StatBlock";
-import {colors} from "../../../design/colors";
+import {colors} from "../../../design";
+import {DashboardComparison, DashboardSummary} from "../../../types/dashboard";
 
-export const SummaryCard = ({analytics, comparison, formatCurrency}: any) => {
+type Props = {
+    summary: DashboardSummary;
+    comparison: DashboardComparison | null;
+    formatCurrency: (value: number) => string;
+};
 
+export const SummaryCard = ({
+                                summary,
+                                comparison,
+                                formatCurrency,
+                            }: Props) => {
     const navigation = useNavigation<any>();
 
     return (
         <View style={styles.summaryCard}>
-
             <View style={styles.statsRow}>
-
                 <StatBlock
                     icon="arrow-down-left"
                     label="Income"
-                    value={analytics.totalIncome}
+                    value={summary.monthlyIncome}
                     percent={comparison?.change.income.percent}
                     color={colors.income}
                     formatCurrency={formatCurrency}
@@ -28,7 +36,7 @@ export const SummaryCard = ({analytics, comparison, formatCurrency}: any) => {
                 <StatBlock
                     icon="arrow-up-right"
                     label="Expense"
-                    value={analytics.totalExpense}
+                    value={summary.monthlyExpense}
                     percent={comparison?.change.expense.percent}
                     color={colors.expense}
                     formatCurrency={formatCurrency}
@@ -39,8 +47,8 @@ export const SummaryCard = ({analytics, comparison, formatCurrency}: any) => {
                 <StatBlock
                     icon="pie-chart"
                     label="Investment"
-                    value={analytics.totalInvestment}
-                    percent={comparison?.change.investment?.percent}
+                    value={summary.monthlyInvestment}
+                    percent={comparison?.change.investment.percent}
                     color={colors.investment}
                     formatCurrency={formatCurrency}
                     onPress={() => navigation.navigate("Investment")}
@@ -51,20 +59,17 @@ export const SummaryCard = ({analytics, comparison, formatCurrency}: any) => {
                 <StatBlock
                     icon="activity"
                     label="Savings"
-                    value={analytics.netSavings}
+                    value={summary.monthlySavings}
                     percent={comparison?.change.savings.percent}
                     color={colors.savings}
                     formatCurrency={formatCurrency}
                 />
-
             </View>
-
         </View>
     );
 };
 
 const styles = StyleSheet.create({
-
     summaryCard: {
         backgroundColor: "#fff",
         borderTopLeftRadius: 30,
@@ -83,5 +88,4 @@ const styles = StyleSheet.create({
         height: 40,
         backgroundColor: "#F1F5F9",
     },
-
 });
