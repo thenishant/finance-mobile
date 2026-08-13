@@ -2,7 +2,7 @@ import React from "react";
 import {StyleSheet, Text, View} from "react-native";
 import {Transaction} from "../../../types/transaction";
 import {TransactionItem} from "./TransactionItem";
-import {colors} from "../../../design/colors";
+import {colors} from "../../../design";
 
 interface Props {
     date: string;
@@ -39,8 +39,8 @@ export const TransactionGroup = ({
                             id={t.id}
                             type={t.type}
                             amount={Number(t.amount)}
-                            // title={t.note}
-                            category={t.category?.name}
+                            title={t.merchant?.name}
+                            category={t.category}
                             account={t.sourceAccount?.name ?? t.destinationAccount?.name}
                             needsCategoryReview={t.needsCategoryReview}
                             onDelete={onDelete}

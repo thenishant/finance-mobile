@@ -167,9 +167,16 @@ const TransactionDetailScreen = () => {
                         />
                     )}
 
+                    {transaction.category && transaction.category.parent && (
+                        <DetailRow
+                            label="Main Category"
+                            value={transaction.category.parent.name}
+                        />
+                    )}
+
                     {transaction.category && (
                         <DetailRow
-                            label="Category"
+                            label="Sub Category"
                             value={transaction.category.name}
                         />
                     )}

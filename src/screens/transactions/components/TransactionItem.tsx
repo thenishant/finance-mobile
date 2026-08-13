@@ -11,7 +11,12 @@ interface Props {
     type: TransactionType;
     amount: number;
     title?: string;
-    category?: string;
+    category?: {
+        name: string;
+        parent?: {
+            name: string;
+        } | null;
+    };
     account?: string;
     needsCategoryReview: boolean;
     onDelete: (id: string) => void;
@@ -51,6 +56,9 @@ export const TransactionItem = ({
         );
     };
 
+    const categoryLabel = category?.name;
+    const parentCategory = category?.parent?.name;
+
     return (
         <Swipeable
             ref={swipeRef}
@@ -77,7 +85,7 @@ export const TransactionItem = ({
                             <Text
                                 numberOfLines={1}
                                 style={styles.category}>
-                                {title?.trim() || category || type}
+                                {title?.trim() || categoryLabel || type}
                             </Text>
 
                             {needsCategoryReview && (
@@ -92,7 +100,7 @@ export const TransactionItem = ({
                         <Text
                             numberOfLines={1}
                             style={styles.account}>
-                            {[category, account]
+                            {[parentCategory, account]
                                 .filter(Boolean)
                                 .join(" • ")}
                         </Text>
@@ -169,8 +177,8 @@ const styles = StyleSheet.create({
         borderRadius: 10,
         paddingHorizontal: 8,
         paddingVertical: 2,
+        flexShrink: 0,
     },
-
     reviewText: {
         color: "#B45309",
         fontSize: 10,

@@ -217,7 +217,7 @@ const AddTransactionScreen = () => {
 
         Alert.alert(
             "Remember this merchant?",
-            `Future transactions from "${transaction!.merchant}" will automatically be categorized as "${selectedCategory!.name}".`,
+            `Future transactions from "${transaction?.merchant?.name}" will automatically be categorized as "${selectedCategory!.name}".`,
             [
                 {
                     text: "Not now",
