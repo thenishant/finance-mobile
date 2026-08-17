@@ -6,6 +6,7 @@ import {useMutation, useQuery, useQueryClient,} from "@tanstack/react-query";
 import {Button} from "../../components/common/ui";
 import {transactionService} from "../../services/transaction.service";
 import {Transaction} from "../../types/transaction";
+import {formatDateTime} from "../../utils/date";
 
 type RouteParams = {
     TransactionDetail: {
@@ -28,17 +29,6 @@ const getTransactionColor = (
         default:
             return "#6B7280";
     }
-};
-
-const formatDate = (date?: string) => {
-    if (!date) return "-";
-
-    return new Date(date).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        }
-    );
 };
 
 const DetailRow = ({label, value}: {
@@ -127,9 +117,10 @@ const TransactionDetailScreen = () => {
         );
     }
 
-    const color =
-        getTransactionColor(transaction.type);
-
+    const color = getTransactionColor(transaction.type);
+    console.log(transaction.date);
+    console.log(new Date(transaction.date).toString());
+    console.log(new Date(transaction.date).toISOString());
     return (
         <SafeAreaView
             edges={["left", "right", "bottom"]}
@@ -142,22 +133,17 @@ const TransactionDetailScreen = () => {
                     <Text style={[styles.amount, {color},]}>
                         ₹{Number(transaction.amount).toLocaleString("en-IN")}
                     </Text>
-
-                    <Text style={styles.category}>
-                        {transaction.merchant?.name ??
-                            transaction.category?.name ??
-                            transaction.type}
-                    </Text>
-
-                    <Text style={styles.date}>
-                        {formatDate(transaction.date)}
-                    </Text>
                 </View>
 
                 <View style={styles.card}>
                     <DetailRow
                         label="Type"
                         value={transaction.type}
+                    />
+
+                    <DetailRow
+                        label="Time"
+                        value={formatDateTime(transaction.date)}
                     />
 
                     {transaction.merchant && (

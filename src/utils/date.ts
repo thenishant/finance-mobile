@@ -18,3 +18,27 @@ export const formatDateLabel = (dateString: string) => {
         year: "numeric",
     });
 };
+
+export const formatDate = (date?: string) => {
+    if (!date) return "-";
+
+    return new Date(date).toLocaleDateString("en-IN", {
+            day: "numeric",
+            month: "short",
+            year: "numeric",
+        }
+    );
+};
+
+export const formatDateTime = (date?: string) => {
+    if (!date) return "-";
+
+    return new Intl.DateTimeFormat("en-IN", {
+        day: "2-digit",
+        month: "short",
+        year: "numeric",
+        hour: "2-digit",
+        minute: "2-digit",
+        hour12: true,
+    }).format(new Date(date));
+};
