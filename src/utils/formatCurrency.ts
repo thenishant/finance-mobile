@@ -1,48 +1,81 @@
-export const formatCurrency = (
-    value: string,
-    currency: string = "INR"
-) => {
-    if (!value) return "";
+export interface FormatCurrencyOptions {
+    currency?: string;
+    compact?: boolean;
+    maximumFractionDigits?: number;
+    showSign?: boolean;
+}
 
-    const numeric = Number(value.replace(/[^0-9.]/g, ""));
-
-    if (isNaN(numeric)) return "";
-
-    return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 2,
-    }).format(numeric);
-};
-
-export const formatCurrencyNumber = (
+const formatCompact = (
     value: number,
-    currency: string = "INR"
-) => {
-    return new Intl.NumberFormat("en-IN", {
-        style: "currency",
-        currency,
-        maximumFractionDigits: 0,
-    }).format(value);
-};
+): string => {
 
-export const formatCurrencyCompact = (value: number) => {
     const abs = Math.abs(value);
 
     const format = (num: number) =>
-        Number.isInteger(num) ? num : num.toFixed(1);
+        Number.isInteger(num)
+            ? num.toString()
+            : num.toFixed(1);
 
     if (abs >= 1_00_00_000) {
-        return `₹ ${format(value / 1_00_00_000)}Cr`;
+        return `₹${format(value / 1_00_00_000)}Cr`;
     }
 
     if (abs >= 1_00_000) {
-        return `₹ ${format(value / 1_00_000)}L`;
+        return `₹${format(value / 1_00_000)}L`;
     }
 
     if (abs >= 1_000) {
-        return `₹ ${format(value / 1_000)}K`;
+        return `₹${format(value / 1_000)}K`;
     }
 
-    return `₹ ${value}`;
+    return `₹${value}`;
+};
+
+export const formatCurrency = (
+    value: number | string,
+    options: FormatCurrencyOptions = {},
+): string => {
+
+    const {
+        currency = "INR",
+        compact = false,
+        maximumFractionDigits = 2,
+        showSign = false,
+    } = options;
+
+    const numeric =
+        typeof value === "number"
+            ? value
+            : Number(
+                value.replace(
+                    /[^0-9.-]/g,
+                    "",
+                ),
+            );
+
+    if (Number.isNaN(numeric)) {
+        return "";
+    }
+
+    if (compact) {
+        return formatCompact(numeric);
+    }
+
+    const formatted =
+        new Intl.NumberFormat(
+            "en-IN",
+            {
+                style: "currency",
+                currency,
+                maximumFractionDigits,
+            },
+        ).format(numeric);
+
+    if (!showSign || numeric === 0) {
+        return formatted;
+    }
+
+    return numeric > 0
+        ? `+${formatted}`
+        : formatted;
 };

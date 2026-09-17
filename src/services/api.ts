@@ -1,29 +1,61 @@
 import axios from "axios";
-import AsyncStorage from "@react-native-async-storage/async-storage";
+
+import {queryClient} from "../lib/queryClient";
+import {useAuthStore} from "../stores/useAuthStore";
 
 export const api = axios.create({
     baseURL: process.env.EXPO_PUBLIC_API_URL,
 });
 
-api.interceptors.request.use(
-    async (config) => {
-        const token = await AsyncStorage.getItem("access_token");
+api.interceptors.request.use(config => {
 
-        if (token) {
-            config.headers.Authorization = `Bearer ${token}`;
-        }
+    const token =
+        useAuthStore.getState().token;
 
-        return config;
-    },
-    (error) => Promise.reject(error)
-);
+    if (token) {
+
+        config.headers.Authorization =
+            `Bearer ${token}`;
+
+    }
+
+    return config;
+
+});
+
+let isHandling401 = false;
 
 api.interceptors.response.use(
-    (response) => response,
-    async (error) => {
-        if (error.response?.status === 401) {
-            await AsyncStorage.removeItem("access_token");
+
+    response => response,
+
+    async error => {
+
+        if (
+            error.response?.status === 401 &&
+            !isHandling401
+        ) {
+
+            isHandling401 = true;
+
+            try {
+
+                await useAuthStore
+                    .getState()
+                    .clearSession();
+
+                queryClient.clear();
+
+            } finally {
+
+                isHandling401 = false;
+
+            }
+
         }
+
         return Promise.reject(error);
-    }
+
+    },
+
 );

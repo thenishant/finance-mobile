@@ -1,24 +1,42 @@
-export const colors: any = {
-    darkBackground2: '#4a4e69',
+export const colors = {
+    background: "#000814",
+
+    surface: "#1c1c1c",
+    // surface2: "#1A1A1F",
+    // surface3: "#222228",
+
+    border: "#2C2C33",
+
+    text: "#FFFFFF",
+    textSecondary: "#A1A1AA",
+    textMuted: "#71717A",
+
+    primary: "#4F8CFF",
+    success: "#22C55E",
+    danger: "#EF4444",
+    warning: "#F59E0B",
+    info: "#67C23A",
+
     white: "#FFFFFF",
-    darkBackground: '#14213d',
+    black: "#000000",
+    textLight: "#D4D4D8",
+    divider: "#26262B",
 
-    red: '#DC2626',
-    green: '#16A34A',
-    blue: '#1982c4',
-    orange: '#ff792e',
-    grey: "#6c757d",
-    darkGrey: "#e5e6e8",
+    overlay: "rgba(255,255,255,0.05)",
 
-    background: "#FFFFFF",
-    primary: "#2563EB",
-    muted: "#6B7280",
-    lightGray: "#F3F4F6",
-    border: "#E5E7EB",
-    text: "#111827",
-    income: "#16A34A",      // modern green
-    expense: "#DC2626",     // strong but not neon red
-    investment: "#7C3AED",  // indigo
-    savings: "#2563EB",     // fintech blue
-    yellow: "#F59E0B",
-};
+    cardShadow: "#000000",
+
+    surfaceSecondary: "#1A1C20",
+
+    surfaceElevated: "#22252A",
+
+    muted: "#9CA3AF",
+    heroStart: "#253B72",
+
+    heroEnd: "#17181D",
+    textMutedLight: "#A1A1AA",
+    overlayLight: "rgba(255,255,255,0.05)",
+    overlayMedium: "rgba(255,255,255,0.08)",
+} as const;
+
+export type ColorName = keyof typeof colors;

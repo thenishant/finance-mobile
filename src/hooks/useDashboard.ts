@@ -1,12 +1,18 @@
-import {keepPreviousData, useQuery} from "@tanstack/react-query";
+import {useQuery} from "@tanstack/react-query";
 
 import {analyticsService} from "../services/analytics.service";
+import {useAuth} from "./useAuth";
 
+export const useDashboard = (
+    year: number,
+    month: number,
+) => {
+    const {isAuthenticated} = useAuth();
 
-export const useDashboard = (year: number, month: number) =>
-    useQuery({
+    return useQuery({
         queryKey: ["dashboard", year, month],
         queryFn: () => analyticsService.getDashboard(year, month),
-        placeholderData: keepPreviousData,
+        enabled: isAuthenticated,
         staleTime: 1000 * 60 * 5,
     });
+};

@@ -7,13 +7,20 @@ export interface DashboardSummary {
 }
 
 export interface DashboardComparisonMetric {
-    amount: number;
-    percent: number;
+    diff: number;
+    percent: number | null;
+}
+
+export interface DashboardComparisonSummary {
+    totalIncome: number;
+    totalExpense: number;
+    totalInvestment: number;
+    netSavings: number;
 }
 
 export interface DashboardComparison {
-    current: DashboardSummary;
-    previous: DashboardSummary;
+    current: DashboardComparisonSummary;
+    previous: DashboardComparisonSummary;
 
     change: {
         income: DashboardComparisonMetric;
@@ -28,29 +35,35 @@ export interface DashboardAccount {
     name: string;
     type: string;
     balance: number;
-    last4: string;
+    last4: string | null;
 }
 
 export interface DashboardCategory {
-    id: string;
+    categoryId: string | null;
     name: string;
-    amount: number;
-    percentage: number;
+    total: number;
 }
 
 export interface DashboardTransaction {
     id: string;
-    amount: string;
-    type: string;
     merchant: string | null;
     category: string | null;
+    amount: number;
+    type: "INCOME" | "EXPENSE" | "INVESTMENT" | "TRANSFER";
     date: string;
 }
 
 export interface DashboardResponse {
     summary: DashboardSummary;
-    comparison: DashboardComparison | null;
+    comparison: DashboardComparison;
     accounts: DashboardAccount[];
     topCategories: DashboardCategory[];
     recentTransactions: DashboardTransaction[];
+}
+
+export interface Merchant {
+    id: string;
+    name: string;
+    createdAt: string;
+    updatedAt: string;
 }

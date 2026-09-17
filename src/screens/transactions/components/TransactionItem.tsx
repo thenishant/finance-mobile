@@ -1,10 +1,19 @@
 import React, {useRef} from "react";
-import {Alert, Pressable, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {Alert, StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+
 import {Swipeable} from "react-native-gesture-handler";
-import {Feather} from "@expo/vector-icons";
-import {transactionColors} from "../../../design/transactionColors";
-import {TransactionType} from "../../../types/transaction";
-import {colors} from "../../../design";
+
+import AppIcon from "../../../components/common/AppIcon";
+import ListRow from "../../../components/common/ListRow";
+
+import {AmountText, Body, Caption,} from "../../../components/typography";
+
+import {colors, spacing,} from "../../../design";
+
+import {financeIcons, FinanceIconType,} from "../../../design/icons";
+
+import {TransactionType,} from "../../../types/transaction";
+import {fontSize} from "../../../design/font";
 
 interface Props {
     id: string;
@@ -23,6 +32,24 @@ interface Props {
     onPress: () => void;
 }
 
+const transactionIcon = (
+    type: TransactionType,
+): FinanceIconType => {
+    switch (type) {
+        case "INCOME":
+            return "income";
+
+        case "EXPENSE":
+            return "expense";
+
+        case "INVESTMENT":
+            return "investment";
+
+        case "TRANSFER":
+            return "transfer";
+    }
+};
+
 export const TransactionItem = ({
                                     id,
                                     type,
@@ -34,7 +61,8 @@ export const TransactionItem = ({
                                     onDelete,
                                     onPress,
                                 }: Props) => {
-    const swipeRef = useRef<Swipeable>(null);
+    const swipeRef =
+        useRef<Swipeable>(null);
 
     const handleDelete = () => {
         Alert.alert(
@@ -44,20 +72,35 @@ export const TransactionItem = ({
                 {
                     text: "Cancel",
                     style: "cancel",
-                }, {
-                text: "Delete",
-                style: "destructive",
-                onPress: () => {
-                    swipeRef.current?.close();
-                    onDelete(id);
                 },
-            },
-            ]
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () => {
+                        swipeRef.current?.close();
+                        onDelete(id);
+                    },
+                },
+            ],
         );
     };
 
-    const categoryLabel = category?.name;
-    const parentCategory = category?.parent?.name;
+    const iconType =
+        transactionIcon(type);
+
+    const icon =
+        financeIcons[iconType];
+
+    const titleText =
+        title?.trim() ||
+        category?.name ||
+        "Unknown";
+
+    const metadata = [
+        category?.parent?.name,
+        category?.name,
+        account,
+    ].filter(Boolean);
 
     return (
         <Swipeable
@@ -65,123 +108,89 @@ export const TransactionItem = ({
             renderRightActions={() => (
                 <TouchableOpacity
                     style={styles.deleteButton}
-                    onPress={handleDelete}>
-                    <Feather
-                        name="trash-2"
-                        size={18}
-                        color="#FFFFFF"/>
+                    onPress={handleDelete}
+                    activeOpacity={0.8}
+                >
+                    <AppIcon type="trash"/>
                 </TouchableOpacity>
             )}
-            overshootRight={false}>
-            <Pressable
+            overshootRight={false}
+        >
+            <ListRow
                 onPress={onPress}
-                android_ripple={{color: colors.white,}}
-                style={styles.container}>
-                <View style={styles.leftBlock}>
-
-                    <View style={[styles.dot, {backgroundColor: transactionColors[type].primary}]}/>
-                    <View style={styles.content}>
-                        <View style={styles.titleRow}>
-                            <Text
-                                numberOfLines={1}
-                                style={styles.category}>
-                                {title?.trim() || categoryLabel || type}
-                            </Text>
-
-                            {needsCategoryReview && (
-                                <View style={styles.reviewBadge}>
-                                    <Text style={styles.reviewText}>
-                                        Review
-                                    </Text>
-                                </View>
-                            )}
-                        </View>
-
-                        <Text
+                left={
+                    <AppIcon type={iconType}/>
+                }
+                title={
+                    <View style={styles.titleRow}>
+                        <Body
+                            weight="regular"
                             numberOfLines={1}
-                            style={styles.account}>
-                            {[parentCategory, account]
-                                .filter(Boolean)
-                                .join(" • ")}
-                        </Text>
-                    </View>
-                </View>
+                            ellipsizeMode="tail">
+                            {titleText}
+                        </Body>
 
-                <Text style={[styles.amount, {color: transactionColors[type].primary}]}>
-                    ₹{amount.toLocaleString("en-IN")}
-                </Text>
-            </Pressable>
+                        {needsCategoryReview && (
+                            <View style={styles.reviewBadge}>
+                                <Text style={styles.reviewText}>
+                                    Review
+                                </Text>
+                            </View>
+                        )}
+                    </View>
+                }
+                subtitle={
+                    metadata.length > 0 ? (
+                        <Caption
+                            color="textSecondary"
+                            numberOfLines={1}
+                            ellipsizeMode="tail"
+                        >
+                            {metadata.join(" • ")}
+                        </Caption>
+                    ) : undefined
+                }
+                trailing={
+                    <AmountText
+                        value={amount}
+                        color={icon.color}
+                        style={styles.amount}
+                    />
+                }
+            />
         </Swipeable>
     );
 };
 
 const styles = StyleSheet.create({
-    container: {
-        flexDirection: "row",
-        justifyContent: "space-between",
-        alignItems: "center",
-        paddingVertical: 16,
-        paddingHorizontal: 16,
-        backgroundColor: colors.white,
-    },
-
-    leftBlock: {
+    titleRow: {
         flexDirection: "row",
         alignItems: "center",
-        flex: 1,
-        gap: 12,
-        marginRight: 12,
+        minWidth: 0,
     },
 
-    content: {
-        flex: 1,
+    reviewBadge: {
+        marginLeft: 6,
+        paddingHorizontal: 7,
+        paddingVertical: 3,
+        borderRadius: 7,
+        backgroundColor: "#3A2B0A",
     },
 
-    category: {
-        fontSize: 15,
-        fontWeight: "700",
-        color: "#0F172A",
-    },
-
-    account: {
-        fontSize: 12,
-        color: colors.grey,
-        marginTop: 4,
+    reviewText: {
+        fontSize: fontSize.xs,
+        fontWeight: "bold",
+        color: colors.warning,
     },
 
     amount: {
-        fontSize: 16,
-        fontWeight: "800",
-    },
-
-    dot: {
-        width: 10,
-        height: 10,
-        borderRadius: 5,
+        fontSize: fontSize.lg,
+        fontWeight: "regular"
     },
 
     deleteButton: {
         justifyContent: "center",
-        backgroundColor: colors.red,
         alignItems: "center",
-        width: 72,
-    },
-    titleRow: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-
-    reviewBadge: {
-        marginLeft: 8,
-        backgroundColor: "#FEF3C7",
-        borderRadius: 10,
-        paddingHorizontal: 8,
-        paddingVertical: 2,
-        flexShrink: 0,
-    },
-    reviewText: {
-        color: "#B45309",
-        fontSize: 10,
-        fontWeight: "700",
+        marginLeft: spacing.sm
     },
 });

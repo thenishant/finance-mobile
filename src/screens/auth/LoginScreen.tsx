@@ -1,173 +1,282 @@
-import React, {useEffect, useState} from "react";
-import {Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import React, {useState} from "react";
+import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
-import {useAuth} from "../../hooks/useAuth";
+import {Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
+
 import {AuthStackParamList} from "../../navigation/AuthNavigator";
-import {api} from "../../services/api";
+import {useAuth} from "../../hooks/useAuth";
+import {authService} from "../../services/auth.service";
 import {supabase} from "../../lib/supabase";
 
 WebBrowser.maybeCompleteAuthSession();
 
-type Props = NativeStackScreenProps<AuthStackParamList, "Login">;
+type Props = NativeStackScreenProps<
+    AuthStackParamList,
+    "Login"
+>;
 
 const LoginScreen = ({navigation}: Props) => {
-    const {loginWithPassword, loginWithToken} = useAuth();
+    const {
+        loginWithPassword,
+        loginWithGoogle,
+    } = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
-    useEffect(() => {
-        const {data: listener} = supabase.auth.onAuthStateChange(
-            async (event, session) => {
-                // console.log("AUTH EVENT:", event);
-                // console.log("SESSION:", session?.access_token);
-
-                if (event === "SIGNED_IN" && session?.access_token) {
-                    try {
-                        console.log("Sending token to backend...");
-
-                        const res = await api.post("/auth/google", {
-                            supabaseToken: session.access_token,
-                        });
-
-                        const appToken = res.data.data.token;
-
-                        console.log("Backend token received:", appToken);
-
-                        await loginWithToken(appToken);
-
-                        // console.log("Login context updated");
-
-                    } catch (err) {
-
-                        console.log("GOOGLE BACKEND ERROR:", err);
-
-                        if ((err as any)?.response) {
-
-                            console.log(
-                                "GOOGLE BACKEND RESPONSE:",
-
-                                (err as any).response.data
-                            );
-
-                        }
-
-                    }
-                }
-            }
-        );
-
-        return () => {
-            listener.subscription.unsubscribe();
-        };
-    }, []);
+    const [googleLoading, setGoogleLoading] =
+        useState(false);
 
     const handleLogin = async () => {
         try {
-            await loginWithPassword(email, password);
+            await loginWithPassword(
+                email.trim(),
+                password,
+            );
         } catch (error) {
-            Alert.alert("Login Failed", "Invalid credentials");
+            console.error(
+                "Login failed:",
+                error,
+            );
+
+            Alert.alert(
+                "Login Failed",
+                "Invalid credentials",
+            );
         }
     };
 
     const handleGoogleLogin = async () => {
+        if (googleLoading) {
+            return;
+        }
+
+        setGoogleLoading(true);
+
         try {
-            const redirectTo = "finance-mobile://";
+            const {
+                authUrl,
+                redirectTo,
+            } = await authService.startGoogleLogin();
 
-            const {data, error} = await supabase.auth.signInWithOAuth({
-                provider: "google",
-                options: {
+            console.log(
+                "Opening Google OAuth:",
+                authUrl,
+            );
+
+            console.log(
+                "OAuth redirect:",
+                redirectTo,
+            );
+
+            const result =
+                await WebBrowser.openAuthSessionAsync(
+                    authUrl,
                     redirectTo,
-                    skipBrowserRedirect: true,
-                },
-            });
-
-            if (error) throw error;
-
-            if (data?.url) {
-                const result = await WebBrowser.openAuthSessionAsync(
-                    data.url,
-                    redirectTo
                 );
 
-                console.log(error)
-                if (result.type === "success" && result.url) {
-                    // 🔥 Extract tokens from URL
-                    const params = new URLSearchParams(
-                        result.url.split("#")[1]
-                    );
+            console.log(
+                "Google OAuth result:",
+                result,
+            );
 
-                    const access_token = params.get("access_token");
-                    const refresh_token = params.get("refresh_token");
-                    console.log(access_token)
-                    console.log(refresh_token)
-
-                    if (!access_token || !refresh_token) {
-                        throw new Error("Missing tokens from OAuth redirect");
-                    }
-
-                    const {error: sessionError} =
-                        await supabase.auth.setSession({
-                            access_token,
-                            refresh_token,
-                        });
-
-
-                    if (sessionError) throw sessionError;
-                }
+            if (
+                result.type !== "success" ||
+                !result.url
+            ) {
+                console.log(
+                    "Google OAuth cancelled",
+                );
+                return;
             }
 
-        } catch (err) {
-            console.log("Google login failed:", err);
+            console.log(
+                "Google callback URL:",
+                result.url,
+            );
+
+            const {
+                params,
+                errorCode,
+            } =
+                QueryParams.getQueryParams(
+                    result.url,
+                );
+
+            console.log(
+                "OAuth callback params:",
+                params,
+            );
+
+            if (errorCode) {
+                throw new Error(errorCode);
+            }
+
+            /*
+             * Implicit flow returns the access token
+             * in the callback URL.
+             */
+            if (!params.access_token) {
+                throw new Error(
+                    "Google authentication did not return a Supabase access token.",
+                );
+            }
+
+            /*
+             * Give the token to Supabase so it creates
+             * and persists the local session.
+             */
+            console.log(
+                "Google OAuth Access Token:",
+                params.access_token,
+            );
+
+            console.log(
+                "Google OAuth Refresh Token:",
+                params.refresh_token,
+            );
+
+            const {data, error} = await supabase.auth.setSession({
+                access_token: params.access_token,
+                refresh_token: params.refresh_token ?? "",
+            });
+
+            if (error) {
+                throw error;
+            }
+
+            const supabaseToken = data.session?.access_token;
+
+            if (!supabaseToken) {
+                throw new Error(
+                    "Supabase session was not created.",
+                );
+            }
+
+            console.log(
+                "Supabase Access Token:",
+                supabaseToken,
+            );
+
+            await loginWithGoogle(supabaseToken);
+
+            console.log("Finance application authentication successful",);
+
+            if (error) {
+                throw error;
+            }
+
+            if (!data.session?.access_token) {
+                throw new Error(
+                    "Supabase session was not created.",
+                );
+            }
+
+            console.log(
+                "Supabase authentication successful",
+            );
+
+        } catch (error) {
+            console.error(
+                "Google login failed:",
+                error,
+            );
+
+            Alert.alert(
+                "Google Login Failed",
+                error instanceof Error
+                    ? error.message
+                    : "Please try again.",
+            );
+        } finally {
+            setGoogleLoading(false);
         }
     };
 
-
     return (
         <View style={styles.container}>
-            <Text style={styles.logo}>Finance</Text>
-            <Text style={styles.subtitle}>Track. Grow. Simplify.</Text>
+            <Text style={styles.logo}>
+                Finance
+            </Text>
+
+            <Text style={styles.subtitle}>
+                Track. Grow. Simplify.
+            </Text>
 
             <View style={styles.card}>
                 <TextInput
                     placeholder="Email"
+                    placeholderTextColor="#71717A"
                     style={styles.input}
                     autoCapitalize="none"
+                    autoCorrect={false}
+                    keyboardType="email-address"
                     value={email}
                     onChangeText={setEmail}
                 />
 
                 <TextInput
                     placeholder="Password"
+                    placeholderTextColor="#71717A"
                     secureTextEntry
                     style={styles.input}
                     value={password}
                     onChangeText={setPassword}
                 />
 
-                <TouchableOpacity style={styles.primaryButton} onPress={handleLogin}>
-                    <Text style={styles.primaryText}>Login</Text>
+                <TouchableOpacity
+                    style={styles.primaryButton}
+                    onPress={handleLogin}
+                >
+                    <Text
+                        style={styles.primaryText}
+                    >
+                        Login
+                    </Text>
                 </TouchableOpacity>
 
                 <TouchableOpacity
                     style={styles.secondaryButton}
-                    onPress={() => navigation.navigate("Register")}
+                    onPress={() =>
+                        navigation.navigate(
+                            "Register",
+                        )
+                    }
                 >
-                    <Text style={styles.secondaryText}>Create Account</Text>
+                    <Text
+                        style={styles.secondaryText}
+                    >
+                        Create Account
+                    </Text>
                 </TouchableOpacity>
 
                 <View style={styles.divider}>
                     <View style={styles.line}/>
-                    <Text style={styles.or}>OR</Text>
+
+                    <Text style={styles.or}>
+                        OR
+                    </Text>
+
                     <View style={styles.line}/>
                 </View>
 
                 <TouchableOpacity
-                    style={styles.googleButton}
+                    style={[
+                        styles.googleButton,
+                        googleLoading &&
+                        styles.googleButtonDisabled,
+                    ]}
                     onPress={handleGoogleLogin}
+                    disabled={googleLoading}
                 >
-                    <Text style={styles.googleText}>Continue with Google</Text>
+                    <Text
+                        style={styles.googleText}
+                    >
+                        {googleLoading
+                            ? "Connecting..."
+                            : "Continue with Google"}
+                    </Text>
                 </TouchableOpacity>
             </View>
         </View>
@@ -179,7 +288,7 @@ export default LoginScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F1F5F9",
+        backgroundColor: "#000000",
         justifyContent: "center",
         padding: 24,
     },
@@ -187,35 +296,37 @@ const styles = StyleSheet.create({
     logo: {
         fontSize: 32,
         fontWeight: "700",
+        color: "#FFFFFF",
         textAlign: "center",
         marginBottom: 6,
     },
 
     subtitle: {
         textAlign: "center",
-        color: "#6B7280",
+        color: "#A1A1AA",
         marginBottom: 32,
     },
 
     card: {
-        backgroundColor: "#FFFFFF",
+        backgroundColor: "#131316",
         padding: 24,
         borderRadius: 20,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 20,
-        elevation: 4,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "#2C2C33",
     },
 
     input: {
-        backgroundColor: "#F9FAFB",
+        backgroundColor: "#1A1A1F",
+        color: "#FFFFFF",
         padding: 14,
         borderRadius: 10,
         marginBottom: 16,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "#2C2C33",
     },
 
     primaryButton: {
-        backgroundColor: "#2563EB",
+        backgroundColor: "#4F8CFF",
         padding: 14,
         borderRadius: 12,
         alignItems: "center",
@@ -233,7 +344,7 @@ const styles = StyleSheet.create({
     },
 
     secondaryText: {
-        color: "#2563EB",
+        color: "#4F8CFF",
         fontWeight: "500",
     },
 
@@ -245,20 +356,26 @@ const styles = StyleSheet.create({
 
     line: {
         flex: 1,
-        height: 1,
-        backgroundColor: "#E5E7EB",
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: "#2C2C33",
     },
 
     or: {
         marginHorizontal: 10,
-        color: "#9CA3AF",
+        color: "#71717A",
     },
 
     googleButton: {
-        backgroundColor: "#111827",
+        backgroundColor: "#222228",
         padding: 14,
         borderRadius: 12,
         alignItems: "center",
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: "#2C2C33",
+    },
+
+    googleButtonDisabled: {
+        opacity: 0.5,
     },
 
     googleText: {

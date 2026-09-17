@@ -1,8 +1,10 @@
 import React from "react";
-import {StyleSheet, Text, View} from "react-native";
+import {StyleSheet, View} from "react-native";
 import {Transaction} from "../../../types/transaction";
 import {TransactionItem} from "./TransactionItem";
-import {colors} from "../../../design";
+import SectionCard from "../../../components/common/SectionCard";
+import {Caption} from "../../../components/typography";
+import {colors, spacing} from "../../../design";
 
 interface Props {
     date: string;
@@ -19,84 +21,81 @@ export const TransactionGroup = ({
                                  }: Props) => {
     return (
         <View style={styles.section}>
-            <View style={styles.headerRow}>
-                <Text style={styles.date}>
+            <View style={styles.header}>
+                <Caption color="muted">
                     {date}
-                </Text>
+                </Caption>
 
-                <Text style={styles.count}>
+                <Caption color="muted">
                     {transactions.length}{" "}
-                    {transactions.length === 1
-                        ? "transaction"
-                        : "transactions"}
-                </Text>
+                    {transactions.length === 1 ? "transaction" : "transactions"}
+                </Caption>
             </View>
 
-            <View style={styles.group}>
-                {transactions.map((t, index) => (
-                    <View key={t.id}>
-                        <TransactionItem
-                            id={t.id}
-                            type={t.type}
-                            amount={Number(t.amount)}
-                            title={t.merchant?.name}
-                            category={t.category}
-                            account={t.sourceAccount?.name ?? t.destinationAccount?.name}
-                            needsCategoryReview={t.needsCategoryReview}
-                            onDelete={onDelete}
-                            onPress={() => onPress(t)}
-                        />
+            <SectionCard>
+                {transactions.map(
+                    (transaction, index) => (
+                        <React.Fragment
+                            key={transaction.id}
+                        >
+                            <TransactionItem
+                                id={transaction.id}
+                                type={transaction.type}
+                                amount={Number(
+                                    transaction.amount,
+                                )}
+                                title={
+                                    transaction.merchant?.name ??
+                                    transaction.merchantNormalized ??
+                                    undefined
+                                }
+                                category={
+                                    transaction.category
+                                }
+                                account={
+                                    transaction
+                                        .sourceAccount?.name ??
+                                    transaction
+                                        .destinationAccount?.name
+                                }
+                                needsCategoryReview={
+                                    transaction.needsCategoryReview
+                                }
+                                onDelete={onDelete}
+                                onPress={() =>
+                                    onPress(transaction)
+                                }
+                            />
 
-                        {index !==
-                            transactions.length - 1 && (
-                                <View
-                                    style={styles.divider}
-                                />
-                            )}
-                    </View>
-                ))}
-            </View>
+                            {index <
+                                transactions.length - 1 && (
+                                    <View
+                                        style={styles.divider}
+                                    />
+                                )}
+                        </React.Fragment>
+                    ),
+                )}
+            </SectionCard>
         </View>
     );
 };
 
 const styles = StyleSheet.create({
     section: {
-        marginBottom: 20,
+        marginBottom: spacing.sm,
     },
 
-    headerRow: {
+    header: {
         flexDirection: "row",
-        justifyContent: "space-between",
         alignItems: "center",
-        marginBottom: 8,
-        paddingHorizontal: 4,
-    },
-
-    date: {
-        fontSize: 11,
-        fontWeight: "700",
-        color: colors.grey,
-        letterSpacing: 0.5,
-    },
-
-    count: {
-        fontSize: 11,
-        fontWeight: "600",
-        color: colors.grey,
-    },
-
-    group: {
-        backgroundColor: colors.white,
-        borderRadius: 20,
-        overflow: "hidden",
-        borderWidth: 1,
-        borderColor: colors.white,
+        justifyContent: "space-between",
+        marginBottom: spacing.sm,
+        paddingHorizontal: spacing.sm,
     },
 
     divider: {
-        height: 1,
-        backgroundColor: "#EEF2F7",
-        marginLeft: 56,
+        height: spacing.xxs,
+        backgroundColor: colors.border,
     },
 });

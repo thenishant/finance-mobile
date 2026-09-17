@@ -18,27 +18,27 @@ type Props = TextProps & {
 
 const variantStyles: Record<Variant, TextStyle> = {
     display: {
-        fontSize: typography.display,
+        fontSize: typography.display.fontSize,
         fontWeight: "700",
     },
     title: {
-        fontSize: typography.title,
+        fontSize: typography.title.fontSize,
         fontWeight: "700",
     },
     heading: {
-        fontSize: typography.heading,
+        fontSize: typography.heading.fontSize,
         fontWeight: "600",
     },
     body: {
-        fontSize: typography.body,
+        fontSize: typography.body.fontSize,
         fontWeight: "400",
     },
     caption: {
-        fontSize: typography.caption,
+        fontSize: typography.caption.fontSize,
         fontWeight: "500",
     },
     small: {
-        fontSize: typography.small,
+        fontSize: typography.label.fontSize,
         fontWeight: "400",
     },
 };

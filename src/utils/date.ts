@@ -1,3 +1,30 @@
+export function formatDate(date: string) {
+    const d = new Date(date);
+    const today = new Date();
+    const yesterday = new Date();
+    yesterday.setDate(today.getDate() - 1);
+    if (d.toDateString() === today.toDateString()) {
+        return "Today";
+    }
+    if (d.toDateString() === yesterday.toDateString()) {
+        return "Yesterday";
+    }
+    const diff = Math.floor(
+        (today.getTime() - d.getTime()) /
+        (1000 * 60 * 60 * 24),
+    );
+
+    if (diff < 7) {
+        return `${diff} days ago`;
+    }
+
+    return d.toLocaleDateString("en-IN", {
+        day: "numeric",
+        month: "short",
+    });
+
+}
+
 export const formatDateLabel = (dateString: string) => {
     const date = new Date(dateString);
     const today = new Date();
@@ -17,17 +44,6 @@ export const formatDateLabel = (dateString: string) => {
         month: "short",
         year: "numeric",
     });
-};
-
-export const formatDate = (date?: string) => {
-    if (!date) return "-";
-
-    return new Date(date).toLocaleDateString("en-IN", {
-            day: "numeric",
-            month: "short",
-            year: "numeric",
-        }
-    );
 };
 
 export const formatDateTime = (date?: string) => {

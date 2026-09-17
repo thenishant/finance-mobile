@@ -1,12 +1,15 @@
 import React from "react";
-import {ActivityIndicator, Alert, StyleSheet, Text, View,} from "react-native";
+import {ActivityIndicator, Alert, ScrollView, StyleSheet, Text, View,} from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
 import {RouteProp, useNavigation, useRoute,} from "@react-navigation/native";
 import {useMutation, useQuery, useQueryClient,} from "@tanstack/react-query";
+
 import {Button} from "../../components/common/ui";
 import {transactionService} from "../../services/transaction.service";
 import {Transaction} from "../../types/transaction";
 import {formatDateTime} from "../../utils/date";
+import {colors} from "../../design";
+import {transactionColors} from "../../design/transactionColors";
 
 type RouteParams = {
     TransactionDetail: {
@@ -14,35 +17,16 @@ type RouteParams = {
     };
 };
 
-const getTransactionColor = (
-    type?: string
-) => {
-    switch (type) {
-        case "INCOME":
-            return "#16A34A";
-        case "EXPENSE":
-            return "#DC2626";
-        case "INVESTMENT":
-            return "#4F46E5";
-        case "TRANSFER":
-            return "#2563EB";
-        default:
-            return "#6B7280";
-    }
-};
-
-const DetailRow = ({label, value}: {
+const DetailRow = ({
+                       label,
+                       value,
+                   }: {
     label: string;
     value?: string | number | null;
 }) => (
     <View style={styles.row}>
-        <Text style={styles.label}>
-            {label}
-        </Text>
-
-        <Text style={styles.value}>
-            {value || "-"}
-        </Text>
+        <Text style={styles.label}>{label}</Text>
+        <Text style={styles.value}>{value || "-"}</Text>
     </View>
 );
 
@@ -51,10 +35,9 @@ const ReviewBanner = () => (
         <Text style={styles.reviewTitle}>
             ⚠ Review Suggested Category
         </Text>
-
         <Text style={styles.reviewSubtitle}>
-            We weren't completely confident about the AI-selected category.
-            Please review it and edit the transaction if needed.
+            We weren't completely confident about the AI-selected
+            category. Please review it and edit the transaction if needed.
         </Text>
     </View>
 );
@@ -62,49 +45,54 @@ const ReviewBanner = () => (
 const TransactionDetailScreen = () => {
     const navigation = useNavigation<any>();
     const queryClient = useQueryClient();
-    const route = useRoute<RouteProp<RouteParams, "TransactionDetail">>();
+    const route =
+        useRoute<RouteProp<RouteParams, "TransactionDetail">>();
     const {transactionId} = route.params;
 
-    const {data: transaction, isLoading,} = useQuery<Transaction>({
-        queryKey: ["transaction", transactionId,],
-        queryFn: () => transactionService.getById(transactionId),
-    });
-
-    const deleteMutation =
-        useMutation({
-            mutationFn: (id: string) =>
-                transactionService.delete(id),
-
-            onSuccess: async () => {
-                await queryClient.invalidateQueries({
-                    queryKey: [
-                        "transactions",
-                    ],
-                });
-
-                navigation.goBack();
-            },
+    const {data: transaction, isLoading} =
+        useQuery<Transaction>({
+            queryKey: ["transaction", transactionId],
+            queryFn: () =>
+                transactionService.getById(transactionId),
         });
+
+    const deleteMutation = useMutation({
+        mutationFn: (id: string) =>
+            transactionService.delete(id),
+
+        onSuccess: async () => {
+            await queryClient.invalidateQueries({
+                queryKey: ["transactions"],
+            });
+            navigation.goBack();
+        },
+    });
 
     const handleDelete = () => {
         Alert.alert(
             "Delete Transaction",
-            `Delete ₹${Number(transaction?.amount ?? 0).toLocaleString("en-IN")} transaction?`,
-            [{
-                text: "Cancel",
-                style: "cancel",
-            }, {
-                text: "Delete",
-                style: "destructive",
-                onPress: () => deleteMutation.mutate(transactionId),
-            }]
+            `Delete ₹${Number(
+                transaction?.amount ?? 0,
+            ).toLocaleString("en-IN")} transaction?`,
+            [
+                {text: "Cancel", style: "cancel"},
+                {
+                    text: "Delete",
+                    style: "destructive",
+                    onPress: () =>
+                        deleteMutation.mutate(transactionId),
+                },
+            ],
         );
     };
 
     if (isLoading) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <ActivityIndicator size="large"/>
+                <ActivityIndicator
+                    size="small"
+                    color={colors.textMuted}
+                />
             </SafeAreaView>
         );
     }
@@ -112,26 +100,51 @@ const TransactionDetailScreen = () => {
     if (!transaction) {
         return (
             <SafeAreaView style={styles.loadingContainer}>
-                <Text>Transaction not found</Text>
+                <Text style={styles.emptyText}>
+                    Transaction not found
+                </Text>
             </SafeAreaView>
         );
     }
 
-    const color = getTransactionColor(transaction.type);
-    console.log(transaction.date);
-    console.log(new Date(transaction.date).toString());
-    console.log(new Date(transaction.date).toISOString());
+    const amountColor =
+        transactionColors[transaction.type].primary;
+
     return (
         <SafeAreaView
             edges={["left", "right", "bottom"]}
-            style={styles.container}>
-            <View style={styles.content}>
+            style={styles.container}
+        >
+            <ScrollView
+                showsVerticalScrollIndicator={false}
+                contentContainerStyle={styles.content}
+            >
                 {transaction.needsCategoryReview && (
                     <ReviewBanner/>
                 )}
+
                 <View style={styles.hero}>
-                    <Text style={[styles.amount, {color},]}>
-                        ₹{Number(transaction.amount).toLocaleString("en-IN")}
+                    <Text
+                        style={[
+                            styles.amount,
+                            {color: amountColor},
+                        ]}
+                    >
+                        ₹
+                        {Number(
+                            transaction.amount,
+                        ).toLocaleString("en-IN")}
+                    </Text>
+
+                    <Text style={styles.heroTitle}>
+                        {transaction.merchant?.name ??
+                            transaction.merchantNormalized ??
+                            transaction.merchantRaw ??
+                            "Transaction"}
+                    </Text>
+
+                    <Text style={styles.heroDate}>
+                        {formatDateTime(transaction.date)}
                     </Text>
                 </View>
 
@@ -153,10 +166,12 @@ const TransactionDetailScreen = () => {
                         />
                     )}
 
-                    {transaction.category && transaction.category.parent && (
+                    {transaction.category?.parent && (
                         <DetailRow
                             label="Main Category"
-                            value={transaction.category.parent.name}
+                            value={
+                                transaction.category.parent.name
+                            }
                         />
                     )}
 
@@ -170,14 +185,18 @@ const TransactionDetailScreen = () => {
                     {transaction.sourceAccount?.name && (
                         <DetailRow
                             label="From Account"
-                            value={transaction.sourceAccount.name}
+                            value={
+                                transaction.sourceAccount.name
+                            }
                         />
                     )}
 
                     {transaction.destinationAccount?.name && (
                         <DetailRow
                             label="To Account"
-                            value={transaction.destinationAccount.name}
+                            value={
+                                transaction.destinationAccount.name
+                            }
                         />
                     )}
 
@@ -188,16 +207,19 @@ const TransactionDetailScreen = () => {
                         />
                     )}
                 </View>
+
                 <View style={styles.actions}>
                     <View style={styles.actionButton}>
                         <Button
                             title="Edit"
                             onPress={() =>
                                 navigation.navigate(
-                                    "AddTransaction", {
+                                    "AddTransaction",
+                                    {
                                         mode: "edit",
-                                        transactionId: transaction.id,
-                                    }
+                                        transactionId:
+                                        transaction.id,
+                                    },
                                 )
                             }
                         />
@@ -205,13 +227,17 @@ const TransactionDetailScreen = () => {
 
                     <View style={styles.actionButton}>
                         <Button
-                            title={deleteMutation.isPending ? "Deleting..." : "Delete"}
+                            title={
+                                deleteMutation.isPending
+                                    ? "Deleting..."
+                                    : "Delete"
+                            }
                             variant="secondary"
                             onPress={handleDelete}
                         />
                     </View>
                 </View>
-            </View>
+            </ScrollView>
         </SafeAreaView>
     );
 };
@@ -221,99 +247,115 @@ export default TransactionDetailScreen;
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor:
-            "#F5F7FA",
+        backgroundColor: colors.darkBackground,
     },
+
     content: {
-        flex: 1,
-        paddingHorizontal: 16,
-        paddingTop: 8,
-        paddingBottom: 16,
+        paddingHorizontal: 32,
+        paddingTop: 12,
+        paddingBottom: 40,
     },
+
     loadingContainer: {
         flex: 1,
-        justifyContent:
-            "center",
+        justifyContent: "center",
         alignItems: "center",
+        backgroundColor: colors.darkBackground,
     },
+
     hero: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 20,
-        paddingVertical: 20,
-        paddingHorizontal: 20,
         alignItems: "center",
-        marginBottom: 16,
+        paddingVertical: 24,
+        paddingHorizontal: 20,
+        marginBottom: 14,
+        borderRadius: 28,
+        backgroundColor: colors.darkGrey,
     },
+
     amount: {
-        fontSize: 32,
+        fontSize: 34,
         fontWeight: "800",
     },
-    category: {
-        marginTop: 8,
-        fontSize: 16,
+
+    heroTitle: {
+        marginTop: 10,
+        fontSize: 18,
         fontWeight: "700",
-        color: "#111827",
+        color: colors.white,
+        textAlign: "center",
     },
-    date: {
-        marginTop: 4,
+
+    heroDate: {
+        marginTop: 5,
         fontSize: 13,
-        color: "#6B7280",
+        color: colors.textSecondary,
     },
+
     card: {
-        backgroundColor:
-            "#FFFFFF",
-        borderRadius: 20,
-        paddingHorizontal: 16,
-        paddingVertical: 4,
+        overflow: "hidden",
+        borderRadius: 28,
+        paddingHorizontal: 20,
+        backgroundColor: colors.darkGrey,
         marginBottom: 16,
     },
+
     row: {
         flexDirection: "row",
-        justifyContent:
-            "space-between",
-        alignItems: "center",
-        paddingVertical: 12,
+        justifyContent: "space-between",
+        alignItems: "flex-start",
+        paddingVertical: 16,
         borderBottomWidth: StyleSheet.hairlineWidth,
-        borderBottomColor:
-            "#F3F4F6",
+        borderBottomColor: colors.border,
     },
+
     label: {
-        fontSize: 14,
-        color: "#6B7280",
+        fontSize: 13,
+        color: colors.textSecondary,
     },
+
     value: {
+        maxWidth: "62%",
         fontSize: 14,
         fontWeight: "600",
-        color: "#111827",
-        maxWidth: "60%",
+        color: colors.white,
         textAlign: "right",
     },
+
     actions: {
         flexDirection: "row",
         gap: 12,
-        marginBottom: 32,
+        marginBottom: 20,
     },
+
     actionButton: {
         flex: 1,
     },
+
     reviewBanner: {
-        borderRadius: 16,
+        borderRadius: 18,
         padding: 16,
-        marginBottom: 16,
+        marginBottom: 14,
         borderWidth: 1,
-        backgroundColor: "#FEF3C7",
-        borderColor: "#FCD34D",
+        backgroundColor: "#2A220F",
+        borderColor: "#5B4610",
     },
+
     reviewTitle: {
         fontSize: 15,
         fontWeight: "700",
-        color: "#92400E",
+        color: "#F59E0B",
     },
 
     reviewSubtitle: {
         marginTop: 6,
         fontSize: 13,
         lineHeight: 18,
-        color: "#92400E",
+        color: colors.textSecondary,
+    },
+
+    emptyText: {
+        fontSize: 15,
+        fontWeight: "600",
+        color: colors.textSecondary,
     },
 });

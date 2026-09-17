@@ -1,16 +1,27 @@
 import React from "react";
-import {ActivityIndicator, FlatList, RefreshControl, StyleSheet, Text, View,} from "react-native";
+import {ActivityIndicator, FlatList, RefreshControl, StyleSheet, View,} from "react-native";
+
 import {TransactionGroup} from "./TransactionGroup";
+
 import {GroupedTransaction, Transaction,} from "../../../types/transaction";
-import {colors} from "../../../design/colors";
+
+import {Body} from "../../../components/typography";
+
+import {ControlGroup} from "../../../components/common/ui";
+
+import {colors, spacing,} from "../../../design";
 
 interface Props {
     data: GroupedTransaction[];
+
     isLoading: boolean;
     refreshing: boolean;
+
     onRefresh: () => void;
     onDelete: (id: string) => void;
     onPress: (transaction: Transaction) => void;
+
+    controls: React.ComponentProps<typeof ControlGroup>["controls"];
 }
 
 export const TransactionList = ({
@@ -20,21 +31,19 @@ export const TransactionList = ({
                                     onRefresh,
                                     onDelete,
                                     onPress,
+                                    controls,
                                 }: Props) => {
     if (isLoading) {
         return (
             <View style={styles.center}>
-                <ActivityIndicator size="large"/>
-            </View>
-        );
-    }
+                <ActivityIndicator
+                    size="small"
+                    color={colors.primary}
+                />
 
-    if (!data.length) {
-        return (
-            <View style={styles.center}>
-                <Text style={styles.emptyText}>
-                    No transactions yet
-                </Text>
+                <Body color="muted">
+                    Loading transactions...
+                </Body>
             </View>
         );
     }
@@ -42,41 +51,65 @@ export const TransactionList = ({
     return (
         <FlatList
             data={data}
-            keyExtractor={(item) => item.date}
-            contentContainerStyle={styles.content}
+            keyExtractor={item => item.date}
             showsVerticalScrollIndicator={false}
+            contentContainerStyle={[
+                styles.content,
+                !data.length && styles.emptyContent,
+            ]}
             refreshControl={
                 <RefreshControl
                     refreshing={refreshing}
-                    onRefresh={onRefresh}/>
+                    onRefresh={onRefresh}
+                    tintColor={colors.primary}
+                />
+            }
+            ListHeaderComponent={
+                <ControlGroup controls={controls}/>
+            }
+            ListEmptyComponent={
+                <View style={styles.empty}>
+                    <Body weight="regular">
+                        No transactions yet
+                    </Body>
+
+                    <Body color="muted">
+                        Your transactions will appear here.
+                    </Body>
+                </View>
             }
             renderItem={({item}) => (
                 <TransactionGroup
                     date={item.date}
                     transactions={item.transactions}
                     onDelete={onDelete}
-                    onPress={onPress}/>
-            )}/>
+                    onPress={onPress}
+                />
+            )}
+        />
     );
 };
 
 const styles = StyleSheet.create({
     content: {
-        paddingHorizontal: 16,
-        paddingTop: 12,
-        paddingBottom: 100,
-        backgroundColor: colors.darkGrey,
+        paddingBottom: spacing.xl,
+    },
+
+    emptyContent: {
+        flexGrow: 1,
+    },
+
+    empty: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        gap: spacing.xs,
     },
 
     center: {
         flex: 1,
-        justifyContent: "center",
         alignItems: "center",
-    },
-
-    emptyText: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: colors.grey,
+        justifyContent: "center",
+        gap: spacing.xs,
     },
 });

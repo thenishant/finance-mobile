@@ -1,161 +1,81 @@
-import React, {useRef} from "react";
-import {ActivityIndicator, PanResponder, Pressable, StyleSheet, View} from "react-native";
+import React from "react";
+import {Pressable, StyleSheet, View,} from "react-native";
+import Ionicons from "@expo/vector-icons/Ionicons";
 
-import {AppText, Icon} from "../";
-import {colors, spacing} from "../../../design";
-import {useMonthStore} from "../../../stores/useMonthStore";
-import {monthNames} from "../../../utils/months";
+import {colors, radius, shadows, spacing,} from "../../../design";
 
-type Props = {
-    trend?: number | null;
-    variant?: "light" | "dark";
-    loading?: boolean;
-};
+import {Body, Caption,} from "../../typography";
+
+interface Props {
+    year: number;
+    month: number;
+    onPrevious: () => void;
+    onNext: () => void;
+}
+
+const MONTHS = [
+    "January",
+    "February",
+    "March",
+    "April",
+    "May",
+    "June",
+    "July",
+    "August",
+    "September",
+    "October",
+    "November",
+    "December",
+];
 
 export default function MonthSelector({
-                                          trend,
-                                          variant = "light",
-                                          loading = false,
+                                          year,
+                                          month,
+                                          onPrevious,
+                                          onNext,
                                       }: Props) {
-    const year = useMonthStore((s) => s.year);
-    const month = useMonthStore((s) => s.month);
-    const prevMonth = useMonthStore((s) => s.prevMonth);
-    const nextMonth = useMonthStore((s) => s.nextMonth);
-
-    const dark = variant === "dark";
-
-    const textColor = dark ? colors.white : colors.text;
-    const iconColor = dark ? colors.darkGrey : colors.muted;
-
-    const now = new Date();
-
-    const canGoNext =
-        year < now.getFullYear() ||
-        (year === now.getFullYear() &&
-            month < now.getMonth() + 1);
-
-    const previous = () => prevMonth();
-
-    const next = () => {
-        if (canGoNext) {
-            nextMonth();
-        }
-    };
-
-    const panResponder = useRef(
-        PanResponder.create({
-            onMoveShouldSetPanResponder: (_, g) =>
-                Math.abs(g.dx) > 30,
-
-            onPanResponderRelease: (_, g) => {
-                if (loading) {
-                    return;
-                }
-                if (g.dx > 60) {
-                    previous();
-                } else if (g.dx < -60) {
-                    next();
-                }
-            },
-        })
-    ).current;
-
-    // const trend = comparison?.change?.expense?.percent;
-
-    const trendColor =
-        trend == null
-            ? colors.grey
-            : trend > 0
-                ? colors.red
-                : trend < 0
-                    ? colors.green
-                    : colors.grey;
-
-    const trendIcon =
-        trend == null
-            ? "remove-outline"
-            : trend > 0
-                ? "trending-up-outline"
-                : trend < 0
-                    ? "trending-down-outline"
-                    : "remove-outline";
-
     return (
-        <View
-            {...panResponder.panHandlers}
-            style={styles.container}
-        >
+        <View style={styles.container}>
             <Pressable
-                style={styles.button}
-                onPress={previous}
-                disabled={loading}
+                onPress={onPrevious}
                 hitSlop={8}
+                style={({pressed}) => [
+                    styles.button,
+                    pressed && styles.pressed,
+                ]}
             >
-                <Icon
+                <Ionicons
                     name="chevron-back"
-                    size={22}
-                    color={iconColor}
+                    size={20}
+                    color={colors.text}
                 />
             </Pressable>
 
-            <View style={styles.center}>
-                <View style={styles.pill}>
-                    <AppText
-                        variant="body"
-                        weight="700"
-                        color={textColor}
-                    >
-                        {monthNames[month - 1]} {year}
-                    </AppText>
+            <View style={styles.month}>
+                <Body
+                    weight="semibold"
+                    style={styles.monthName}
+                >
+                    {MONTHS[month - 1]}
+                </Body>
 
-                    {loading ? (
-                        <ActivityIndicator
-                            size="small"
-                            color={textColor}
-                        />
-                    ) : (
-                        trend != null && (
-                            <View
-                                style={[
-                                    styles.badge,
-                                    {
-                                        backgroundColor: `${trendColor}15`,
-                                    },
-                                ]}
-                            >
-                                <Icon
-                                    name={trendIcon}
-                                    size={12}
-                                    color={trendColor}
-                                />
-
-                                <AppText
-                                    variant="small"
-                                    weight="700"
-                                    color={trendColor}
-                                >
-                                    {Math.abs(trend)}%
-                                </AppText>
-                            </View>
-                        )
-                    )}
-                </View>
+                <Caption color="muted">
+                    {year}
+                </Caption>
             </View>
 
             <Pressable
-                style={styles.button}
-                onPress={next}
-                disabled={!canGoNext || loading}
+                onPress={onNext}
                 hitSlop={8}
+                style={({pressed}) => [
+                    styles.button,
+                    pressed && styles.pressed,
+                ]}
             >
-                <Icon
+                <Ionicons
                     name="chevron-forward"
-                    size={22}
-                    color={
-                        canGoNext
-                            ? iconColor
-                            : colors.border
-                    }
+                    size={20}
+                    color={colors.text}
                 />
             </Pressable>
         </View>
@@ -166,32 +86,43 @@ const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
         alignItems: "center",
-        paddingHorizontal: spacing.sm,
-        paddingVertical: spacing.sm,
+        justifyContent: "space-between",
+
+        backgroundColor: colors.surface,
+
+        borderRadius: radius.lg,
+        borderWidth: 1,
+        borderColor: colors.border,
+
+        padding: spacing.xs,
+
+        ...shadows.card,
     },
 
     button: {
-        width: 40,
+        width: 42,
+        height: 42,
+
         alignItems: "center",
+        justifyContent: "center",
+
+        backgroundColor: colors.background,
+
+        borderRadius: radius.md,
     },
 
-    center: {
+    pressed: {
+        opacity: 0.7,
+    },
+
+    month: {
         flex: 1,
+
         alignItems: "center",
+        justifyContent: "center",
     },
 
-    pill: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: spacing.sm,
-    },
-
-    badge: {
-        flexDirection: "row",
-        alignItems: "center",
-        gap: 4,
-        paddingHorizontal: spacing.sm,
-        paddingVertical: 2,
-        borderRadius: 999,
+    monthName: {
+        textAlign: "center",
     },
 });

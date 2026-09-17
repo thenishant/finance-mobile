@@ -1,8 +1,8 @@
 import React from "react";
 import {StyleSheet, View} from "react-native";
-import {AppText} from "../common";
-import {colors, spacing} from "../../design";
-import {formatCurrency} from "../../utils/currency";
+import {formatCurrency} from "../../../utils/currency";
+import {colors, spacing} from "../../../design";
+import {AppText} from "../../../components/common";
 
 type SummaryRowProps = {
     label: string;

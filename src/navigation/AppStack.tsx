@@ -10,11 +10,10 @@ import {CreateAccountScreen} from "../screens/accounts/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
 import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
 
-import {Button} from "../components/common/ui";
 import {TransactionType} from "../types/transaction";
-import {transactionService} from "../services/transaction.service";
 import TransactionDetailScreen from "../screens/transactions/TransactionDetailScreen";
 import {AccountDetailScreen} from "../screens/accounts/AccountDetailScreen";
+import {Button} from "../components/Button";
 
 export type AppStackParamList = {
     Tabs: undefined;
@@ -38,7 +37,7 @@ export const AppStack = () => {
     useEffect(() => {
         queryClient.prefetchQuery({
             queryKey: ["transactions"],
-            queryFn: transactionService.getAll,
+            // queryFn: transactionService.getAll,
         });
     }, []);
 

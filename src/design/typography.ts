@@ -1,8 +1,31 @@
 export const typography = {
-    display: 34,
-    title: 24,
-    heading: 20,
-    body: 16,
-    caption: 13,
-    small: 12,
-};
+    display: {
+        fontSize: 40,
+        lineHeight: 48,
+    },
+
+    title: {
+        fontSize: 30,
+        lineHeight: 38,
+    },
+
+    heading: {
+        fontSize: 22,
+        lineHeight: 30,
+    },
+
+    body: {
+        fontSize: 16,
+        lineHeight: 24,
+    },
+
+    caption: {
+        fontSize: 13,
+        lineHeight: 18,
+    },
+
+    label: {
+        fontSize: 12,
+        lineHeight: 16,
+    },
+} as const;

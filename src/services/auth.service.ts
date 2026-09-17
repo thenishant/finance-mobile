@@ -1,34 +1,64 @@
 import {api} from "./api";
-import {supabase} from "../lib/supabase";
-import * as AuthSession from "expo-auth-session";
 import {unwrap} from "./base";
+import {supabase} from "../lib/supabase";
 
 export const authService = {
-
-    async login(email: string, password: string): Promise<string> {
-        const res = await api.post("/auth/login", {email, password});
-        return unwrap<{ token: string }>(res).token;
-    },
-
-    async register(email: string, password: string): Promise<string> {
-        const res = await api.post("/auth/register", {email, password});
-        return unwrap<{ token: string }>(res).token;
-    },
-
-    async googleOAuth() {
-        const redirectTo = AuthSession.makeRedirectUri({
-            scheme: "finance-mobile",
-        });
-
-        const {data, error} = await supabase.auth.signInWithOAuth({
-            provider: "google",
-            options: {
-                redirectTo,
-                skipBrowserRedirect: true,
+    async login(
+        email: string,
+        password: string,
+    ): Promise<string> {
+        const res = await api.post(
+            "/auth/login",
+            {
+                email,
+                password,
             },
-        });
+        );
 
-        if (error) throw error;
+        return unwrap<{ token: string }>(res).token;
+    },
+
+    async register(
+        email: string,
+        password: string,
+    ): Promise<string> {
+        const res = await api.post(
+            "/auth/register",
+            {
+                email,
+                password,
+            },
+        );
+
+        return unwrap<{ token: string }>(res).token;
+    },
+
+    async startGoogleLogin() {
+        const redirectTo = "finance-mobile://auth/callback";
+
+        console.log(
+            "OAuth redirect:",
+            redirectTo,
+        );
+
+        const {data, error} =
+            await supabase.auth.signInWithOAuth({
+                provider: "google",
+                options: {
+                    redirectTo,
+                    skipBrowserRedirect: true,
+                },
+            });
+
+        if (error) {
+            throw error;
+        }
+
+        if (!data?.url) {
+            throw new Error(
+                "Google OAuth URL not returned.",
+            );
+        }
 
         return {
             authUrl: data.url,
@@ -36,7 +66,16 @@ export const authService = {
         };
     },
 
-    async logout() {
-        await supabase.auth.signOut();
+    async googleLogin(
+        supabaseToken: string,
+    ): Promise<string> {
+        const res = await api.post(
+            "/auth/google",
+            {
+                supabaseToken,
+            },
+        );
+
+        return unwrap<{ token: string }>(res).token;
     },
 };

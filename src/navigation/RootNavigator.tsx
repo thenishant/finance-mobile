@@ -1,24 +1,40 @@
 import React from "react";
-import {DefaultTheme, NavigationContainer} from "@react-navigation/native";
-import {ActivityIndicator, View} from "react-native";
+
+import {ActivityIndicator, View,} from "react-native";
+
+import {DarkTheme, NavigationContainer,} from "@react-navigation/native";
+
 import {AuthNavigator} from "./AuthNavigator";
 import {AppStack} from "./AppStack";
+
 import {useAuth} from "../hooks/useAuth";
+import {colors} from "../design";
 
 const AppTheme = {
-    ...DefaultTheme,
+    ...DarkTheme,
     colors: {
-        ...DefaultTheme.colors,
-        background: "#F5F7FA",
+        ...DarkTheme.colors,
+        background: colors.background,
+        card: colors.surface,
     },
 };
 
 export const RootNavigator = () => {
-    const {token, loading} = useAuth();
+
+    const {
+        loading,
+        isAuthenticated,
+    } = useAuth();
 
     if (loading) {
+
         return (
-            <View style={{flex: 1, justifyContent: "center", alignItems: "center"}}>
+            <View
+                style={{
+                    flex: 1,
+                    justifyContent: "center",
+                    alignItems: "center",
+                }}>
                 <ActivityIndicator size="large"/>
             </View>
         );
@@ -26,7 +42,7 @@ export const RootNavigator = () => {
 
     return (
         <NavigationContainer theme={AppTheme}>
-            {token ? <AppStack/> : <AuthNavigator/>}
+            {isAuthenticated ? <AppStack/> : <AuthNavigator/>}
         </NavigationContainer>
     );
 };

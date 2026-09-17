@@ -1,51 +1,104 @@
-import {useEffect} from "react";
-import AsyncStorage from "@react-native-async-storage/async-storage";
-import {useQueryClient} from "@tanstack/react-query";
+import {useCallback} from "react";
+
+import {queryClient} from "../lib/queryClient";
+import {supabase} from "../lib/supabase";
+
 import {authService} from "../services/auth.service";
+
 import {useAuthStore} from "../stores/useAuthStore";
 
 export const useAuth = () => {
-    const {token, loading, setToken, setLoading} = useAuthStore();
-    const queryClient = useQueryClient();
 
-    useEffect(() => {
-        const loadToken = async () => {
-            const storedToken = await AsyncStorage.getItem("access_token");
-            setToken(storedToken);
-            setLoading(false);
-        };
+    const token =
+        useAuthStore(state => state.token);
 
-        loadToken();
-    }, []);
+    const loading =
+        useAuthStore(state => state.loading);
 
-    const loginWithPassword = async (email: string, password: string) => {
-        const newToken = await authService.login(email, password);
+    const initialize =
+        useAuthStore(state => state.initialize);
 
-        await AsyncStorage.setItem("access_token", newToken);
-        setToken(newToken);
-    };
+    const login =
+        useAuthStore(state => state.login);
 
-    const loginWithToken = async (newToken: string) => {
-        await AsyncStorage.setItem("access_token", newToken);
-        setToken(newToken);
-    };
+    const clearSession =
+        useAuthStore(state => state.clearSession);
 
-    const logout = async () => {
-        await authService.logout();
+    const loginWithPassword = useCallback(
+        async (
+            email: string,
+            password: string,
+        ) => {
 
-        await AsyncStorage.removeItem("access_token");
+            const token =
+                await authService.login(
+                    email,
+                    password,
+                );
 
-        // Clear React Query cache
-        queryClient.clear();
+            await login(token);
 
-        setToken(null);
-    };
+        },
+        [login],
+    );
+
+    const loginWithToken = useCallback(
+        async (
+            token: string,
+        ) => {
+
+            await login(token);
+
+        },
+        [login],
+    );
+
+    const loginWithGoogle = useCallback(
+        async (supabaseToken: string) => {
+            const token =
+                await authService.googleLogin(
+                    supabaseToken,
+                );
+
+            await login(token);
+        },
+        [login],
+    );
+
+    const logout = useCallback(
+        async () => {
+
+            try {
+
+                await supabase.auth.signOut();
+
+            } catch (error) {
+
+                console.warn(
+                    "Supabase logout failed",
+                    error,
+                );
+
+            }
+
+            await clearSession();
+
+            queryClient.clear();
+
+        },
+        [clearSession],
+    );
 
     return {
         token,
         loading,
+        isAuthenticated: !!token,
+        initialize,
         loginWithPassword,
         loginWithToken,
+        loginWithGoogle,
         logout,
+        clearSession,
     };
+
 };
