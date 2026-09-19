@@ -41,9 +41,7 @@ export const TransactionGroup = ({
                             <TransactionItem
                                 id={transaction.id}
                                 type={transaction.type}
-                                amount={Number(
-                                    transaction.amount,
-                                )}
+                                amount={Number(transaction.amount,)}
                                 title={
                                     transaction.merchant?.name ??
                                     transaction.merchantNormalized ??

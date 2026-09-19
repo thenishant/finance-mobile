@@ -1,31 +1,33 @@
+import {fontSize} from "./font";
+
 export const typography = {
     display: {
-        fontSize: 40,
+        fontSize: fontSize.xxxl,
         lineHeight: 48,
     },
 
     title: {
-        fontSize: 30,
+        fontSize: fontSize.xxl,
         lineHeight: 38,
     },
 
     heading: {
-        fontSize: 22,
+        fontSize: fontSize.xl,
         lineHeight: 30,
     },
 
     body: {
-        fontSize: 16,
+        fontSize: fontSize.md,
         lineHeight: 24,
     },
 
     caption: {
-        fontSize: 13,
+        fontSize: fontSize.sm,
         lineHeight: 18,
     },
 
     label: {
-        fontSize: 12,
+        fontSize: fontSize.xs,
         lineHeight: 16,
     },
 } as const;

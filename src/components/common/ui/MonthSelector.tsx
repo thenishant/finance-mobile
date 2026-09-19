@@ -54,8 +54,7 @@ export default function MonthSelector({
                 />
             </Pressable>
             <View style={styles.month}>
-                <Body weight="semibold" style={styles.monthName}>{MONTHS[month - 1]}</Body>
-                <Caption color="muted">{year}</Caption>
+                <Body weight="semibold" style={styles.monthName}>{MONTHS[month - 1]} {year}</Body>
             </View>
 
             <Pressable
@@ -91,12 +90,12 @@ const styles = StyleSheet.create({
     },
 
     button: {
-        width: 42,
-        height: 42,
+        width: 32,
+        height: 32,
         alignItems: "center",
         justifyContent: "center",
         backgroundColor: colors.background,
-        borderRadius: radius.md,
+        borderRadius: radius.sm,
     },
 
     disabledButton: {

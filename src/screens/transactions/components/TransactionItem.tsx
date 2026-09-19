@@ -8,7 +8,7 @@ import ListRow from "../../../components/common/ListRow";
 
 import {AmountText, Body, Caption,} from "../../../components/typography";
 
-import {colors, spacing,} from "../../../design";
+import {colors, spacing, typography,} from "../../../design";
 
 import {financeIcons, FinanceIconType,} from "../../../design/icons";
 
@@ -68,39 +68,24 @@ export const TransactionItem = ({
         Alert.alert(
             "Delete Transaction",
             "Are you sure you want to delete this transaction?",
-            [
-                {
-                    text: "Cancel",
-                    style: "cancel",
+            [{
+                text: "Cancel",
+                style: "cancel",
+            }, {
+                text: "Delete",
+                style: "destructive",
+                onPress: () => {
+                    swipeRef.current?.close();
+                    onDelete(id);
                 },
-                {
-                    text: "Delete",
-                    style: "destructive",
-                    onPress: () => {
-                        swipeRef.current?.close();
-                        onDelete(id);
-                    },
-                },
-            ],
+            }],
         );
     };
 
-    const iconType =
-        transactionIcon(type);
-
-    const icon =
-        financeIcons[iconType];
-
-    const titleText =
-        title?.trim() ||
-        category?.name ||
-        "Unknown";
-
-    const metadata = [
-        category?.parent?.name,
-        category?.name,
-        account,
-    ].filter(Boolean);
+    const iconType = transactionIcon(type);
+    const icon = financeIcons[iconType];
+    const titleText = title?.trim() || category?.name || "Unknown";
+    const metadata = [category?.parent?.name, category?.name, account,].filter(Boolean);
 
     return (
         <Swipeable
@@ -118,9 +103,7 @@ export const TransactionItem = ({
         >
             <ListRow
                 onPress={onPress}
-                left={
-                    <AppIcon type={iconType}/>
-                }
+                left={<AppIcon type={iconType}/>}
                 title={
                     <View style={styles.titleRow}>
                         <Body
@@ -184,7 +167,7 @@ const styles = StyleSheet.create({
     },
 
     amount: {
-        fontSize: fontSize.lg,
+        fontSize: typography.body.fontSize,
         fontWeight: "regular"
     },
 
