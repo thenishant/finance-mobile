@@ -1,13 +1,21 @@
 import React, {useState} from "react";
 import * as QueryParams from "expo-auth-session/build/QueryParams";
 import * as WebBrowser from "expo-web-browser";
-import {Alert, StyleSheet, Text, TextInput, TouchableOpacity, View,} from "react-native";
+import {Alert, KeyboardAvoidingView, Platform, ScrollView, StyleSheet, View,} from "react-native";
 import {NativeStackScreenProps} from "@react-navigation/native-stack";
 
 import {AuthStackParamList} from "../../navigation/AuthNavigator";
 import {useAuth} from "../../hooks/useAuth";
 import {authService} from "../../services/auth.service";
 import {supabase} from "../../lib/supabase";
+
+import {AppScreen} from "../../ui";
+
+import {Spacer,} from "../../components";
+
+import {colors, spacing,} from "../../design";
+import {AppText, Card, Input} from "../../components/common";
+import {Button} from "../../components/Button";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -25,25 +33,39 @@ const LoginScreen = ({navigation}: Props) => {
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
 
+    const [loginLoading, setLoginLoading] =
+        useState(false);
+
     const [googleLoading, setGoogleLoading] =
         useState(false);
 
     const handleLogin = async () => {
+        if (loginLoading) {
+            return;
+        }
+
+        if (!email.trim() || !password) {
+            Alert.alert(
+                "Missing information",
+                "Please enter your email and password.",
+            );
+            return;
+        }
+
+        setLoginLoading(true);
+
         try {
             await loginWithPassword(
                 email.trim(),
                 password,
             );
-        } catch (error) {
-            console.error(
-                "Login failed:",
-                error,
-            );
-
+        } catch {
             Alert.alert(
                 "Login Failed",
-                "Invalid credentials",
+                "Invalid credentials.",
             );
+        } finally {
+            setLoginLoading(false);
         }
     };
 
@@ -60,41 +82,18 @@ const LoginScreen = ({navigation}: Props) => {
                 redirectTo,
             } = await authService.startGoogleLogin();
 
-            console.log(
-                "Opening Google OAuth:",
-                authUrl,
-            );
-
-            console.log(
-                "OAuth redirect:",
-                redirectTo,
-            );
-
             const result =
                 await WebBrowser.openAuthSessionAsync(
                     authUrl,
                     redirectTo,
                 );
 
-            console.log(
-                "Google OAuth result:",
-                result,
-            );
-
             if (
                 result.type !== "success" ||
                 !result.url
             ) {
-                console.log(
-                    "Google OAuth cancelled",
-                );
                 return;
             }
-
-            console.log(
-                "Google callback URL:",
-                result.url,
-            );
 
             const {
                 params,
@@ -104,49 +103,32 @@ const LoginScreen = ({navigation}: Props) => {
                     result.url,
                 );
 
-            console.log(
-                "OAuth callback params:",
-                params,
-            );
-
             if (errorCode) {
                 throw new Error(errorCode);
             }
 
-            /*
-             * Implicit flow returns the access token
-             * in the callback URL.
-             */
             if (!params.access_token) {
                 throw new Error(
                     "Google authentication did not return a Supabase access token.",
                 );
             }
 
-            /*
-             * Give the token to Supabase so it creates
-             * and persists the local session.
-             */
-            console.log(
-                "Google OAuth Access Token:",
+            const {
+                data,
+                error,
+            } = await supabase.auth.setSession({
+                access_token:
                 params.access_token,
-            );
-
-            console.log(
-                "Google OAuth Refresh Token:",
-                params.refresh_token,
-            );
-
-            const {data, error} = await supabase.auth.setSession({
-                access_token: params.access_token,
-                refresh_token: params.refresh_token ?? "",
+                refresh_token:
+                    params.refresh_token ?? "",
             });
 
             if (error) {
                 throw error;
             }
 
-            const supabaseToken = data.session?.access_token;
+            const supabaseToken =
+                data.session?.access_token;
 
             if (!supabaseToken) {
                 throw new Error(
@@ -154,35 +136,10 @@ const LoginScreen = ({navigation}: Props) => {
                 );
             }
 
-            console.log(
-                "Supabase Access Token:",
+            await loginWithGoogle(
                 supabaseToken,
             );
-
-            await loginWithGoogle(supabaseToken);
-
-            console.log("Finance application authentication successful",);
-
-            if (error) {
-                throw error;
-            }
-
-            if (!data.session?.access_token) {
-                throw new Error(
-                    "Supabase session was not created.",
-                );
-            }
-
-            console.log(
-                "Supabase authentication successful",
-            );
-
         } catch (error) {
-            console.error(
-                "Google login failed:",
-                error,
-            );
-
             Alert.alert(
                 "Google Login Failed",
                 error instanceof Error
@@ -195,191 +152,181 @@ const LoginScreen = ({navigation}: Props) => {
     };
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.logo}>
-                Finance
-            </Text>
-
-            <Text style={styles.subtitle}>
-                Track. Grow. Simplify.
-            </Text>
-
-            <View style={styles.card}>
-                <TextInput
-                    placeholder="Email"
-                    placeholderTextColor="#71717A"
-                    style={styles.input}
-                    autoCapitalize="none"
-                    autoCorrect={false}
-                    keyboardType="email-address"
-                    value={email}
-                    onChangeText={setEmail}
-                />
-
-                <TextInput
-                    placeholder="Password"
-                    placeholderTextColor="#71717A"
-                    secureTextEntry
-                    style={styles.input}
-                    value={password}
-                    onChangeText={setPassword}
-                />
-
-                <TouchableOpacity
-                    style={styles.primaryButton}
-                    onPress={handleLogin}
-                >
-                    <Text
-                        style={styles.primaryText}
-                    >
-                        Login
-                    </Text>
-                </TouchableOpacity>
-
-                <TouchableOpacity
-                    style={styles.secondaryButton}
-                    onPress={() =>
-                        navigation.navigate(
-                            "Register",
-                        )
+        <AppScreen
+            keyboard={false}
+            padded={false}
+        >
+            <KeyboardAvoidingView
+                style={styles.keyboard}
+                behavior={
+                    Platform.OS === "ios"
+                        ? "padding"
+                        : undefined
+                }
+            >
+                <ScrollView
+                    contentContainerStyle={
+                        styles.content
                     }
+                    keyboardShouldPersistTaps="handled"
+                    showsVerticalScrollIndicator={false}
                 >
-                    <Text
-                        style={styles.secondaryText}
-                    >
-                        Create Account
-                    </Text>
-                </TouchableOpacity>
+                    <View style={styles.loginContainer}>
+                        <View style={styles.header}>
+                            <AppText
+                                variant="display"
+                                style={styles.logo}
+                            >
+                                Finance
+                            </AppText>
 
-                <View style={styles.divider}>
-                    <View style={styles.line}/>
+                            <Spacer size="xs"/>
 
-                    <Text style={styles.or}>
-                        OR
-                    </Text>
+                            <AppText
+                                variant="body"
+                                color={colors.textSecondary}
+                                style={styles.subtitle}
+                            >
+                                Track. Grow. Simplify.
+                            </AppText>
+                        </View>
+                    </View>
 
-                    <View style={styles.line}/>
-                </View>
+                    <Card padding={spacing.lg}>
+                        <Input
+                            placeholder="Email"
+                            placeholderTextColor={
+                                colors.textMuted
+                            }
+                            autoCapitalize="none"
+                            autoCorrect={false}
+                            keyboardType="email-address"
+                            textContentType="emailAddress"
+                            value={email}
+                            onChangeText={setEmail}
+                        />
 
-                <TouchableOpacity
-                    style={[
-                        styles.googleButton,
-                        googleLoading &&
-                        styles.googleButtonDisabled,
-                    ]}
-                    onPress={handleGoogleLogin}
-                    disabled={googleLoading}
-                >
-                    <Text
-                        style={styles.googleText}
-                    >
-                        {googleLoading
-                            ? "Connecting..."
-                            : "Continue with Google"}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </View>
+                        <Spacer size="sm"/>
+
+                        <Input
+                            placeholder="Password"
+                            placeholderTextColor={
+                                colors.textMuted
+                            }
+                            secureTextEntry
+                            textContentType="password"
+                            value={password}
+                            onChangeText={setPassword}
+                        />
+
+                        <Spacer size="sm"/>
+
+                        <Button
+                            title={
+                                loginLoading
+                                    ? "Logging in..."
+                                    : "Login"
+                            }
+                            onPress={handleLogin}
+                            disabled={loginLoading}
+                        />
+
+                        <Spacer size="xs"/>
+
+                        <Button
+                            title="Create Account"
+                            variant="secondary"
+                            onPress={() =>
+                                navigation.navigate(
+                                    "Register",
+                                )
+                            }
+                        />
+
+                        <View style={styles.divider}>
+                            <View
+                                style={
+                                    styles.dividerLine
+                                }
+                            />
+
+                            <AppText
+                                variant="caption"
+                                color={
+                                    colors.textSecondary
+                                }
+                            >
+                                OR
+                            </AppText>
+
+                            <View
+                                style={
+                                    styles.dividerLine
+                                }
+                            />
+                        </View>
+
+                        <Button
+                            title={
+                                googleLoading
+                                    ? "Connecting..."
+                                    : "Continue with Google"
+                            }
+                            variant="secondary"
+                            onPress={
+                                handleGoogleLogin
+                            }
+                            disabled={
+                                googleLoading
+                            }
+                        />
+                    </Card>
+                </ScrollView>
+            </KeyboardAvoidingView>
+        </AppScreen>
     );
 };
 
 export default LoginScreen;
 
 const styles = StyleSheet.create({
-    container: {
+    keyboard: {
         flex: 1,
-        backgroundColor: "#000000",
+    },
+
+    content: {
         justifyContent: "center",
-        padding: 24,
+        padding: spacing.lg,
+        marginTop: spacing.xl,
+    },
+
+    loginContainer: {
+        width: "100%",
+    },
+
+    header: {
+        alignItems: "center",
+        marginBottom: spacing.xl,
     },
 
     logo: {
-        fontSize: 32,
-        fontWeight: "700",
-        color: "#FFFFFF",
         textAlign: "center",
-        marginBottom: 6,
     },
 
     subtitle: {
         textAlign: "center",
-        color: "#A1A1AA",
-        marginBottom: 32,
-    },
-
-    card: {
-        backgroundColor: "#131316",
-        padding: 24,
-        borderRadius: 20,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: "#2C2C33",
-    },
-
-    input: {
-        backgroundColor: "#1A1A1F",
-        color: "#FFFFFF",
-        padding: 14,
-        borderRadius: 10,
-        marginBottom: 16,
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: "#2C2C33",
-    },
-
-    primaryButton: {
-        backgroundColor: "#4F8CFF",
-        padding: 14,
-        borderRadius: 12,
-        alignItems: "center",
-        marginBottom: 12,
-    },
-
-    primaryText: {
-        color: "#FFFFFF",
-        fontWeight: "600",
-    },
-
-    secondaryButton: {
-        padding: 12,
-        alignItems: "center",
-    },
-
-    secondaryText: {
-        color: "#4F8CFF",
-        fontWeight: "500",
     },
 
     divider: {
         flexDirection: "row",
         alignItems: "center",
-        marginVertical: 20,
+        gap: spacing.sm,
+        marginVertical: spacing.lg,
     },
 
-    line: {
+    dividerLine: {
         flex: 1,
         height: StyleSheet.hairlineWidth,
-        backgroundColor: "#2C2C33",
-    },
-
-    or: {
-        marginHorizontal: 10,
-        color: "#71717A",
-    },
-
-    googleButton: {
-        backgroundColor: "#222228",
-        padding: 14,
-        borderRadius: 12,
-        alignItems: "center",
-        borderWidth: StyleSheet.hairlineWidth,
-        borderColor: "#2C2C33",
-    },
-
-    googleButtonDisabled: {
-        opacity: 0.5,
-    },
-
-    googleText: {
-        color: "#FFFFFF",
-        fontWeight: "600",
+        backgroundColor: colors.border,
     },
 });

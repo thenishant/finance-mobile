@@ -1,5 +1,5 @@
-import React, {useCallback} from "react";
-import {RefreshControl, ScrollView, StyleSheet, View,} from "react-native";
+import React from "react";
+import {ScrollView, StyleSheet, View,} from "react-native";
 
 import {useMonthStore} from "../../stores/useMonthStore";
 import {useDashboard} from "../../hooks/useDashboard";
@@ -9,12 +9,12 @@ import {Body, Heading} from "../../components/typography";
 import {Spacer} from "../../components";
 
 import HeroCard from "../../components/premium/HeroCardV2";
-import StatsCarousel from "../../components/dashboard/StatsCarousel";
 import AccountsSection from "../../components/dashboard/AccountsSection";
 import ActivitySection from "../../components/dashboard/ActivitySection";
 import MonthSelector from "../../components/common/ui/MonthSelector";
 
-import {spacing} from "../../design";
+import {colors, spacing} from "../../design";
+import StatsSection from "../../components/dashboard/StatsSection";
 
 const MonthSelectorContainer = React.memo(
     function MonthSelectorContainer() {
@@ -116,39 +116,40 @@ export default function DashboardScreen() {
                     />
 
                     <Spacer size="md"/>
-
-                    <StatsCarousel
-                        income={summary.monthlyIncome}
-                        expense={summary.monthlyExpense}
-                        investment={summary.monthlyInvestment}
-                        savings={summary.monthlySavings}
-                        incomeChange={
-                            comparison.change.income.percent ?? 0
-                        }
-                        expenseChange={
-                            comparison.change.expense.percent ?? 0
-                        }
-                        investmentChange={
-                            comparison.change.investment.percent ?? 0
-                        }
-                        savingsChange={
-                            comparison.change.savings.percent ?? 0
-                        }
+                    <StatsSection
+                        stats={[
+                            {
+                                title: "Income",
+                                value: summary.monthlyIncome,
+                                change: comparison.change.income.percent ?? 0,
+                                type: "income",
+                            },
+                            {
+                                title: "Expenses",
+                                value: summary.monthlyExpense,
+                                change: comparison.change.expense.percent ?? 0,
+                                type: "expense",
+                            },
+                            {
+                                title: "Investments",
+                                value: summary.monthlyInvestment,
+                                change: comparison.change.investment.percent ?? 0,
+                                type: "investment",
+                            },
+                            {
+                                title: "Savings",
+                                value: summary.monthlySavings,
+                                change: comparison.change.savings.percent ?? 0,
+                                type: "savings",
+                            },
+                        ]}
                     />
 
                     <Spacer size="md"/>
-
-                    <AccountsSection
-                        accounts={accounts}
-                    />
-
+                    <AccountsSection accounts={accounts}/>
                     <Spacer size="md"/>
-
-                    <ActivitySection
-                        transactions={recentTransactions}
-                    />
-
-                    <Spacer size="lg"/>
+                    <ActivitySection transactions={recentTransactions}/>
+                    <Spacer size="md"/>
                 </ScrollView>
             </View>
         </AppScreen>
