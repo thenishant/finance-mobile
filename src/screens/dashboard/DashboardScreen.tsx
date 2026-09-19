@@ -1,26 +1,21 @@
 import React from "react";
 import {ScrollView, StyleSheet, View,} from "react-native";
-
 import {useMonthStore} from "../../stores/useMonthStore";
 import {useDashboard} from "../../hooks/useDashboard";
-
 import {AppScreen} from "../../ui";
 import {Body, Heading} from "../../components/typography";
 import {Spacer} from "../../components";
-
 import HeroCard from "../../components/premium/HeroCardV2";
 import AccountsSection from "../../components/dashboard/AccountsSection";
 import ActivitySection from "../../components/dashboard/ActivitySection";
 import MonthSelector from "../../components/common/ui/MonthSelector";
-
-import {colors, spacing} from "../../design";
+import {spacing} from "../../design";
 import StatsSection from "../../components/dashboard/StatsSection";
 
 const MonthSelectorContainer = React.memo(
     function MonthSelectorContainer() {
         const year = useMonthStore((state) => state.year);
         const month = useMonthStore((state) => state.month);
-
         const prevMonth = useMonthStore((state) => state.prevMonth);
         const nextMonth = useMonthStore((state) => state.nextMonth);
 
@@ -40,21 +35,13 @@ const MonthSelectorContainer = React.memo(
 export default function DashboardScreen() {
     const year = useMonthStore((state) => state.year);
     const month = useMonthStore((state) => state.month);
-
-    const {
-        data,
-        isLoading,
-        error,
-        refetch,
-    } = useDashboard(year, month);
+    const {data, isLoading, error} = useDashboard(year, month);
 
     if (isLoading && !data) {
         return (
             <AppScreen keyboard={false}>
                 <View style={styles.center}>
-                    <Body>
-                        Loading...
-                    </Body>
+                    <Body>Loading...</Body>
                 </View>
             </AppScreen>
         );
@@ -64,15 +51,9 @@ export default function DashboardScreen() {
         return (
             <AppScreen keyboard={false}>
                 <View style={styles.center}>
-                    <Heading>
-                        Something went wrong
-                    </Heading>
-
+                    <Heading>Something went wrong</Heading>
                     <Spacer size="sm"/>
-
-                    <Body>
-                        Unable to load your dashboard.
-                    </Body>
+                    <Body>Unable to load your dashboard.</Body>
                 </View>
             </AppScreen>
         );
@@ -82,26 +63,18 @@ export default function DashboardScreen() {
         return (
             <AppScreen keyboard={false}>
                 <View style={styles.center}>
-                    <Body>
-                        No dashboard data available.
-                    </Body>
+                    <Body>No dashboard data available.</Body>
                 </View>
             </AppScreen>
         );
     }
 
-    const {
-        summary,
-        comparison,
-        accounts,
-        recentTransactions,
-    } = data;
+    const {summary, comparison, accounts, recentTransactions} = data;
 
     return (
         <AppScreen keyboard={false}>
             <View style={styles.container}>
                 <MonthSelectorContainer/>
-
                 <ScrollView
                     style={styles.scrollView}
                     contentContainerStyle={styles.scrollContent}
@@ -109,12 +82,9 @@ export default function DashboardScreen() {
                 >
                     <HeroCard
                         balance={summary.totalBalance}
-                        change={
-                            comparison.change.savings.percent ?? 0
-                        }
+                        change={comparison.change.savings.percent ?? 0}
                         changeLabel="This Month"
                     />
-
                     <Spacer size="md"/>
                     <StatsSection
                         stats={[
@@ -144,7 +114,6 @@ export default function DashboardScreen() {
                             },
                         ]}
                     />
-
                     <Spacer size="md"/>
                     <AccountsSection accounts={accounts}/>
                     <Spacer size="md"/>

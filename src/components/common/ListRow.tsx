@@ -31,11 +31,8 @@ export default function ListRow({
                                 }: ListRowProps) {
 
     const content = (
-
         <View style={[styles.container, style]}>
-
             <View style={styles.topRow}>
-
                 {left && (
                     <View style={styles.left}>
                         {left}
@@ -43,37 +40,25 @@ export default function ListRow({
                 )}
 
                 <View style={styles.center}>
-
                     {title}
-
                     {subtitle && (
                         <View style={styles.subtitle}>
                             {subtitle}
                         </View>
                     )}
-
                 </View>
-
                 {trailing && (
                     <View style={styles.trailing}>
                         {trailing}
                     </View>
                 )}
-
             </View>
-
             {bottom && (
-
                 <View style={styles.bottom}>
-
                     {bottom}
-
                 </View>
-
             )}
-
         </View>
-
     );
 
     if (!onPress) {
@@ -81,7 +66,6 @@ export default function ListRow({
     }
 
     return (
-
         <Pressable
             onPress={onPress}
             style={({pressed}) => [
@@ -90,7 +74,6 @@ export default function ListRow({
         >
             {content}
         </Pressable>
-
     );
 }
 

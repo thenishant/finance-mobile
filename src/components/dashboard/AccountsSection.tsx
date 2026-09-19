@@ -135,7 +135,7 @@ const styles = StyleSheet.create({
     },
 
     amount: {
-        fontSize: fontSize.lg,
+        fontSize: fontSize.md,
         fontWeight: fontWeights.regular,
     },
 

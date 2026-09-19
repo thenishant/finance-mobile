@@ -1,10 +1,8 @@
 import React from "react";
-import {Pressable, StyleSheet, View,} from "react-native";
+import {Pressable, StyleSheet, View} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
-
-import {colors, radius, shadows, spacing,} from "../../../design";
-
-import {Body, Caption,} from "../../typography";
+import {colors, radius, shadows, spacing} from "../../../design";
+import {Body, Caption} from "../../typography";
 
 interface Props {
     year: number;
@@ -34,6 +32,11 @@ export default function MonthSelector({
                                           onPrevious,
                                           onNext,
                                       }: Props) {
+    const now = new Date();
+    const currentYear = now.getFullYear();
+    const currentMonth = now.getMonth() + 1;
+    const isCurrentMonth = year === currentYear && month === currentMonth;
+
     return (
         <View style={styles.container}>
             <Pressable
@@ -50,32 +53,24 @@ export default function MonthSelector({
                     color={colors.text}
                 />
             </Pressable>
-
             <View style={styles.month}>
-                <Body
-                    weight="semibold"
-                    style={styles.monthName}
-                >
-                    {MONTHS[month - 1]}
-                </Body>
-
-                <Caption color="muted">
-                    {year}
-                </Caption>
+                <Body weight="semibold" style={styles.monthName}>{MONTHS[month - 1]}</Body>
+                <Caption color="muted">{year}</Caption>
             </View>
 
             <Pressable
                 onPress={onNext}
+                disabled={isCurrentMonth}
                 hitSlop={8}
                 style={({pressed}) => [
                     styles.button,
-                    pressed && styles.pressed,
-                ]}
+                    isCurrentMonth && styles.disabledButton,
+                    pressed && !isCurrentMonth && styles.pressed]}
             >
                 <Ionicons
                     name="chevron-forward"
                     size={20}
-                    color={colors.text}
+                    color={isCurrentMonth ? colors.textMuted : colors.text}
                 />
             </Pressable>
         </View>
@@ -87,28 +82,25 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         alignItems: "center",
         justifyContent: "space-between",
-
         backgroundColor: colors.surface,
-
         borderRadius: radius.lg,
         borderWidth: 1,
         borderColor: colors.border,
-
         padding: spacing.xs,
-
         ...shadows.card,
     },
 
     button: {
         width: 42,
         height: 42,
-
         alignItems: "center",
         justifyContent: "center",
-
         backgroundColor: colors.background,
-
         borderRadius: radius.md,
+    },
+
+    disabledButton: {
+        opacity: 0.45,
     },
 
     pressed: {
@@ -117,7 +109,6 @@ const styles = StyleSheet.create({
 
     month: {
         flex: 1,
-
         alignItems: "center",
         justifyContent: "center",
     },
