@@ -1,112 +1,193 @@
 import React from "react";
-import {createBottomTabNavigator} from "@react-navigation/bottom-tabs";
+import {Pressable, StyleSheet, View,} from "react-native";
+import {BottomTabBarProps, createBottomTabNavigator,} from "@react-navigation/bottom-tabs";
 import {Ionicons} from "@expo/vector-icons";
-import {StyleSheet, View} from "react-native";
-import {useNavigation} from "@react-navigation/native";
 import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 import DashboardScreen from "../screens/dashboard/DashboardScreen";
 import TransactionListScreen from "../screens/transactions/TransactionListScreen";
 import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
+import {GmailScreen} from "../screens/gmail/GmailScreen";
+
 import {AppStackParamList} from "./AppStack";
 import {colors} from "../design";
-import {GmailScreen} from "../screens/gmail/GmailScreen";
 
 export type MainTabParamList = {
     Dashboard: undefined;
     Transactions: undefined;
-    Add: undefined;
     Accounts: undefined;
     Analytics: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-type StackNavigationProp = NativeStackNavigationProp<AppStackParamList>;
-const EmptyScreen = () => null;
-export const MainTabs = () => {
-    const navigation = useNavigation<StackNavigationProp>();
+type StackNavigationProp =
+    NativeStackNavigationProp<AppStackParamList>;
+
+const tabIcons = {
+    Dashboard: "home",
+    Transactions: "receipt-outline",
+    Accounts: "wallet-outline",
+    Analytics: "pie-chart-outline",
+} as const;
+
+function CustomTabBar({state, navigation}: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
+
+    const routes = state.routes;
+
+    return (
+        <View
+            style={[
+                styles.tabBar,
+                {
+                    paddingBottom: insets.bottom,
+                },
+            ]}
+        >
+            <View style={styles.tabRow}>
+                {routes.slice(0, 2).map((route, index) => {
+                    const focused =
+                        state.index === index;
+
+                    return (
+                        <Pressable
+                            key={route.key}
+                            onPress={() => {
+                                navigation.navigate(route.name);
+                            }}
+                            style={styles.tab}
+                        >
+                            <Ionicons
+                                name={tabIcons[route.name]}
+                                size={26}
+                                color={
+                                    focused
+                                        ? colors.primary
+                                        : colors.textMuted
+                                }
+                            />
+                        </Pressable>
+                    );
+                })}
+
+                <View style={styles.addSlot}>
+                    <Pressable
+                        onPress={() =>
+                            navigation.navigate(
+                                "AddTransaction",
+                                {
+                                    mode: "create",
+                                },
+                            )
+                        }
+                        style={styles.addButton}
+                    >
+                        <Ionicons
+                            name="add"
+                            size={36}
+                            color={colors.white}
+                        />
+                    </Pressable>
+                </View>
+
+                {routes.slice(2).map((route, index) => {
+                    const routeIndex = index + 2;
+
+                    const focused =
+                        state.index === routeIndex;
+
+                    return (
+                        <Pressable
+                            key={route.key}
+                            onPress={() => {
+                                navigation.navigate(route.name);
+                            }}
+                            style={styles.tab}
+                        >
+                            <Ionicons
+                                name={tabIcons[route.name]}
+                                size={26}
+                                color={focused ? colors.primary : colors.textMuted}
+                            />
+                        </Pressable>
+                    );
+                })}
+            </View>
+        </View>
+    );
+}
+
+export const MainTabs = () => {
     return (
         <Tab.Navigator
-            screenOptions={({route}) => ({
+            tabBar={(props) => (
+                <CustomTabBar {...props} />
+            )}
+            screenOptions={{
                 headerShown: false,
-                tabBarShowLabel: false,
-                tabBarActiveTintColor: colors.primary,
-                tabBarInactiveTintColor: colors.textMuted,
-                tabBarStyle: [styles.tabBarStyle, {
-                    backgroundColor: colors.surface,
-                    paddingBottom: insets.bottom,
-                }],
-
-                tabBarIcon: ({color}) => {
-                    switch (route.name) {
-                        case "Dashboard":
-                            return (
-                                <Ionicons name="home" size={22} color={color}/>);
-                        case "Transactions":
-                            return (
-                                <Ionicons name="receipt-outline" size={22} color={color}/>);
-                        case "Accounts":
-                            return (
-                                <Ionicons name="wallet-outline" size={22} color={color}/>
-                            );
-
-                        case "Analytics":
-                            return (
-                                <Ionicons name="pie-chart-outline" size={22} color={color}/>
-                            );
-
-                        case "Add":
-                            return (
-                                <View style={styles.floatingButton}>
-                                    <Ionicons name="add" size={28} color={colors.white}/>
-                                </View>
-                            );
-                        default:
-                            return null;
-                    }
-                }
-            })}
+            }}
         >
-            <Tab.Screen name="Dashboard" component={DashboardScreen}/>
-            <Tab.Screen name="Transactions" component={TransactionListScreen}/>
-            <Tab.Screen name="Add" component={EmptyScreen}
-                        listeners={{
-                            tabPress: e => {
-                                e.preventDefault();
-                                navigation.navigate("AddTransaction", {
-                                    mode: "create",
-                                });
-                            }
-                        }}
+            <Tab.Screen
+                name="Dashboard"
+                component={DashboardScreen}
             />
 
-            <Tab.Screen name="Accounts" component={GmailScreen}/>
-            <Tab.Screen name="Analytics" component={AnalyticsScreen}/>
+            <Tab.Screen
+                name="Transactions"
+                component={TransactionListScreen}
+            />
+
+            <Tab.Screen
+                name="Accounts"
+                component={GmailScreen}
+            />
+
+            <Tab.Screen
+                name="Analytics"
+                component={AnalyticsScreen}
+            />
         </Tab.Navigator>
     );
 };
 
 const styles = StyleSheet.create({
-    tabBarStyle: {
-        height: 70,
+    tabBar: {
+        height: 60,
         borderTopWidth: 0,
-        backgroundColor: colors.surface,
-        elevation: 20,
         shadowColor: colors.cardShadow,
         shadowOpacity: 0.1,
         shadowRadius: 10,
     },
 
-    floatingButton: {
+    tabRow: {
+        flex: 1,
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    tab: {
+        flex: 1,
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    addSlot: {
+        flex: 1,
+        height: "100%",
+        alignItems: "center",
+        justifyContent: "center",
+    },
+
+    addButton: {
         width: 64,
         height: 64,
         borderRadius: 32,
         backgroundColor: colors.primary,
-        justifyContent: "center",
         alignItems: "center",
+        justifyContent: "center",
         marginTop: -30,
         shadowColor: colors.cardShadow,
         shadowOpacity: 0.25,

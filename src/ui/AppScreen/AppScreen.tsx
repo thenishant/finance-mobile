@@ -10,8 +10,8 @@ import {
     ViewStyle,
 } from "react-native";
 import {SafeAreaView} from "react-native-safe-area-context";
-import {colors, spacing} from "../../design";
 
+import {colors, spacing} from "../../design";
 
 export interface AppScreenProps {
     children: React.ReactNode;
@@ -43,10 +43,9 @@ export const AppScreen = ({
             showsVerticalScrollIndicator={false}
             contentContainerStyle={[{
                 flexGrow: 1,
-                padding: padded
-                    ? spacing.lg
-                    : 0,
-            }, contentContainerStyle
+                padding: padded ? spacing.lg : 0,
+            },
+                contentContainerStyle,
             ]}
             refreshControl={
                 onRefresh ? (
@@ -59,48 +58,27 @@ export const AppScreen = ({
             }
         >
             {children}
-        </ScrollView>) : (<View style={[{
-            flex: 1,
-            padding: padded
-                ? spacing.lg
-                : 0,
-        },
-            contentContainerStyle,
-        ]}
-        >
+        </ScrollView>) : (
+        <View style={[{flex: 1, padding: padded ? spacing.lg : 0}, contentContainerStyle]}>
             {children}
         </View>
     );
 
     const wrappedContent = keyboard ? (
-            <KeyboardAvoidingView
-                style={{flex: 1}}
-                behavior={
-                    Platform.OS === "ios" ? "padding" : undefined
-                }
-            >
-                {content}
-            </KeyboardAvoidingView>
-        )
-        : content;
+        <KeyboardAvoidingView
+            style={{flex: 1}}
+            behavior={Platform.OS === "ios" ? "padding" : undefined}>
+            {content}
+        </KeyboardAvoidingView>
+    ) : (content);
 
     const screen = (
-        <View
-            style={[
-                {
-                    flex: 1,
-                    backgroundColor:
-                    colors.background,
-                },
-                style,
-            ]}
-        >
+        <View style={[{flex: 1, backgroundColor: colors.background}, style,]}>
             <StatusBar
                 translucent={false}
                 backgroundColor={colors.background}
                 barStyle="light-content"
             />
-
             {wrappedContent}
         </View>
     );
@@ -111,18 +89,8 @@ export const AppScreen = ({
 
     return (
         <SafeAreaView
-            edges={[
-                "top",
-                "left",
-                "right",
-                "bottom",
-            ]}
-            style={{
-                flex: 1,
-                backgroundColor:
-                colors.background,
-            }}
-        >
+            edges={["top", "left", "right"]}
+            style={{flex: 1, backgroundColor: colors.background,}}>
             {screen}
         </SafeAreaView>
     );
