@@ -1,12 +1,11 @@
-import React, {useMemo, useState} from "react";
-
-import {useMutation, useQuery, useQueryClient,} from "@tanstack/react-query";
+import React, {useState} from "react";
 
 import {useNavigation} from "@react-navigation/native";
 
-import {TransactionFilters, transactionService, TransactionSortBy,} from "../../services/transaction.service";
+import {TransactionFilters, TransactionSortBy,} from "../../services/transaction.service";
 
 import {useGroupedTransactions} from "../../hooks/useGroupedTransactions";
+import {useTransactions} from "../../hooks/useTransctions";
 
 import {Transaction, TRANSACTION_TYPES_LABELS, TransactionType,} from "../../types/transaction";
 
@@ -23,6 +22,9 @@ import {SortOption} from "../../components/common/ui";
 
 import {financeIcons} from "../../design/icons";
 
+import {useMonthStore} from "../../stores/useMonthStore";
+import MonthSelector from "../../components/common/ui/MonthSelector";
+
 type Sheet = "filter" | "sort" | null;
 
 const transactionTypeIcons: Record<
@@ -36,10 +38,17 @@ const transactionTypeIcons: Record<
 };
 
 const TransactionListScreen = () => {
-    const queryClient = useQueryClient();
     const navigation = useNavigation<any>();
 
-    const [sheet, setSheet] = useState<Sheet>(null);
+    const {
+        year,
+        month,
+        prevMonth,
+        nextMonth,
+    } = useMonthStore();
+
+    const [sheet, setSheet] =
+        useState<Sheet>(null);
 
     const [sortBy, setSortBy] =
         useState<TransactionSortBy>("date");
@@ -54,105 +63,46 @@ const TransactionListScreen = () => {
         useState(false);
 
     const {
-        data: transactions = [],
+        transactions,
         isLoading,
-        refetch,
-    } = useQuery<Transaction[]>({
-        queryKey: [
-            "transactions",
-            sortBy,
-            filters,
-        ],
-
-        queryFn: () =>
-            transactionService.getAll({
-                sortBy,
-                order: "desc",
-                ...filters,
-            }),
+        refresh,
+        deleteTransaction,
+    } = useTransactions({
+        year,
+        month,
+        sortBy,
+        filters,
     });
 
-    const deleteMutation = useMutation({
-        mutationFn: (id: string) =>
-            transactionService.delete(id),
+    const grouped = useGroupedTransactions(
+        transactions,
+        sortBy,
+    );
 
-        onMutate: async id => {
-            await queryClient.cancelQueries({
-                queryKey: ["transactions"],
-            });
+    const hasFilter = Boolean(filters.type);
 
-            const queryKey = [
-                "transactions",
-                sortBy,
-                filters,
-            ];
+    const filterLabel = filters.type
+        ? TRANSACTION_TYPES_LABELS.find(
+        option =>
+            option.value === filters.type,
+    )?.label ?? "All"
+        : "All";
 
-            const previous =
-                queryClient.getQueryData<Transaction[]>(
-                    queryKey,
-                );
+    const sortLabels: Record<TransactionSortBy, string> = {
+        date: "Transaction date",
+        createdAt: "Date added",
+        amount: "Amount",
+        merchant: "Merchant",
+        category: "Category",
+    };
 
-            queryClient.setQueryData<Transaction[]>(
-                queryKey,
-                (old = []) =>
-                    old.filter(
-                        transaction =>
-                            transaction.id !== id,
-                    ),
-            );
+    const sortLabel = sortLabels[sortBy];
 
-            return {previous};
-        },
-
-        onError: (
-            _error,
-            _id,
-            context,
-        ) => {
-            if (context?.previous) {
-                queryClient.setQueryData(
-                    [
-                        "transactions",
-                        sortBy,
-                        filters,
-                    ],
-                    context.previous,
-                );
-            }
-        },
-
-        onSettled: async () => {
-            await Promise.all([
-                queryClient.invalidateQueries({
-                    queryKey: ["transactions"],
-                }),
-
-                queryClient.invalidateQueries({
-                    queryKey: ["dashboard"],
-                }),
-
-                queryClient.invalidateQueries({
-                    queryKey: ["analytics"],
-                }),
-
-                queryClient.invalidateQueries({
-                    queryKey: ["accounts"],
-                }),
-            ]);
-        },
-    });
-
-    /**
-     * Pull-to-refresh only. Binding this to isRefetching
-     * popped the spinner open on every background refetch
-     * (e.g. after deleting a transaction) and jolted the
-     * list.
-     */
     const handleRefresh = async () => {
         setRefreshing(true);
 
         try {
-            await refetch();
+            await refresh();
         } finally {
             setRefreshing(false);
         }
@@ -194,32 +144,52 @@ const TransactionListScreen = () => {
         setSheet(null);
     };
 
-    const grouped = useGroupedTransactions(
-        transactions,
-        sortBy,
-    );
+    const transactionTypeFilter = {
+        title: "TRANSACTION TYPE",
 
-    const hasFilters =
-        Object.keys(filters).length > 0;
+        options: [
+            {
+                label: "All",
+                selected: !pendingFilters.type,
 
-    const filterLabel =
-        filters.type
-            ? filters.type.charAt(0) +
-            filters.type.slice(1).toLowerCase()
-            : filters.accountType
-                ? filters.accountType
-                    .replace("_", " ")
-                    .toLowerCase()
-                    .replace(
-                        /\b\w/g,
-                        char => char.toUpperCase(),
-                    )
-                : "All";
+                onPress: () =>
+                    setPendingFilters(
+                        current => ({
+                            ...current,
+                            type: undefined,
+                        }),
+                    ),
+            },
 
-    const sortLabel =
-        sortBy === "date"
-            ? "Transaction date"
-            : "Date added";
+            ...TRANSACTION_TYPES_LABELS.map(
+                option => ({
+                    label: option.label,
+
+                    selected:
+                        pendingFilters.type ===
+                        option.value,
+
+                    icon: financeIcons[
+                        transactionTypeIcons[
+                            option.value
+                            ]
+                        ],
+
+                    onPress: () =>
+                        setPendingFilters(
+                            current => ({
+                                ...current,
+                                type:
+                                    current.type ===
+                                    option.value
+                                        ? undefined
+                                        : option.value,
+                            }),
+                        ),
+                }),
+            ),
+        ],
+    };
 
     const controls = [
         {
@@ -227,7 +197,7 @@ const TransactionListScreen = () => {
             value: filterLabel,
             icon: "options-outline" as const,
             onPress: openFilter,
-            active: hasFilters,
+            active: hasFilter,
         },
         {
             label: "SORT BY",
@@ -237,68 +207,23 @@ const TransactionListScreen = () => {
         },
     ];
 
-    /*
-     * Filter definitions.
-     *
-     * All filter logic lives here.
-     * TransactionFilterSection only renders the filter.
-     */
-    const transactionTypeFilter = useMemo(
-        () => ({
-            title: "TRANSACTION TYPE",
-
-            options: [
-                {
-                    label: "All",
-                    selected: !pendingFilters.type,
-                    onPress: () =>
-                        setPendingFilters(current => ({
-                            ...current,
-                            type: undefined,
-                        })),
-                },
-
-                ...TRANSACTION_TYPES_LABELS.map(
-                    option => ({
-                        label: option.label,
-                        selected:
-                            pendingFilters.type ===
-                            option.value,
-
-                        icon: financeIcons[
-                            transactionTypeIcons[
-                                option.value
-                                ]
-                            ],
-
-                        onPress: () =>
-                            setPendingFilters(
-                                current => ({
-                                    ...current,
-                                    type:
-                                        current.type ===
-                                        option.value
-                                            ? undefined
-                                            : option.value,
-                                }),
-                            ),
-                    }),
-                ),
-            ],
-        }),
-        [pendingFilters.type],
-    );
-
     return (
         <AppScreen>
             <ScreenHeader title="Transactions"/>
+
+            <MonthSelector
+                year={year}
+                month={month}
+                onPrevious={prevMonth}
+                onNext={nextMonth}
+            />
 
             <TransactionList
                 data={grouped}
                 isLoading={isLoading}
                 refreshing={refreshing}
                 onRefresh={handleRefresh}
-                onDelete={id => deleteMutation.mutate(id)}
+                onDelete={deleteTransaction}
                 onPress={handleTransactionPress}
                 controls={controls}
             />
@@ -328,12 +253,8 @@ const TransactionListScreen = () => {
                     <SortOption
                         title="Transaction date"
                         subtitle="When the transaction happened"
-                        selected={
-                            sortBy === "date"
-                        }
-                        onPress={() =>
-                            selectSort("date")
-                        }
+                        selected={sortBy === "date"}
+                        onPress={() => selectSort("date")}
                     />
 
                     <SortOption
@@ -341,6 +262,13 @@ const TransactionListScreen = () => {
                         subtitle="When the transaction was recorded"
                         selected={sortBy === "createdAt"}
                         onPress={() => selectSort("createdAt")}
+                    />
+
+                    <SortOption
+                        title="Amount"
+                        subtitle="Sort by transaction amount"
+                        selected={sortBy === "amount"}
+                        onPress={() => selectSort("amount")}
                     />
                 </TransactionSortSection>
             </BottomSheet>

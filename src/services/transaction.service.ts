@@ -19,13 +19,18 @@ export type UpdateTransactionRequest =
 
 export type TransactionSortBy =
     | "date"
-    | "createdAt";
+    | "createdAt"
+    | "amount"
+    | "merchant"
+    | "category";
 
 export type TransactionOrder =
     | "asc"
     | "desc";
 
 export type TransactionFilters = {
+    year?: number;
+    month?: number;
     type?: TransactionType;
     accountType?:
         | "BANK_ACCOUNT"

@@ -87,7 +87,7 @@ export default function HeroCard({
 }
 const styles = StyleSheet.create({
     container: {
-        borderRadius: radius.xl,
+        borderRadius: radius.md,
         padding: spacing.xl,
         overflow: "hidden",
         ...shadows.hero,

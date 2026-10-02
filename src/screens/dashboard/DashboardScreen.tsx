@@ -191,7 +191,6 @@ const styles = StyleSheet.create({
     topBar: {
         flexDirection: "row",
         alignItems: "center",
-        marginBottom: spacing.sm,
     },
 
     monthSelector: {
@@ -208,6 +207,7 @@ const styles = StyleSheet.create({
         backgroundColor: colors.surface,
         alignItems: "center",
         justifyContent: "center",
+        marginBottom: spacing.sm,
     },
 
     pressed: {

@@ -79,15 +79,12 @@ const AnalyticsScreen = () => {
     return (
         <AppScreen keyboard={false}>
             <View style={styles.container}>
-                <View style={styles.monthSelector}>
-                    <MonthSelector
-                        year={year}
-                        month={month}
-                        onPrevious={prevMonth}
-                        onNext={nextMonth}
-                    />
-                </View>
-
+                <MonthSelector
+                    year={year}
+                    month={month}
+                    onPrevious={prevMonth}
+                    onNext={nextMonth}
+                />
                 {body}
             </View>
         </AppScreen>
@@ -100,11 +97,6 @@ const styles = StyleSheet.create({
     container: {
         flex: 1,
         minHeight: 0,
-    },
-
-    monthSelector: {
-        width: "100%",
-        marginBottom: spacing.sm,
     },
 
     center: {

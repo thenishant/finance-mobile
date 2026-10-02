@@ -82,11 +82,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
         justifyContent: "space-between",
         backgroundColor: colors.surface,
-        borderRadius: radius.lg,
+        borderRadius: radius.sm,
         borderWidth: 1,
         borderColor: colors.border,
         padding: spacing.xs,
         ...shadows.card,
+        marginBottom: spacing.sm,
     },
 
     button: {

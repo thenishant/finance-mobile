@@ -4,7 +4,7 @@ import {formatDateLabel} from "../utils/date";
 
 export const useGroupedTransactions = (
     transactions: Transaction[],
-    sortBy: "date" | "createdAt",
+    sortBy: "date" | "createdAt" | "amount" | "merchant" | "category",
 ): GroupedTransaction[] => {
 
     return useMemo(() => {
