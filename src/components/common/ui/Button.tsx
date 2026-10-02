@@ -76,7 +76,7 @@ const styles = StyleSheet.create({
     secondary: {
         backgroundColor: colors.white,
         borderWidth: 1,
-        borderColor: colors.grey,
+        borderColor: colors.border,
     },
     ghost: {
         backgroundColor: "transparent",
@@ -88,7 +88,7 @@ const styles = StyleSheet.create({
         letterSpacing: 0.2,
     },
     darkText: {
-        color: colors.darkBackground,
+        color: colors.background,
     },
     pressed: {
         opacity: 0.9,

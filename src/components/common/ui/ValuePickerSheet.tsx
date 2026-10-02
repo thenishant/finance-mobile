@@ -1,7 +1,11 @@
 import React, {useEffect, useRef, useState} from "react";
-import {Animated, Dimensions, Modal, Pressable, StyleSheet, Text, View} from "react-native";
+import {Animated, Dimensions, Modal, Pressable, StyleSheet, View} from "react-native";
 
-import {Button, Input, Pill} from "./index";
+import {Input, Pill} from "./index";
+import {Button} from "../../Button";
+
+import {Body, Heading} from "../../typography";
+import {colors, radius, spacing} from "../../../design";
 
 interface Props {
     visible: boolean;
@@ -13,6 +17,8 @@ interface Props {
 
     value?: string;
     placeholder?: string;
+
+    loading?: boolean;
 
     onChange?: (value: string) => void;
     onSave: (value: string) => void;
@@ -28,6 +34,7 @@ export const ValuePickerSheet = ({
                                      presets = [],
                                      value = "",
                                      placeholder,
+                                     loading = false,
                                      onChange,
                                      onSave,
                                      onClose,
@@ -93,6 +100,10 @@ export const ValuePickerSheet = ({
     };
 
     const handleSave = () => {
+        if (loading) {
+            return;
+        }
+
         onSave(localValue);
         closeSheet();
     };
@@ -118,14 +129,17 @@ export const ValuePickerSheet = ({
 
                     <View style={styles.handle}/>
 
-                    <Text style={styles.title}>
+                    <Heading>
                         {title}
-                    </Text>
+                    </Heading>
 
                     {subtitle && (
-                        <Text style={styles.subtitle}>
+                        <Body
+                            color="textSecondary"
+                            style={styles.subtitle}
+                        >
                             {subtitle}
-                        </Text>
+                        </Body>
                     )}
 
                     {renderPreview && (
@@ -158,6 +172,9 @@ export const ValuePickerSheet = ({
                     <Button
                         title="Save"
                         onPress={handleSave}
+                        loading={loading}
+                        disabled={loading}
+                        fullWidth
                     />
 
                 </Animated.View>
@@ -172,7 +189,7 @@ const styles = StyleSheet.create({
 
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.35)",
+        backgroundColor: "rgba(0,0,0,0.6)",
         justifyContent: "flex-end"
     },
 
@@ -181,45 +198,41 @@ const styles = StyleSheet.create({
     },
 
     sheet: {
-        backgroundColor: "#fff",
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 20,
-        paddingBottom: 30
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderColor: colors.border,
+        padding: spacing.lg,
+        paddingBottom: spacing.xxl
     },
 
     handle: {
         width: 40,
         height: 5,
-        backgroundColor: "#E5E7EB",
-        borderRadius: 3,
+        backgroundColor: colors.border,
+        borderRadius: radius.xs,
         alignSelf: "center",
-        marginBottom: 14
-    },
-
-    title: {
-        fontSize: 18,
-        fontWeight: "700",
-        marginBottom: 4
+        marginBottom: spacing.lg
     },
 
     subtitle: {
-        color: "#6B7280",
-        marginBottom: 16
+        marginTop: spacing.xs,
+        marginBottom: spacing.lg
     },
 
     preview: {
         alignItems: "center",
-        marginBottom: 16
+        marginBottom: spacing.lg
     },
 
     presets: {
         flexDirection: "row",
         justifyContent: "center",
-        marginBottom: 16
+        marginBottom: spacing.lg
     },
 
     input: {
-        marginBottom: 20
+        marginBottom: spacing.lg
     }
 });

@@ -62,7 +62,8 @@ export const useDisconnectGmail = () => {
 export const useSyncGmail = () => {
     const queryClient = useQueryClient();
     return useMutation({
-        mutationFn: () => gmailService.sync(20),
+        mutationFn: (maxResults?: number) =>
+            gmailService.sync(maxResults ?? 20),
         onSuccess: async () => {
             await queryClient.invalidateQueries({
                 queryKey: GMAIL_QUERY_KEY,

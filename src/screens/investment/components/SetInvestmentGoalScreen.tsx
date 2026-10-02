@@ -1,21 +1,39 @@
 import React from "react";
-import {StyleSheet, Text, TouchableOpacity, View} from "react-native";
+import {Pressable, StyleSheet, View} from "react-native";
+
+import SectionCard from "../../../components/common/SectionCard";
+import {Button} from "../../../components/Button";
+import {Spacer} from "../../../components";
 
 import {StatsRow} from "../../../components/common/ui/StatsRow";
 import {RemainingInvestment} from "../../../components/common/ui/RemainingInvestment";
-import {Button} from "../../../components/common/ui";
 
+import {Body, Caption, Heading, Title,} from "../../../components/typography";
+
+import {colors, radius, spacing} from "../../../design";
+import {formatCurrency} from "../../../utils/currency";
 import {monthNames} from "../../../utils/months";
 import {useToastStore} from "../../../stores/useToastStore";
 
+/**
+ * Investment health, mapped onto the app palette.
+ * "orange" has no palette equivalent, so it stays a
+ * literal to keep the four states distinguishable.
+ */
 const statusColors = {
-    green: "#10B981",
-    yellow: "#F59E0B",
+    green: colors.success,
+    yellow: colors.warning,
     orange: "#FB923C",
-    red: "#EF4444",
+    red: colors.danger,
 } as const;
 
-export const SetInvestmentGoalScreen = ({month, months, onSetGoal, onMonthPress}: any) => {
+export const SetInvestmentGoalScreen = ({
+                                            month,
+                                            selectedMonth,
+                                            months,
+                                            onSetGoal,
+                                            onMonthPress,
+                                        }: any) => {
 
     const investment = month?.investment ?? {};
     const remaining = investment?.remaining ?? 0;
@@ -27,42 +45,62 @@ export const SetInvestmentGoalScreen = ({month, months, onSetGoal, onMonthPress}
 
     if (!hasGoal && !hasInvestments) {
         return (
-            <View style={styles.empty}>
-                <Text style={styles.emptyTitle}>
-                    Start Your Investment Journey
-                </Text>
+            <SectionCard>
+                <View style={styles.empty}>
+                    <Heading align="center">
+                        Start Your Investment Journey
+                    </Heading>
 
-                <Text style={styles.emptySubtitle}>
-                    Set a monthly goal and track your progress throughout the year.
-                </Text>
+                    <Body
+                        color="textSecondary"
+                        align="center"
+                        style={styles.emptySubtitle}
+                    >
+                        Set a monthly goal and track your
+                        progress throughout the year.
+                    </Body>
 
-                <Button
-                    title="Set Investment Goal"
-                    onPress={onSetGoal}
-                />
-            </View>
+                    <Button
+                        title="Set Investment Goal"
+                        onPress={onSetGoal}
+                        fullWidth
+                    />
+                </View>
+            </SectionCard>
         );
     }
 
     if (!hasGoal && hasInvestments) {
         return (
             <>
-                <View style={styles.empty}>
-                    <Text style={styles.emptyTitle}>
-                        Investments Found
-                    </Text>
+                <SectionCard>
+                    <View style={styles.empty}>
+                        <Heading align="center">
+                            Investments Found
+                        </Heading>
 
-                    <Text style={styles.emptySubtitle}>
-                        You've already invested this month but no goal was configured.
-                    </Text>
+                        <Body
+                            color="textSecondary"
+                            align="center"
+                            style={styles.emptySubtitle}
+                        >
+                            You've already invested this month
+                            but no goal was configured.
+                        </Body>
 
-                    <Button
-                        title="Set Goal"
-                        onPress={onSetGoal}
-                    />
-                </View>
+                        <Button
+                            title="Set Goal"
+                            onPress={onSetGoal}
+                            fullWidth
+                        />
+                    </View>
+                </SectionCard>
 
-                <Streak months={months}/>
+                <Spacer size="md"/>
+
+                <Streak months={months} month={selectedMonth}/>
+
+                <Spacer size="md"/>
 
                 <ActivityGrid
                     months={months}
@@ -74,33 +112,53 @@ export const SetInvestmentGoalScreen = ({month, months, onSetGoal, onMonthPress}
 
     return (
         <>
-            <View style={styles.summaryCard}>
+            <SectionCard
+                title="Monthly Goal"
+                actionLabel="Edit"
+                onActionPress={onSetGoal}
+            >
+                <View style={styles.summary}>
+                    <Title
+                        weight="bold"
+                        style={styles.summaryAmount}
+                    >
+                        {formatCurrency(goalAmount)}
+                    </Title>
+                </View>
 
-                <Text style={styles.summaryLabel}>
-                    Monthly Goal
-                </Text>
-
-                <Text style={styles.summaryAmount}>
-                    ₹{goalAmount.toLocaleString("en-IN")}
-                </Text>
                 {month && (
                     <>
-                        <Text style={styles.monthTitle}>
-                            {monthNames[(month.month ?? 1) - 1]} Investment Summary
-                        </Text>
+                        <View style={styles.divider}/>
+
+                        <Heading>
+                            {monthNames[(month.month ?? 1) - 1]} Summary
+                        </Heading>
 
                         <StatsRow
                             items={[
-                                {label: "Invested", value: invested, color: "#10B981"},
-                                {label: "Goal", value: goalAmount, color: "#2563EB"},
+                                {
+                                    label: "Invested",
+                                    value: invested,
+                                    color: colors.success,
+                                },
+                                {
+                                    label: "Goal",
+                                    value: goalAmount,
+                                    color: colors.primary,
+                                },
                             ]}
                         />
+
                         <RemainingInvestment remaining={remaining}/>
                     </>
                 )}
-            </View>
+            </SectionCard>
 
-            <Streak months={months}/>
+            <Spacer size="md"/>
+
+            <Streak months={months} month={selectedMonth}/>
+
+            <Spacer size="md"/>
 
             <ActivityGrid
                 months={months}
@@ -110,206 +168,167 @@ export const SetInvestmentGoalScreen = ({month, months, onSetGoal, onMonthPress}
     );
 };
 
-const Streak = ({months}: any) => {
+const Streak = ({months, month}: any) => {
 
+    /**
+     * Count back from the month being viewed, not from
+     * December. Walking from year-end always breaks on the
+     * first future month, which pinned the streak at 0.
+     */
     let streak = 0;
 
-    for (let i = months.length - 1; i >= 0; i--) {
-        if (months[i]?.investment?.invested > 0) streak++;
+    for (let i = (month ?? 1) - 1; i >= 0; i--) {
+        if ((months?.[i]?.investment?.invested ?? 0) > 0) streak++;
         else break;
     }
 
     return (
-        <View style={styles.streak}>
-            <Text style={styles.streakLabel}>
-                Consistency
-            </Text>
+        <SectionCard>
+            <View style={styles.streak}>
+                <Caption color="textSecondary">
+                    Consistency
+                </Caption>
 
-            <Text style={styles.streakText}>
-                🔥 {streak} Month Streak
-            </Text>
-        </View>
+                <Body
+                    weight="bold"
+                    style={styles.streakText}
+                >
+                    🔥 {streak} Month Streak
+                </Body>
+            </View>
+        </SectionCard>
     );
 };
 
 const ActivityGrid = ({months, onMonthPress}: any) => {
     const {show} = useToastStore();
+
     const handlePress = (month: any) => {
         const goalAmount = month?.investment?.goalAmount ?? 0;
         const invested = month?.investment?.invested ?? 0;
+
         if (goalAmount === 0 && invested === 0) {
             show("Set a goal to unlock this month");
             return;
         }
+
         onMonthPress(month);
     };
 
     return (
-        <View style={styles.grid}>
+        <SectionCard title="Activity">
+            <View style={styles.grid}>
+                {monthNames.map((name, i) => {
 
-            {monthNames.map((name, i) => {
+                    const m = months?.[i] ?? {};
+                    const goalAmount = m?.investment?.goalAmount ?? 0;
+                    const invested = m?.investment?.invested ?? 0;
+                    const locked = goalAmount === 0 && invested === 0;
 
-                const m = months?.[i] ?? {};
-                const goalAmount = m?.investment?.goalAmount ?? 0;
-                const invested = m?.investment?.invested ?? 0;
-                const locked = goalAmount === 0 && invested === 0;
+                    const color = locked
+                        ? colors.border
+                        : statusColors[
+                            (m?.investment
+                                ?.status as keyof typeof statusColors) ?? "green"
+                            ];
 
-                const color = locked ?
-                    "#E5E7EB" : statusColors[(m?.investment?.status as keyof typeof statusColors) ?? "green"];
-                return (
-                    <TouchableOpacity
-                        key={i}
-                        style={styles.cell}
-                        activeOpacity={0.7}
-                        onPress={() => handlePress(m)}
-                    >
-
-                        <View style={styles.boxWrapper}>
-
+                    return (
+                        <Pressable
+                            key={i}
+                            style={({pressed}) => [
+                                styles.cell,
+                                pressed && styles.pressed,
+                            ]}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${name} investment activity`}
+                            onPress={() => handlePress(m)}
+                        >
                             <View
                                 style={[
                                     styles.box,
                                     {backgroundColor: color},
-                                    locked && styles.disabledBox
+                                    locked && styles.disabledBox,
                                 ]}
                             />
-                        </View>
 
-                        <Text
-                            style={[
-                                styles.month,
-                                locked && styles.disabledMonth
-                            ]}
-                        >
-                            {name}
-                        </Text>
-
-                    </TouchableOpacity>
-                );
-            })}
-
-        </View>
+                            <Caption
+                                color={
+                                    locked
+                                        ? "textMuted"
+                                        : "textSecondary"
+                                }
+                            >
+                                {name}
+                            </Caption>
+                        </Pressable>
+                    );
+                })}
+            </View>
+        </SectionCard>
     );
 };
 
 const styles = StyleSheet.create({
 
-    summary: {
-        paddingHorizontal: 20,
-        marginTop: 12,
-    },
-    summaryCard: {
-        marginHorizontal: 20,
-        marginTop: 12,
-        padding: 20,
-        borderRadius: 20,
-        backgroundColor: "#FFFFFF",
-        borderWidth: 1,
-        borderColor: "#F3F4F6",
+    empty: {
         alignItems: "center",
+        paddingVertical: spacing.sm,
     },
 
-    summaryLabel: {
-        fontSize: 12,
-        color: "#6B7280",
+    emptySubtitle: {
+        marginTop: spacing.xs,
+        marginBottom: spacing.lg,
+        lineHeight: 21,
+    },
+
+    summary: {
+        alignItems: "center",
+        paddingVertical: spacing.sm,
     },
 
     summaryAmount: {
-        fontSize: 30,
-        fontWeight: "800",
-        color: "#111827",
-        marginTop: 4,
+        marginTop: spacing.xxs,
     },
 
-    summaryProgress: {
-        fontSize: 14,
-        color: "#6B7280",
-        marginTop: 4,
-        marginBottom: 12,
-    },
-    cell: {
-        width: "25%",
-        alignItems: "center",
-        marginBottom: 20,
-    },
-    monthTitle: {
-        fontSize: 18,
-        fontWeight: "700",
-        marginTop: 12,
-        color: "#111827",
+    divider: {
+        height: StyleSheet.hairlineWidth,
+        backgroundColor: colors.border,
+        marginBottom: spacing.md,
     },
 
     streak: {
-        marginTop: 20,
-        marginHorizontal: 20,
-        paddingVertical: 14,
-        borderRadius: 16,
-        backgroundColor: "#F9FAFB",
         alignItems: "center",
-    },
-
-    streakLabel: {
-        fontSize: 12,
-        color: "#6B7280",
-        marginBottom: 4,
+        paddingVertical: spacing.xs,
     },
 
     streakText: {
-        fontSize: 16,
-        fontWeight: "700",
-        color: "#111827",
+        marginTop: spacing.xxs,
     },
 
     grid: {
         flexDirection: "row",
         flexWrap: "wrap",
-        marginTop: 20,
-        paddingHorizontal: 20
+        marginTop: spacing.sm,
     },
-    boxWrapper: {
-        position: "relative"
+
+    cell: {
+        width: "25%",
+        alignItems: "center",
+        marginBottom: spacing.lg,
     },
 
     box: {
         width: 28,
         height: 28,
-        borderRadius: 6,
-        marginBottom: 6
-    },
-    month: {
-        fontSize: 11,
-        color: "#6B7280"
-    },
-
-    disabledMonth: {
-        color: "#9CA3AF"
+        borderRadius: radius.xs,
+        marginBottom: spacing.xs,
     },
 
     disabledBox: {
-        opacity: 0.6
+        opacity: 0.6,
     },
 
-    empty: {
-        margin: 20,
-        padding: 24,
-        backgroundColor: "#F9FAFB",
-        borderRadius: 20,
-        alignItems: "center",
+    pressed: {
+        opacity: 0.6,
     },
-
-    emptySubtitle: {
-        fontSize: 14,
-        color: "#6B7280",
-        textAlign: "center",
-        marginBottom: 16,
-        lineHeight: 20,
-    },
-
-    emptyTitle: {
-        fontSize: 18,
-        fontWeight: "700",
-        marginBottom: 8,
-        color: "#111827",
-    }
-
 });

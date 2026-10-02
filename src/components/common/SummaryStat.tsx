@@ -65,7 +65,7 @@ export default function SummaryStat({
             {percent != null && percent !== 0 && (
                 <AppText
                     variant="small"
-                    color={percent > 0 ? colors.income : colors.expense}
+                    color={percent > 0 ? colors.success : colors.danger}
                 >
                     {percent > 0 ? "▲" : "▼"} {Math.abs(percent)}%
                 </AppText>

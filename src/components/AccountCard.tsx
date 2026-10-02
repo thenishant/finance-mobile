@@ -33,7 +33,7 @@ const accountMap: Record<
     },
     INVESTMENT: {
         icon: "trending-up-outline",
-        color: colors.investment,
+        color: colors.primary,
     },
 };
 

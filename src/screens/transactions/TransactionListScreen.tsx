@@ -50,11 +50,13 @@ const TransactionListScreen = () => {
     const [pendingFilters, setPendingFilters] =
         useState<TransactionFilters>({});
 
+    const [refreshing, setRefreshing] =
+        useState(false);
+
     const {
         data: transactions = [],
         isLoading,
         refetch,
-        isRefetching,
     } = useQuery<Transaction[]>({
         queryKey: [
             "transactions",
@@ -139,6 +141,22 @@ const TransactionListScreen = () => {
             ]);
         },
     });
+
+    /**
+     * Pull-to-refresh only. Binding this to isRefetching
+     * popped the spinner open on every background refetch
+     * (e.g. after deleting a transaction) and jolted the
+     * list.
+     */
+    const handleRefresh = async () => {
+        setRefreshing(true);
+
+        try {
+            await refetch();
+        } finally {
+            setRefreshing(false);
+        }
+    };
 
     const handleTransactionPress = (
         transaction: Transaction,
@@ -278,8 +296,8 @@ const TransactionListScreen = () => {
             <TransactionList
                 data={grouped}
                 isLoading={isLoading}
-                refreshing={isRefetching}
-                onRefresh={refetch}
+                refreshing={refreshing}
+                onRefresh={handleRefresh}
                 onDelete={id => deleteMutation.mutate(id)}
                 onPress={handleTransactionPress}
                 controls={controls}

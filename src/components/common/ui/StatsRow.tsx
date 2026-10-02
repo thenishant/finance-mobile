@@ -1,6 +1,8 @@
 import React from "react";
 import {StyleSheet, View} from "react-native";
 import {StatChip} from "./StatChip";
+import {spacing} from "../../../design";
+import {formatCurrency} from "../../../utils/currency";
 
 interface StatItem {
     label: string;
@@ -28,7 +30,7 @@ export const StatsRow = ({items}: Props) => {
 
                     <StatChip
                         label={item.label}
-                        value={`₹${item.value.toLocaleString()}`}
+                        value={formatCurrency(item.value)}
                         color={item.color}
                     />
 
@@ -44,8 +46,8 @@ const styles = StyleSheet.create({
 
     row: {
         flexDirection: "row",
-        gap: 12,
-        marginTop: 12
+        gap: spacing.md,
+        marginTop: spacing.md
     },
 
     item: {

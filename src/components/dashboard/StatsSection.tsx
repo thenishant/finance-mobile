@@ -1,5 +1,5 @@
 import React from "react";
-import {StyleSheet, View} from "react-native";
+import {Pressable, StyleSheet, View} from "react-native";
 import Ionicons from "@expo/vector-icons/Ionicons";
 
 import SectionCard from "../common/SectionCard";
@@ -17,6 +17,12 @@ export interface Stat {
     value: number;
     change: number;
     type: FinanceIconType;
+
+    /**
+     * Makes the tile tappable. Left out, the tile
+     * renders as plain, non-interactive content.
+     */
+    onPress?: () => void;
 }
 
 interface Props {
@@ -31,8 +37,8 @@ export default function StatsSection({stats}: Props) {
                     const positive = stat.change >= 0;
                     const icon = financeIcons[stat.type];
 
-                    return (
-                        <View key={stat.type} style={styles.stat}>
+                    const content = (
+                        <>
                             <View style={styles.icon}>
                                 <Ionicons
                                     name={icon.icon}
@@ -75,7 +81,33 @@ export default function StatsSection({stats}: Props) {
                                     {Math.abs(stat.change).toFixed(1)}%
                                 </Body>
                             </View>
-                        </View>
+                        </>
+                    );
+
+                    if (!stat.onPress) {
+                        return (
+                            <View
+                                key={stat.type}
+                                style={styles.stat}
+                            >
+                                {content}
+                            </View>
+                        );
+                    }
+
+                    return (
+                        <Pressable
+                            key={stat.type}
+                            onPress={stat.onPress}
+                            accessibilityRole="button"
+                            accessibilityLabel={`${stat.title}, view details`}
+                            style={({pressed}) => [
+                                styles.stat,
+                                pressed && styles.pressed,
+                            ]}
+                        >
+                            {content}
+                        </Pressable>
                     );
                 })}
             </View>
@@ -93,6 +125,10 @@ const styles = StyleSheet.create({
         flex: 1,
         alignItems: "center",
         paddingVertical: spacing.sm,
+    },
+
+    pressed: {
+        opacity: 0.6,
     },
 
     icon: {

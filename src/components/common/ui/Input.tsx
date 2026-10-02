@@ -20,15 +20,15 @@ export const Input = ({disabled, style, ...props}: Props) => {
                 disabled && styles.disabled,
                 style,
             ]}
-            placeholderTextColor={colors.grey}
+            placeholderTextColor={colors.textMuted}
         />
     );
 };
 
 const styles = StyleSheet.create({
     input: {
-        backgroundColor: colors.darkBackground,
-        borderColor: colors.grey,
+        backgroundColor: colors.background,
+        borderColor: colors.border,
         color: colors.white,
         borderRadius: 16,
         borderWidth: 1,

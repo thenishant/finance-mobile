@@ -1,5 +1,8 @@
 import React from "react";
-import {StyleSheet, Text, View} from "react-native";
+import {StyleSheet, View} from "react-native";
+
+import {Body} from "../../typography";
+import {colors, radius, spacing} from "../../../design";
 import {useToastStore} from "../../../stores/useToastStore";
 
 export const Toast = () => {
@@ -9,10 +12,16 @@ export const Toast = () => {
     if (!message) return null;
 
     return (
-        <View style={styles.container}>
-            <Text style={styles.text}>
+        <View
+            style={styles.container}
+            pointerEvents="none"
+        >
+            <Body
+                weight="semibold"
+                align="center"
+            >
                 {message}
-            </Text>
+            </Body>
         </View>
     );
 };
@@ -21,17 +30,17 @@ const styles = StyleSheet.create({
 
     container: {
         position: "absolute",
-        bottom: 40,
+        bottom: 96,
+        left: spacing.lg,
+        right: spacing.lg,
+        alignItems: "center",
         alignSelf: "center",
-        backgroundColor: "#111827",
-        paddingHorizontal: 16,
-        paddingVertical: 10,
-        borderRadius: 999
+        backgroundColor: colors.surfaceElevated,
+        borderWidth: StyleSheet.hairlineWidth,
+        borderColor: colors.border,
+        paddingHorizontal: spacing.lg,
+        paddingVertical: spacing.md,
+        borderRadius: radius.round,
     },
-
-    text: {
-        color: "#fff",
-        fontWeight: "600"
-    }
 
 });

@@ -1,8 +1,15 @@
 import {api} from "./api";
 import {unwrap} from "./base";
 import {supabase} from "../lib/supabase";
+import {UserProfile} from "../types/user.types";
 
 export const authService = {
+    async me(): Promise<UserProfile> {
+        const res = await api.get("/auth/me");
+
+        return unwrap<UserProfile>(res);
+    },
+
     async login(
         email: string,
         password: string,

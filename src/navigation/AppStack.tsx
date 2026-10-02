@@ -9,6 +9,7 @@ import {SelectAccountScreen} from "../screens/accounts/SelectFinancialAccountScr
 import {CreateAccountScreen} from "../screens/accounts/CreateAccountScreen";
 import {CreateCategoryScreen} from "../screens/categories/CreateCategoryScreen";
 import {InvestmentScreen} from "../screens/investment/InvestmentScreen";
+import {AccountSettingsScreen} from "../screens/settings/AccountSettingsScreen";
 
 import {TransactionType} from "../types/transaction";
 import TransactionDetailScreen from "../screens/transactions/TransactionDetailScreen";
@@ -26,6 +27,7 @@ export type AppStackParamList = {
     CreateAccount: undefined;
     CreateCategory: { type: TransactionType };
     Investment: undefined;
+    AccountSettings: undefined;
 };
 
 const Stack =
@@ -120,6 +122,15 @@ export const AppStack = () => {
                 component={InvestmentScreen}
                 options={{
                     title: "Investment",
+                }}
+            />
+
+            <Stack.Screen
+                name="AccountSettings"
+                component={AccountSettingsScreen}
+                options={{
+                    title: "Account Settings",
+                    headerShown: false,
                 }}
             />
         </Stack.Navigator>

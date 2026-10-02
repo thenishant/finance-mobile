@@ -62,7 +62,7 @@ export const TransactionTypeSection = ({
 const styles = StyleSheet.create({
     container: {
         flexDirection: "row",
-        backgroundColor: colors.darkBackground,
+        backgroundColor: colors.background,
         padding: 8,
     },
     item: {

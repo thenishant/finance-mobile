@@ -1,70 +1,143 @@
-import React, {useRef, useState} from "react";
-import {Animated, StyleSheet, View} from "react-native";
+import React, {useState} from "react";
+import {ActivityIndicator, RefreshControl, ScrollView, StyleSheet, View,} from "react-native";
 
 import {useAnalytics} from "../../hooks/useAnalytics";
 import {useYearAnalytics} from "../../hooks/useYearlyAnalytics";
 
-import {MonthSelector} from "../../components/common/ui/MonthSelector";
+import {AppScreen} from "../../ui";
+import {Spacer} from "../../components";
+import {Button} from "../../components/Button";
+import {Body, Heading} from "../../components/typography";
+import MonthSelector from "../../components/common/ui/MonthSelector";
+
 import {SetInvestmentGoalScreen} from "./components/SetInvestmentGoalScreen";
+import {MonthDetailsSheet, SetInvestmentGoalSheet,} from "./components/SetInvestmentGoalSheet";
 
 import {useMonthStore} from "../../stores/useMonthStore";
-import {MonthDetailsSheet, SetInvestmentGoalSheet} from "./components/SetInvestmentGoalSheet";
-
-import {SafeAreaView} from "react-native-safe-area-context";
+import {colors, spacing} from "../../design";
 
 export const InvestmentScreen = () => {
-
-    const {data} = useAnalytics();
-    const {data: yearData} = useYearAnalytics(new Date().getFullYear());
-
-    const months = yearData?.months ?? [];
 
     const [goalOpen, setGoalOpen] = useState(false);
     const [monthOpen, setMonthOpen] = useState(false);
     const [selectedMonth, setSelectedMonth] = useState<any>(null);
+    const [refreshing, setRefreshing] = useState(false);
 
-    const scrollY = useRef(new Animated.Value(0)).current;
+    const {year, month, prevMonth, nextMonth} =
+        useMonthStore();
 
-    const {month} = useMonthStore();
+    const {data} = useAnalytics();
+
+    /**
+     * Follows the selected year. Pinning this to the
+     * current year showed this year's data while the
+     * header read a different one.
+     */
+    const yearAnalytics = useYearAnalytics(year);
+
+    const yearData = yearAnalytics.data;
+
+    const months = yearData?.months ?? [];
 
     const activeMonth =
         months.find((m: any) => m.month === month) ?? null;
 
+    /**
+     * Pull-to-refresh only, so a background refetch does
+     * not pop the spinner open and jolt the scroll view.
+     */
+    const onRefresh = async () => {
+        setRefreshing(true);
+
+        try {
+            await yearAnalytics.refetch();
+        } finally {
+            setRefreshing(false);
+        }
+    };
+
+    /**
+     * Without this the screen renders "Start Your
+     * Investment Journey" while the year is still loading,
+     * then snaps to real content.
+     */
+    const body = yearAnalytics.isLoading ? (
+        <View style={styles.center}>
+            <ActivityIndicator color={colors.primary}/>
+
+            <Spacer size="sm"/>
+
+            <Body color="textSecondary">
+                Loading your investments...
+            </Body>
+        </View>
+    ) : yearAnalytics.isError ? (
+        <View style={styles.center}>
+            <Heading align="center">
+                Something went wrong
+            </Heading>
+
+            <Spacer size="sm"/>
+
+            <Body color="textSecondary" align="center">
+                Unable to load your investments.
+            </Body>
+
+            <Spacer size="lg"/>
+
+            <Button
+                title="Retry"
+                variant="secondary"
+                onPress={() => yearAnalytics.refetch()}
+            />
+        </View>
+    ) : (
+        <SetInvestmentGoalScreen
+            month={activeMonth}
+            selectedMonth={month}
+            months={months}
+            onSetGoal={() => setGoalOpen(true)}
+            onMonthPress={(m: any) => {
+                setSelectedMonth(m);
+                setMonthOpen(true);
+            }}
+        />
+    );
+
+    /**
+     * safeArea={false}: the native stack header already
+     * consumes the top inset, so letting AppScreen add
+     * it again double-counts it and leaves a dead gap.
+     */
     return (
-        <View style={styles.container}>
-
-            {/* 🔥 SAME SAFE AREA */}
-            <SafeAreaView edges={["top"]} style={styles.topSafeArea}/>
-
-            <Animated.ScrollView
-                contentContainerStyle={{paddingBottom: 60}}
-                onScroll={Animated.event(
-                    [{nativeEvent: {contentOffset: {y: scrollY}}}],
-                    {useNativeDriver: false}
-                )}
-                scrollEventThrottle={16}
-            >
-
-                {/* 🔥 SAME HEADER BLOCK */}
-                <View style={styles.topSection}>
+        <AppScreen keyboard={false} safeArea={false}>
+            <View style={styles.container}>
+                <View style={styles.monthSelector}>
                     <MonthSelector
-                        variant="dark"
-                        scrollY={scrollY}
+                        year={year}
+                        month={month}
+                        onPrevious={prevMonth}
+                        onNext={nextMonth}
                     />
                 </View>
 
-                {/* CONTENT */}
-                <SetInvestmentGoalScreen
-                    month={activeMonth}
-                    months={months}
-                    onSetGoal={() => setGoalOpen(true)}
-                    onMonthPress={(m: any) => {
-                        setSelectedMonth(m);
-                        setMonthOpen(true);
-                    }}
-                />
+                <ScrollView
+                    style={styles.scrollView}
+                    contentContainerStyle={styles.scrollContent}
+                    showsVerticalScrollIndicator={false}
+                    refreshControl={
+                        <RefreshControl
+                            refreshing={refreshing}
+                            onRefresh={onRefresh}
+                            tintColor={colors.primary}
+                        />
+                    }
+                >
+                    {body}
 
-            </Animated.ScrollView>
+                    <Spacer size="md"/>
+                </ScrollView>
+            </View>
 
             <MonthDetailsSheet
                 visible={monthOpen}
@@ -77,23 +150,34 @@ export const InvestmentScreen = () => {
                 income={data?.totalIncome ?? 0}
                 onClose={() => setGoalOpen(false)}
             />
-        </View>
+        </AppScreen>
     );
 };
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#F3F4F6",
+        minHeight: 0,
     },
 
-    topSafeArea: {
-        backgroundColor: "#0F172A",
+    monthSelector: {
+        width: "100%",
+        marginBottom: spacing.sm,
     },
 
-    topSection: {
-        backgroundColor: "#0F172A",
-        paddingHorizontal: 16,
-        paddingBottom: 20,
+    scrollView: {
+        flex: 1,
+    },
+
+    scrollContent: {
+        flexGrow: 1,
+        paddingBottom: spacing.lg,
+    },
+
+    center: {
+        flex: 1,
+        alignItems: "center",
+        justifyContent: "center",
+        paddingHorizontal: spacing.lg,
     },
 });

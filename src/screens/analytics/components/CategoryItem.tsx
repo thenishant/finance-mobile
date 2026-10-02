@@ -1,6 +1,10 @@
 import React, {useState} from "react";
-import {StyleSheet, Text, TouchableOpacity, View,} from "react-native";
+import {Pressable, StyleSheet, View,} from "react-native";
 import {Feather} from "@expo/vector-icons";
+
+import {Body, Caption} from "../../../components/typography";
+import {colors, radius, spacing} from "../../../design";
+import {formatCurrency} from "../../../utils/currency";
 
 interface Child {
     id: string;
@@ -25,28 +29,28 @@ export const CategoryItem = ({
 
     return (
         <View style={styles.card}>
-            <TouchableOpacity
+            <Pressable
                 onPress={() => setExpanded(!expanded)}
-                activeOpacity={0.8}
+                accessibilityRole="button"
             >
                 <View style={styles.header}>
                     <View>
-                        <Text style={styles.category}>
+                        <Body weight="semibold">
                             {category}
-                        </Text>
-                        <Text style={styles.percent}>
+                        </Body>
+                        <Caption color="textSecondary">
                             {percent.toFixed(0)}%
-                        </Text>
+                        </Caption>
                     </View>
 
                     <View style={styles.right}>
-                        <Text style={styles.amount}>
-                            ₹ {total.toLocaleString("en-IN")}
-                        </Text>
+                        <Body weight="semibold">
+                            {formatCurrency(total)}
+                        </Body>
                         <Feather
                             name={expanded ? "chevron-up" : "chevron-down"}
                             size={18}
-                            color="#6B7280"
+                            color={colors.textMuted}
                         />
                     </View>
                 </View>
@@ -60,17 +64,17 @@ export const CategoryItem = ({
                         ]}
                     />
                 </View>
-            </TouchableOpacity>
+            </Pressable>
 
             {expanded &&
                 children.map((child) => (
                     <View key={child.id} style={styles.childRow}>
-                        <Text style={styles.childName}>
+                        <Caption color="textSecondary">
                             {child.name}
-                        </Text>
-                        <Text style={styles.childAmount}>
-                            ₹ {child.total.toLocaleString("en-IN")}
-                        </Text>
+                        </Caption>
+                        <Caption weight="medium">
+                            {formatCurrency(child.total)}
+                        </Caption>
                     </View>
                 ))}
         </View>
@@ -79,63 +83,37 @@ export const CategoryItem = ({
 
 const styles = StyleSheet.create({
     card: {
-        backgroundColor: "#FFFFFF",
-        borderRadius: 16,
-        padding: 16,
-        shadowColor: "#000",
-        shadowOpacity: 0.05,
-        shadowRadius: 10,
-        elevation: 4,
+        backgroundColor: colors.surface,
+        borderRadius: radius.md,
+        padding: spacing.lg,
     },
     header: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
     },
-    category: {
-        fontSize: 15,
-        fontWeight: "600",
-        color: "#111827",
-    },
-    percent: {
-        fontSize: 12,
-        color: "#6B7280",
-        marginTop: 4,
-    },
     right: {
         alignItems: "flex-end",
-        gap: 4,
-    },
-    amount: {
-        fontSize: 14,
-        fontWeight: "600",
+        gap: spacing.xs,
     },
     barBackground: {
         height: 6,
-        backgroundColor: "#E5E7EB",
-        borderRadius: 3,
-        marginTop: 10,
+        backgroundColor: colors.overlayMedium,
+        borderRadius: radius.xs,
+        marginTop: spacing.sm,
         overflow: "hidden",
     },
     barFill: {
         height: 6,
-        backgroundColor: "#2563EB",
-        borderRadius: 3,
+        backgroundColor: colors.primary,
+        borderRadius: radius.xs,
     },
     childRow: {
         flexDirection: "row",
         justifyContent: "space-between",
-        marginTop: 10,
-        paddingTop: 8,
-        borderTopWidth: 1,
-        borderTopColor: "#F3F4F6",
-    },
-    childName: {
-        fontSize: 13,
-        color: "#374151",
-    },
-    childAmount: {
-        fontSize: 13,
-        fontWeight: "500",
+        marginTop: spacing.sm,
+        paddingTop: spacing.sm,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderTopColor: colors.border,
     },
 });

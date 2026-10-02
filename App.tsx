@@ -15,6 +15,7 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import {queryClient} from "./src/lib/queryClient";
 import {RootNavigator} from "./src/navigation/RootNavigator";
 import {AuthBootstrap} from "./src/navigation/AuthBootstrap";
+import {Toast} from "./src/components/common/ui/Toast";
 
 const asyncStoragePersister =
     createAsyncStoragePersister({
@@ -42,6 +43,7 @@ export default function App() {
                     >
                         <AuthBootstrap/>
                         <RootNavigator/>
+                        <Toast/>
                     </PersistQueryClientProvider>
                 </BottomSheetModalProvider>
             </SafeAreaProvider>

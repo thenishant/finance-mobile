@@ -186,13 +186,13 @@ const styles = StyleSheet.create({
         backgroundColor: "transparent",
     },
     sheet: {
-        backgroundColor: colors.darkBackground,
+        backgroundColor: colors.background,
         borderTopLeftRadius: 24,
         borderTopRightRadius: 24,
         padding: 20,
         paddingBottom: 30,
         maxHeight: "75%",
-        shadowColor: colors.grey,
+        shadowColor: colors.cardShadow,
         shadowOpacity: 0.7,
         shadowRadius: 20,
         shadowOffset: {width: 0, height: -6},
@@ -201,7 +201,7 @@ const styles = StyleSheet.create({
     handle: {
         width: 40,
         height: 5,
-        backgroundColor: colors.grey,
+        backgroundColor: colors.border,
         borderRadius: 3,
         alignSelf: "center",
         marginBottom: 12,
@@ -215,7 +215,7 @@ const styles = StyleSheet.create({
     sheetItem: {
         paddingVertical: 14,
         borderBottomWidth: 1,
-        borderBottomColor: colors.grey,
+        borderBottomColor: colors.border,
     },
     sheetText: {
         fontSize: 15,
@@ -230,7 +230,7 @@ const styles = StyleSheet.create({
         width: 56,
         height: 56,
         borderRadius: 28,
-        backgroundColor: colors.blue,
+        backgroundColor: colors.primary,
         justifyContent: "center",
         alignItems: "center",
         shadowColor: "#000",

@@ -63,13 +63,14 @@ export const GmailActionCard = ({
                     </Caption>
                 </View>
 
-                {!syncing && (
-                    <Ionicons
-                        name="chevron-forward"
-                        size={18}
-                        color={colors.textMuted}
-                    />
-                )}
+                {/* Kept mounted so the row does not
+                    reflow when syncing toggles. */}
+                <Ionicons
+                    name="chevron-forward"
+                    size={18}
+                    color={colors.textMuted}
+                    style={syncing && styles.hidden}
+                />
             </Pressable>
 
             <View style={styles.divider}/>
@@ -145,5 +146,9 @@ const styles = StyleSheet.create({
 
     disabled: {
         opacity: 0.6,
+    },
+
+    hidden: {
+        opacity: 0,
     },
 });

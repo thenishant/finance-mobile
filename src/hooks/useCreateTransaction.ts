@@ -81,6 +81,14 @@ export const useCreateTransaction = () => {
             return transactionService.create(data);
         },
 
+        /**
+         * These keys must match the ones the hooks
+         * actually register. "monthly-analytics" and
+         * "yearly-analytics" matched nothing, so the
+         * dashboard, analytics and investment screens
+         * kept showing stale numbers after a new
+         * transaction.
+         */
         onSuccess: async () => {
             await Promise.all([
                 queryClient.invalidateQueries({
@@ -92,11 +100,15 @@ export const useCreateTransaction = () => {
                 }),
 
                 queryClient.invalidateQueries({
-                    queryKey: ["monthly-analytics"],
+                    queryKey: ["dashboard"],
                 }),
 
                 queryClient.invalidateQueries({
-                    queryKey: ["yearly-analytics"],
+                    queryKey: ["analytics"],
+                }),
+
+                queryClient.invalidateQueries({
+                    queryKey: ["analytics-year"],
                 }),
             ]);
         },

@@ -2,35 +2,31 @@ import React from "react";
 import {Pressable, StyleSheet, View,} from "react-native";
 import {BottomTabBarProps, createBottomTabNavigator,} from "@react-navigation/bottom-tabs";
 import {Ionicons} from "@expo/vector-icons";
-import {NativeStackNavigationProp} from "@react-navigation/native-stack";
 import {useSafeAreaInsets} from "react-native-safe-area-context";
 
 import DashboardScreen from "../screens/dashboard/DashboardScreen";
 import TransactionListScreen from "../screens/transactions/TransactionListScreen";
 import AnalyticsScreen from "../screens/analytics/AnalyticsScreen";
-import {GmailScreen} from "../screens/gmail/GmailScreen";
-
-import {AppStackParamList} from "./AppStack";
 import {colors} from "../design";
 
 export type MainTabParamList = {
     Dashboard: undefined;
     Transactions: undefined;
-    Accounts: undefined;
+    Gmail: undefined;
     Analytics: undefined;
 };
 
 const Tab = createBottomTabNavigator<MainTabParamList>();
 
-type StackNavigationProp =
-    NativeStackNavigationProp<AppStackParamList>;
-
-const tabIcons = {
+const tabIcons: Record<
+    keyof MainTabParamList,
+    React.ComponentProps<typeof Ionicons>["name"]
+> = {
     Dashboard: "home",
     Transactions: "receipt-outline",
-    Accounts: "wallet-outline",
+    Gmail: "mail-outline",
     Analytics: "pie-chart-outline",
-} as const;
+};
 
 function CustomTabBar({state, navigation}: BottomTabBarProps) {
     const insets = useSafeAreaInsets();
@@ -60,7 +56,7 @@ function CustomTabBar({state, navigation}: BottomTabBarProps) {
                             style={styles.tab}
                         >
                             <Ionicons
-                                name={tabIcons[route.name]}
+                                name={tabIcons[route.name as keyof MainTabParamList]}
                                 size={26}
                                 color={
                                     focused
@@ -107,7 +103,7 @@ function CustomTabBar({state, navigation}: BottomTabBarProps) {
                             style={styles.tab}
                         >
                             <Ionicons
-                                name={tabIcons[route.name]}
+                                name={tabIcons[route.name as keyof MainTabParamList]}
                                 size={26}
                                 color={focused ? colors.primary : colors.textMuted}
                             />
@@ -137,11 +133,6 @@ export const MainTabs = () => {
             <Tab.Screen
                 name="Transactions"
                 component={TransactionListScreen}
-            />
-
-            <Tab.Screen
-                name="Accounts"
-                component={GmailScreen}
             />
 
             <Tab.Screen

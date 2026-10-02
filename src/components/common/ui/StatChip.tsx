@@ -1,5 +1,8 @@
 import React from "react";
-import {StyleSheet, Text, View} from "react-native";
+import {StyleSheet, View} from "react-native";
+
+import {Body, Caption} from "../../typography";
+import {colors, radius, spacing} from "../../../design";
 
 interface Props {
     label: string;
@@ -10,19 +13,26 @@ interface Props {
 export const StatChip = ({
                              label,
                              value,
-                             color = "#111827"
+                             color = colors.text,
                          }: Props) => {
 
     return (
         <View style={styles.container}>
 
-            <Text style={styles.label}>
+            <Caption color="textSecondary">
                 {label}
-            </Text>
+            </Caption>
 
-            <Text style={[styles.value, {color}]}>
+            <Body
+                weight="bold"
+                color={color}
+                numberOfLines={1}
+                adjustsFontSizeToFit
+                minimumFontScale={0.8}
+                style={styles.value}
+            >
                 {value}
-            </Text>
+            </Body>
 
         </View>
     );
@@ -31,20 +41,13 @@ export const StatChip = ({
 const styles = StyleSheet.create({
 
     container: {
-        backgroundColor: "#F9FAFB",
-        borderRadius: 14,
-        padding: 14
-    },
-
-    label: {
-        fontSize: 12,
-        color: "#6B7280",
-        marginBottom: 4
+        backgroundColor: colors.overlayMedium,
+        borderRadius: radius.md,
+        padding: spacing.md,
     },
 
     value: {
-        fontSize: 16,
-        fontWeight: "700"
-    }
+        marginTop: spacing.xxs,
+    },
 
 });

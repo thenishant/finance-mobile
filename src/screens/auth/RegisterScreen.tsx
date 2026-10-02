@@ -4,7 +4,7 @@ import {authService} from "../../services/auth.service";
 import {useAuth} from "../../hooks/useAuth";
 
 const RegisterScreen = () => {
-    const {login} = useAuth();
+    const {loginWithToken} = useAuth();
 
     const [email, setEmail] = useState("");
     const [password, setPassword] = useState("");
@@ -12,7 +12,7 @@ const RegisterScreen = () => {
     const handleRegister = async () => {
         try {
             const token = await authService.register(email, password);
-            await login(token);
+            await loginWithToken(token);
         } catch (error) {
             Alert.alert("Registration Failed", "Try again");
         }

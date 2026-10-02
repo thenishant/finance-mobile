@@ -76,13 +76,13 @@ const styles = StyleSheet.create({
     container: {
         alignItems: "center",
         margin: 10,
-        backgroundColor: colors.darkBackground,
+        backgroundColor: colors.background,
     },
     label: {
         fontSize: 12,
         fontWeight: "700",
         textTransform: "uppercase",
-        color: colors.grey,
+        color: colors.textMuted,
     },
     amountRow: {
         flexDirection: "row",
@@ -92,7 +92,7 @@ const styles = StyleSheet.create({
     currency: {
         fontSize: 34,
         fontWeight: "500",
-        color: colors.grey,
+        color: colors.textMuted,
         marginRight: 6,
         marginBottom: 4,
     },

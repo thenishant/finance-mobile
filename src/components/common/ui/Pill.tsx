@@ -11,9 +11,11 @@ type Props = {
     textStyle?: StyleProp<TextStyle>;
 };
 
-const PRIMARY = "#2563EB";
-const INACTIVE_BG = "#F3F4F6";
-const INACTIVE_TEXT = "#374151";
+import {colors, radius, spacing} from "../../../design";
+
+const PRIMARY = colors.primary;
+const INACTIVE_BG = colors.overlayMedium;
+const INACTIVE_TEXT = colors.textSecondary;
 
 export const Pill: React.FC<Props> = ({
                                           label,
@@ -62,12 +64,12 @@ export const Pill: React.FC<Props> = ({
 
 const styles = StyleSheet.create({
     base: {
-        paddingVertical: 12,
+        paddingVertical: spacing.md,
         paddingHorizontal: 22,
-        borderRadius: 999,
+        borderRadius: radius.round,
         alignItems: "center",
         justifyContent: "center",
-        marginRight: 8
+        marginRight: spacing.sm
     },
 
     inactive: {
@@ -88,7 +90,7 @@ const styles = StyleSheet.create({
     },
 
     activeText: {
-        color: "#FFFFFF"
+        color: colors.white
     },
 
     disabled: {
@@ -96,6 +98,6 @@ const styles = StyleSheet.create({
     },
 
     disabledText: {
-        color: "#9CA3AF"
+        color: colors.textMuted
     }
 });

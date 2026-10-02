@@ -1,28 +1,52 @@
 import React from "react";
-import {StyleSheet, Text, View} from "react-native";
+import {StyleSheet, View} from "react-native";
+
+import {Body, Caption, Title} from "../../typography";
+import {colors, radius, spacing} from "../../../design";
+import {formatCurrency} from "../../../utils/currency";
 
 interface Props {
     remaining: number;
 }
 
+/**
+ * Only render this where a goal actually exists. With no
+ * goal, `remaining` is 0 and the card would claim the goal
+ * was achieved when there was nothing to achieve.
+ */
 export const RemainingInvestment = ({remaining}: Props) => {
 
+    const achieved = remaining <= 0;
+
+    const accent = achieved
+        ? colors.success
+        : colors.warning;
+
     return (
-        <View style={styles.card}>
+        <View
+            style={[
+                styles.card,
+                {backgroundColor: `${accent}15`},
+            ]}
+        >
 
-            <Text style={styles.label}>
+            <Caption color={accent}>
                 Remaining
-            </Text>
+            </Caption>
 
-            <Text style={styles.value}>
-                ₹{remaining.toLocaleString()}
-            </Text>
+            <Title
+                weight="bold"
+                color={accent}
+                style={styles.value}
+            >
+                {formatCurrency(Math.max(remaining, 0))}
+            </Title>
 
-            <Text style={styles.hint}>
-                {remaining === 0
+            <Body color={accent} style={styles.hint}>
+                {achieved
                     ? "Goal achieved 🎉"
                     : "left to reach goal"}
-            </Text>
+            </Body>
 
         </View>
     );
@@ -31,29 +55,18 @@ export const RemainingInvestment = ({remaining}: Props) => {
 const styles = StyleSheet.create({
 
     card: {
-        marginTop: 12,
-        backgroundColor: "#FEF3C7",
-        borderRadius: 16,
-        padding: 16,
-        alignItems: "center"
-    },
-
-    label: {
-        fontSize: 12,
-        color: "#92400E",
-        marginBottom: 4
+        marginTop: spacing.md,
+        borderRadius: radius.md,
+        padding: spacing.lg,
+        alignItems: "center",
     },
 
     value: {
-        fontSize: 26,
-        fontWeight: "700",
-        color: "#92400E"
+        marginTop: spacing.xxs,
     },
 
     hint: {
-        fontSize: 12,
-        color: "#92400E",
-        marginTop: 2
-    }
+        marginTop: spacing.xxs,
+    },
 
 });

@@ -107,7 +107,7 @@ const styles = StyleSheet.create({
         gap: 6,
     },
     card: {
-        backgroundColor: colors.darkBackground,
+        backgroundColor: colors.background,
         borderRadius: 22,
         padding: 16,
         gap: 16,
@@ -140,6 +140,6 @@ const styles = StyleSheet.create({
     chipText: {
         fontSize: 12,
         fontWeight: "600",
-        color: colors.darkBackground,
+        color: colors.background,
     },
 });

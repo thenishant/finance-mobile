@@ -1,11 +1,15 @@
 import React from "react";
-import {Modal, Pressable, StyleSheet, Text, View} from "react-native";
+import {Modal, Pressable, StyleSheet, View} from "react-native";
 
 import {ValuePickerSheet} from "../../../components/common/ui/ValuePickerSheet";
 import {monthNames} from "../../../utils/months";
 import {StatsRow} from "../../../components/common/ui/StatsRow";
 import {RemainingInvestment} from "../../../components/common/ui/RemainingInvestment";
-import {Button} from "../../../components/common/ui";
+import {Button} from "../../../components/Button";
+
+import {Body, Caption, Heading, Title,} from "../../../components/typography";
+import {colors, radius, spacing} from "../../../design";
+import {formatCurrency} from "../../../utils/currency";
 
 import {useSetInvestmentGoal} from "../../../hooks/useSetInvestmentGoal";
 import {useToastStore} from "../../../stores/useToastStore";
@@ -25,9 +29,13 @@ export const SetInvestmentGoalSheet = ({
 
     const {mutate, isPending} = useSetInvestmentGoal();
     const {show} = useToastStore();
-    const {month} = useMonthStore();
 
-    const year = new Date().getFullYear();
+    /**
+     * Both from the store. Taking month from the store but
+     * year from the clock wrote goals into the wrong year
+     * whenever the selected month crossed a year boundary.
+     */
+    const {year, month} = useMonthStore();
 
     const presets = ["10", "15", "20", "30"];
 
@@ -56,12 +64,15 @@ export const SetInvestmentGoalSheet = ({
                         onSuccess: () => {
                             show("Investment goal saved");
                             onClose();
-                        }
+                        },
+                        onError: () => {
+                            show("Could not save goal. Please try again.");
+                        },
                     }
                 );
             }}
             onClose={onClose}
-            // loading={isPending} // optional if your sheet supports it
+            loading={isPending}
             renderPreview={(value) => {
 
                 const percent = Number(value) || 0;
@@ -70,17 +81,18 @@ export const SetInvestmentGoalSheet = ({
                 const goalAmount = income * percent / 100;
 
                 return (
-                    <>
-                        <View style={styles.previewCard}>
-                            <Text style={styles.previewLabel}>
-                                Monthly Investment Target
-                            </Text>
+                    <View style={styles.previewCard}>
+                        <Caption color="textSecondary">
+                            Monthly Investment Target
+                        </Caption>
 
-                            <Text style={styles.previewAmount}>
-                                ₹{goalAmount.toLocaleString("en-IN")}
-                            </Text>
-                        </View>
-                    </>
+                        <Title
+                            weight="bold"
+                            style={styles.previewAmount}
+                        >
+                            {formatCurrency(goalAmount)}
+                        </Title>
+                    </View>
                 );
             }}
         />
@@ -97,10 +109,17 @@ export const MonthDetailsSheet = ({visible, month, onClose}: any) => {
     const goalAmount = investment?.goalAmount ?? 0;
     const remaining = investment?.remaining ?? 0;
 
-    const progress =
-        goalAmount > 0
-            ? Math.min(invested / goalAmount, 1)
-            : 0;
+    /**
+     * A month reachable from the activity grid may have
+     * investments but no goal. Progress, "remaining" and
+     * "achieved" are all meaningless then, so everything
+     * goal-relative is hidden rather than shown as zero.
+     */
+    const hasGoal = goalAmount > 0;
+
+    const progress = hasGoal
+        ? Math.min(invested / goalAmount, 1)
+        : 0;
 
     const percent = Math.round(progress * 100);
 
@@ -122,38 +141,60 @@ export const MonthDetailsSheet = ({visible, month, onClose}: any) => {
 
                     <View style={styles.handle}/>
 
-                    <Text style={styles.title}>
+                    <Heading style={styles.title}>
                         {monthNames[(month.month ?? 1) - 1]} Investment Summary
-                    </Text>
+                    </Heading>
 
-                    <View style={styles.progressBar}>
-                        <View
-                            style={[
-                                styles.progressFill,
-                                {width: `${percent}%`}
-                            ]}
-                        />
-                    </View>
+                    {hasGoal && (
+                        <View style={styles.progressBar}>
+                            <View
+                                style={[
+                                    styles.progressFill,
+                                    {width: `${percent}%`}
+                                ]}
+                            />
+                        </View>
+                    )}
 
-                    <Text style={styles.progressText}>
-                        {invested.toLocaleString("en-IN")} of {goalAmount.toLocaleString("en-IN")} invested
-                    </Text>
+                    <Body
+                        color="textSecondary"
+                        align="center"
+                        style={styles.progressText}
+                    >
+                        {hasGoal
+                            ? `${formatCurrency(invested)} of ${formatCurrency(goalAmount)} invested`
+                            : `${formatCurrency(invested)} invested — no goal was set`}
+                    </Body>
 
                     <StatsRow
                         items={[
-                            {label: "Saved", value: invested, color: "#10B981"},
-                            {label: "Goal", value: goalAmount, color: "#2563EB"}
+                            {
+                                label: "Saved",
+                                value: invested,
+                                color: colors.success,
+                            },
+                            ...(hasGoal
+                                ? [{
+                                    label: "Goal",
+                                    value: goalAmount,
+                                    color: colors.primary,
+                                }]
+                                : []),
                         ]}
                     />
 
-                    <RemainingInvestment
-                        remaining={remaining}
-                    />
+                    {hasGoal && (
+                        <RemainingInvestment
+                            remaining={remaining}
+                        />
+                    )}
 
                     <Button
                         title="Close"
+                        variant="secondary"
                         onPress={onClose}
-                        style={{marginTop: 20}}
+                        fullWidth
+                        style={styles.closeButton}
                     />
 
                 </View>
@@ -167,32 +208,20 @@ export const MonthDetailsSheet = ({visible, month, onClose}: any) => {
 const styles = StyleSheet.create({
 
     previewCard: {
-        marginTop: 12,
-        padding: 20,
-        borderRadius: 20,
-        backgroundColor: "#F9FAFB",
+        marginTop: spacing.md,
+        padding: spacing.lg,
+        borderRadius: radius.lg,
+        backgroundColor: colors.overlayMedium,
         alignItems: "center",
     },
 
-    previewLabel: {
-        fontSize: 12,
-        color: "#6B7280",
-        marginBottom: 6,
-    },
-
     previewAmount: {
-        fontSize: 28,
-        fontWeight: "800",
-        color: "#111827",
-        letterSpacing: -0.5,
+        marginTop: spacing.xxs,
     },
 
-    previewText: {
-        display: "none",
-    },
     overlay: {
         flex: 1,
-        backgroundColor: "rgba(0,0,0,0.35)",
+        backgroundColor: "rgba(0,0,0,0.6)",
         justifyContent: "flex-end"
     },
 
@@ -201,46 +230,45 @@ const styles = StyleSheet.create({
     },
 
     sheet: {
-        backgroundColor: "#fff",
-        borderTopLeftRadius: 24,
-        borderTopRightRadius: 24,
-        padding: 24,
-        paddingBottom: 24
+        backgroundColor: colors.surface,
+        borderTopLeftRadius: radius.xl,
+        borderTopRightRadius: radius.xl,
+        borderTopWidth: StyleSheet.hairlineWidth,
+        borderColor: colors.border,
+        padding: spacing.xl,
     },
 
     handle: {
         width: 40,
         height: 5,
-        backgroundColor: "#E5E7EB",
-        borderRadius: 3,
+        backgroundColor: colors.border,
+        borderRadius: radius.xs,
         alignSelf: "center",
-        marginBottom: 14
+        marginBottom: spacing.lg
     },
 
     title: {
-        fontSize: 20,
-        fontWeight: "700",
-        color: "#111827",
-        marginBottom: 16,
+        marginBottom: spacing.lg,
     },
 
     progressBar: {
         height: 10,
-        backgroundColor: "#E5E7EB",
-        borderRadius: 6,
+        backgroundColor: colors.overlayMedium,
+        borderRadius: radius.xs,
         overflow: "hidden",
-        marginBottom: 6
+        marginBottom: spacing.sm
     },
 
     progressFill: {
         height: "100%",
-        backgroundColor: "#10B981"
+        backgroundColor: colors.success
     },
 
     progressText: {
-        fontSize: 13,
-        color: "#6B7280",
-        marginBottom: 16,
-        textAlign: "center",
-    }
+        marginBottom: spacing.lg,
+    },
+
+    closeButton: {
+        marginTop: spacing.xl,
+    },
 })

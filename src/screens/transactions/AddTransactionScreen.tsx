@@ -157,6 +157,14 @@ const AddTransactionScreen = () => {
                     });
                     navigation.goBack();
                 },
+                onError: error => {
+                    Alert.alert(
+                        "Could not save transaction",
+                        error instanceof Error
+                            ? error.message
+                            : "Please try again.",
+                    );
+                },
             });
         }
     };
@@ -447,14 +455,14 @@ const styles = StyleSheet.create({
     amountSection: {
         alignItems: "center",
         borderRadius: 28,
-        backgroundColor: colors.darkGrey,
+        backgroundColor: colors.surfaceElevated,
         borderWidth: 1,
         borderColor: colors.border,
         paddingVertical: 8,
     },
     card: {
         overflow: "hidden",
-        backgroundColor: colors.darkGrey,
+        backgroundColor: colors.surfaceElevated,
         borderRadius: 28,
         borderWidth: 1,
         borderColor: colors.border,
@@ -489,7 +497,7 @@ const styles = StyleSheet.create({
     rowSub: {
         marginTop: 2,
         fontSize: 12,
-        color: colors.grey,
+        color: colors.textMuted,
     },
     rowRight: {
         flexDirection: "row",
@@ -508,12 +516,12 @@ const styles = StyleSheet.create({
         paddingHorizontal: 32,
         paddingTop: 12,
         paddingBottom: 24,
-        backgroundColor: colors.darkBackground,
+        backgroundColor: colors.background,
         borderTopWidth: StyleSheet.hairlineWidth,
         borderTopColor: colors.border,
     },
     error: {
-        color: colors.red,
+        color: colors.danger,
         fontSize: 13,
     },
     overlay: {
@@ -526,7 +534,7 @@ const styles = StyleSheet.create({
         width: "100%",
     },
     sheet: {
-        backgroundColor: colors.darkGrey,
+        backgroundColor: colors.surfaceElevated,
         borderTopLeftRadius: 28,
         borderTopRightRadius: 28,
         paddingHorizontal: 12,

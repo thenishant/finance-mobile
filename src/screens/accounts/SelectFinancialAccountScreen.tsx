@@ -74,14 +74,14 @@ const styles = StyleSheet.create({
         gap: 12,
     },
     card: {
-        backgroundColor: colors.darkBackground,
+        backgroundColor: colors.background,
         borderRadius: 18,
         padding: 16,
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
         borderWidth: 1,
-        borderColor: colors.grey,
+        borderColor: colors.border,
     },
     selected: {
         borderColor: "#111827",
